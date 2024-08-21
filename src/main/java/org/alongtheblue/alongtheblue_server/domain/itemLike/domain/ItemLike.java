@@ -1,14 +1,13 @@
 package org.alongtheblue.alongtheblue_server.domain.itemLike.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 
 import java.util.Date;
 
@@ -23,6 +22,10 @@ public class ItemLike {
     @NotNull
     private Date date;
 
+    @ManyToOne
+    @JoinColumn(name = "userId", nullable = false)
+    @JsonBackReference
+    private UserInfo userInfo;
     @Builder
     public ItemLike(Date date) {
         this.date = date;

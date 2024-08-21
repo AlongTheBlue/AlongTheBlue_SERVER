@@ -1,11 +1,10 @@
 package org.alongtheblue.alongtheblue_server.domain.search.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 
 import java.util.Date;
 
@@ -22,6 +21,11 @@ public class Search {
 
     @NotNull
     private Date date;
+
+    @ManyToOne
+    @JoinColumn(name = "userId", nullable = false)
+    @JsonBackReference
+    private UserInfo userInfo;
 
     @Builder
     public Search(String content, Date date) {
