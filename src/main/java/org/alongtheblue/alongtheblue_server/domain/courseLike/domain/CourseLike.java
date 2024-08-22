@@ -24,6 +24,11 @@ public class CourseLike {
     @JsonBackReference
     private UserInfo userInfo;
 
+    @ManyToOne
+    @JoinColumn(name = "userId", nullable = false)
+    @JsonBackReference
+    private UserInfo userInfo;
+
     @Builder
     public CourseLike(Date date) {
         this.date = date;
