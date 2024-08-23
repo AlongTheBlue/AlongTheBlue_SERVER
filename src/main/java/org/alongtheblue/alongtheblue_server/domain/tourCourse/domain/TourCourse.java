@@ -9,7 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.alongtheblue.alongtheblue_server.domain.courseLike.domain.CourseLike;
+import org.alongtheblue.alongtheblue_server.domain.hashTag_course.domain.HashTag_Course;
 import org.alongtheblue.alongtheblue_server.domain.search.domain.Search;
+import org.alongtheblue.alongtheblue_server.domain.tourCourse_item.domain.TourCourse_Item;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 
 import java.util.ArrayList;
@@ -44,6 +46,14 @@ public class TourCourse {
     @OneToMany(mappedBy = "tourCourse", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<CourseLike> courseLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "tourCourse", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<TourCourse_Item> tourCourseItems = new ArrayList<>();
+
+    @OneToMany(mappedBy = "tourCourse", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<HashTag_Course> hashTagCourses = new ArrayList<>();
 
     @Builder
     public TourCourse(String courseName, Date date, Long likeCount, Boolean isPosted) {

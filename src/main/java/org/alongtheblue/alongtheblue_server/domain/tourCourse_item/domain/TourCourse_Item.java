@@ -1,14 +1,14 @@
 package org.alongtheblue.alongtheblue_server.domain.tourCourse_item.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.alongtheblue.alongtheblue_server.domain.tourCourse.domain.TourCourse;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 
 import java.util.Date;
 
@@ -22,6 +22,11 @@ public class TourCourse_Item {
 
     @NotNull
     private Date date;
+
+    @ManyToOne
+    @JoinColumn(name = "courseId", nullable = false)
+    @JsonBackReference
+    private TourCourse tourCourse;
 
     @Builder
     public TourCourse_Item(Date date) {

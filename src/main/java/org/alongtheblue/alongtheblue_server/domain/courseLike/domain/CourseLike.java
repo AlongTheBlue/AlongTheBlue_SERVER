@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.alongtheblue.alongtheblue_server.domain.tourCourse.domain.TourCourse;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 
 import java.util.Date;
@@ -25,9 +26,9 @@ public class CourseLike {
     private UserInfo userInfo;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "courseId", nullable = false)
     @JsonBackReference
-    private UserInfo userInfo;
+    private TourCourse tourCourse;
 
     @Builder
     public CourseLike(Date date) {

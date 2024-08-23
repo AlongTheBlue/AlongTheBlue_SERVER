@@ -1,14 +1,13 @@
 package org.alongtheblue.alongtheblue_server.domain.hashTag_course.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.alongtheblue.alongtheblue_server.domain.tourCourse.domain.TourCourse;
 
 @Entity
 @Getter
@@ -17,4 +16,9 @@ public class HashTag_Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "courseId", nullable = false)
+    @JsonBackReference
+    private TourCourse tourCourse;
 }
