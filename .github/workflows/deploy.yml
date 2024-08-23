@@ -22,4 +22,4 @@ jobs:
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          ssh ec2-user@${EC2_HOST} 'cd ~/AlongTheBlue_SERVER && ./start.sh'
+          ssh -o StrictHostKeyChecking=no ec2-user@${EC2_HOST} 'cd ~/AlongTheBlue_SERVER && ./start.sh'
