@@ -1,19 +1,16 @@
 package org.alongtheblue.alongtheblue_server.domain.item.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.alongtheblue.alongtheblue_server.domain.hashTag_item.domain.HashTag_item;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Getter
+@Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Item {
     @Id
@@ -25,6 +22,10 @@ public class Item {
 
     @NotNull
     private Long likeCount;
+
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<HashTag_item> hashTagItems = new ArrayList<>();
 
     @Builder
     public Item(String categoryId, Long likeCount) {

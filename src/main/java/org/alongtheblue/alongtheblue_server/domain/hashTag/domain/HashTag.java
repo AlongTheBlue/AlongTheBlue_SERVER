@@ -1,14 +1,17 @@
 package org.alongtheblue.alongtheblue_server.domain.hashTag.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.alongtheblue.alongtheblue_server.domain.hashTag_item.domain.HashTag_item;
+import org.alongtheblue.alongtheblue_server.domain.search.domain.Search;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -20,6 +23,10 @@ public class HashTag {
 
     @NotNull
     private String content;
+
+    @OneToMany(mappedBy = "hashTag", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<HashTag_item> hashTagItems = new ArrayList<>();
 
     @Builder
     public HashTag(String content) {
