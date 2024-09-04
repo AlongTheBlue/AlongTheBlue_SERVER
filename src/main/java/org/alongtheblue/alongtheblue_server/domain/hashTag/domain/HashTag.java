@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.alongtheblue.alongtheblue_server.domain.hashTag_item.domain.HashTag_item;
-import org.alongtheblue.alongtheblue_server.domain.search.domain.Search;
 
 import java.util.ArrayList;
 import java.util.List;
