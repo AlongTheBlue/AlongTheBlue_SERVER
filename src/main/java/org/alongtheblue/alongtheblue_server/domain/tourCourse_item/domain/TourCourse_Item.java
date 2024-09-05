@@ -29,8 +29,8 @@ public class TourCourse_Item {
     private Item item;
 
     @ManyToOne
-    @MapsId("tid")
-    @JoinColumn(name = "tid", nullable = false)
+    @MapsId("courseId")
+    @JoinColumn(name = "courseId", nullable = false)
     @JsonBackReference
     private TourCourse tourCourse;
 
@@ -40,6 +40,6 @@ public class TourCourse_Item {
     @AllArgsConstructor
     public class TourCourseItemId implements Serializable {
         private Long itemId;
-        private Long tid;
+        private Long courseId;
     }
 }

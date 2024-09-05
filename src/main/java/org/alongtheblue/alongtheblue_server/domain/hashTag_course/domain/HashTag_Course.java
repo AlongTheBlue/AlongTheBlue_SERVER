@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.alongtheblue.alongtheblue_server.domain.hashTag.domain.HashTag;
-import org.alongtheblue.alongtheblue_server.domain.hashTag_item.domain.HashTag_item;
-import org.alongtheblue.alongtheblue_server.domain.item.domain.Item;
 import org.alongtheblue.alongtheblue_server.domain.tourCourse.domain.TourCourse;
 
 import java.io.Serializable;

@@ -19,24 +19,26 @@ public class ItemLike {
     @EmbeddedId
     private ItemLike.ItemLikeId id;
 
+    private Date date;
+
+    @ManyToOne
+    @MapsId("userId")
+    @JoinColumn(name = "userId", nullable = false)
+    @JsonBackReference
+    private UserInfo userInfo;
+
     @ManyToOne
     @MapsId("itemId")
     @JoinColumn(name = "itemId", nullable = false)
     @JsonBackReference
-    private UserInfo user;
-
-    @ManyToOne
-    @MapsId("hid")
-    @JoinColumn(name = "hid", nullable = false)
-    @JsonBackReference
-    private HashTag hashTag;
+    private Item item;
 
     @Embeddable
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     public class ItemLikeId implements Serializable {
+        private Long userId;
         private Long itemId;
-        private Long hid;
     }
 }
