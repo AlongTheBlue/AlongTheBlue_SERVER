@@ -30,7 +30,7 @@ public class HashTag {
 
     @OneToMany(mappedBy = "hashTag", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<HashTag_Course> hashTagItems = new ArrayList<>();
+    private List<HashTag_Course> hashTagCourses = new ArrayList<>();
 
     @Builder
     public HashTag(String content) {
