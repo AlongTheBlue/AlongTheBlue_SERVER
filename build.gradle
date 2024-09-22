@@ -33,13 +33,19 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+  
+  // 데이터 합치기
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	runtimeOnly 'com.h2database:h2' // H2 데이터베이스를 사용한 예제, 필요에 따라 변경 가능
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// Spring WebFlux 의존성 (WebClient 포함)
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// JSON 파싱을 위한 의존성
+	implementation 'org.json:json:20240303'
+
+	// 테스트 의존성
 	testImplementation 'io.projectreactor:reactor-test'
+	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.86.Final:osx-x86_64'
 }
 
 tasks.named('test') {
