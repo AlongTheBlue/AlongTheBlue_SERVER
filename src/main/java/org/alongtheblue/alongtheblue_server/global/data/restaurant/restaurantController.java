@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/restaurant")
+@RequestMapping("/api/restaurant")
 public class restaurantController {
     private final restaurantService restaurantService;
     // 데이터를 가져와서 데이터베이스에 저장하는 엔드포인트
@@ -16,4 +18,9 @@ public class restaurantController {
     public Mono<Void> fetchAndSaveRestaurants() {
         return restaurantService.fetchAndSaveData();
 }
+
+    @GetMapping("/home")
+    public List<RestaurantDTO> getRestaurant(){
+        return restaurantService.getRestaurant();
+    }
 }

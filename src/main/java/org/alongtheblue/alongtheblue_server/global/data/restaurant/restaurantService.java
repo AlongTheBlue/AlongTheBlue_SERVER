@@ -86,4 +86,17 @@ public class restaurantService {
 
         return new Restaurant(contentId, title, cat1, cat2, cat3, addr1, addr2, areaCode);
     }
+
+    public List<RestaurantDTO> getRestaurant() {
+        List<Restaurant> restaurants= restaurantRepository.findAll();
+        RestaurantDTO dto= new RestaurantDTO();
+        List<RestaurantDTO> dtos= new ArrayList<>();
+        for(Restaurant restaurant: restaurants){
+            dto.setAddress(restaurant.getAddr1().substring(8));
+            dto.setContentid(restaurant.getContentId());
+            dto.setTitle(restaurant.getTitle());
+            dtos.add(dto);
+        }
+        return dtos;
     }
+}
