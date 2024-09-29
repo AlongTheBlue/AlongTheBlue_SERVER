@@ -1,6 +1,7 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,18 @@ public class TourCommunityController {
     @GetMapping("/{postid}")
     public UserTourCourse onepost(@PathVariable Long postid){
         return tourCommunityService.onepost(postid);
+    }
+
+    @GetMapping("/updateImages/{contentId}")
+    public ResponseEntity<String> updateOriginImageUrls(@PathVariable String contentId) {
+        try {
+            // TourCommunityService의 updateOriginImageUrls 메소드 호출
+            tourCommunityService.updateOriginImageUrls(contentId);
+            return ResponseEntity.ok("이미지 업데이트 성공");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("이미지 업데이트 중 오류 발생: " + e.getMessage());
+        }
     }
 
 

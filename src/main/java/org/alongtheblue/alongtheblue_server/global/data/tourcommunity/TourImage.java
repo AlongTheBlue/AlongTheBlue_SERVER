@@ -17,5 +17,6 @@ public class TourImage {
     @JsonBackReference
     private TourPostItem tourPostItem;
 
+    private String url;
 
 }

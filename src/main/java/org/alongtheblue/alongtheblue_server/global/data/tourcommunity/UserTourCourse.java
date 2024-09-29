@@ -25,4 +25,6 @@ public class UserTourCourse {
     @OneToMany(mappedBy = "tourCourseForHashTag", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<TourPostHashTag> tourPostHashTags;
+
+    private String contentId;
 }
