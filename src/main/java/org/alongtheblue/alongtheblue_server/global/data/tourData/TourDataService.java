@@ -1,5 +1,11 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourData;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
+import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationDTO;
+import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationImage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +17,16 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TourDataService {
     @Autowired
     private TourDataRepository tourDataRepository;
+    @Autowired
+    private TourDataImageRepository tourDataImageRepository;
+
     private static final String SERVICE_KEY = "GY8BQwWZJD6QX3tfaQTpfYMRjcRnaHoPAxn/7u6ZffwScPHeO3TYZgA0zMPfnO/iSc/PunU/5rZYIa5jj98sUw==";
 
     public ArrayList<TourData> getTourData() {
@@ -112,7 +123,7 @@ public class TourDataService {
         WebClient webClient = WebClient.builder().baseUrl(url).build();
 
         // 2. 각 contentId로 API 호출 및 데이터 업데이트
-        for(int i=500;i<tourDataList.size();i++){
+        for (int i = 0; i < 10; i++) {
 //        for (TourData tourData : tourDataList) {
             TourData tourData = tourDataList.get(i);
             String contentId = tourData.getId();
@@ -165,7 +176,7 @@ public class TourDataService {
         WebClient webClient = WebClient.builder().baseUrl(url).build();
 
         // 2. 각 contentId로 API 호출 및 데이터 업데이트
-        for(int i=500;i<tourDataList.size();i++){
+        for (int i = 0; i < 10; i++) {
 //        for (TourData tourData : tourDataList) {
             TourData tourData = tourDataList.get(i);
             String contentId = tourData.getId();
@@ -231,5 +242,61 @@ public class TourDataService {
 
         return tourDataList;
     }
+
+    public TourDataBasicDto getTourDataDetails(String contentsid) {
+        // DB에서 TourData 조회
+        Optional<TourData> tourDataOptional = tourDataRepository.findById(contentsid);
+        if (tourDataOptional.isPresent()) {
+            TourData tourData = tourDataOptional.get();
+
+            // TourDataBasicDto에 데이터 매핑
+            TourDataBasicDto tourDataBasicDto = new TourDataBasicDto();
+            tourDataBasicDto.setId(tourData.getId());
+            tourDataBasicDto.setTitle(tourData.getTitle());
+            tourDataBasicDto.setRoadaddress(tourData.getRoadAddress());
+            tourDataBasicDto.setIntroduction(tourData.getDescription());
+            tourDataBasicDto.setCheckintime(tourData.getRestDate());
+            tourDataBasicDto.setInfocenter(tourData.getInfoCenter());
+            tourDataBasicDto.setId(tourData.getId());
+
+
+            // 이미지 리스트를 DTO에 추가
+            List<String> imageUrls = tourData.getImages().stream()
+                    .map(image -> image.getUrl()) // 여기를 수정
+                    .collect(Collectors.toList());
+            tourDataBasicDto.setOriginimgurl(imageUrls);
+
+            return tourDataBasicDto;
+        } else {
+            // 없을 경우 null 리턴 또는 예외 처리
+            return null;
+        }
+    }
+
+//    public List<TourDataBasicDto> getRandomTourDataDetailsWithImages() {
+//        // DB에서 6개의 랜덤 이미지를 가진 TourData 조회
+//        List<TourData> tourDatas = tourDataRepository.findRandomTourDatasWithImages();
+//
+//        // TourDataBasicDto 리스트에 데이터를 매핑
+//        List<TourDataBasicDto> tourDataBasicDtoList = tourDatas.stream().map(tourData -> {
+//            TourDataBasicDto tourDataBasicDto = new TourDataBasicDto();
+//            tourDataBasicDto.setId(tourData.getId());
+//            tourDataBasicDto.setTitle(tourData.getTitle());
+//            tourDataBasicDto.setRoadaddress(tourData.getRoadAddress());
+//            tourDataBasicDto.setIntroduction(tourData.getDescription());
+//            tourDataBasicDto.setCheckintime(tourData.getRestDate());
+//
+//            // 이미지 리스트를 DTO에 추가
+//            List<String> imageUrls = tourData.getImages().stream()
+//                    .map(image -> image.getUrl()) // 람다 표현식으로 변경
+//                    .collect(Collectors.toList());
+//            tourDataBasicDto.setOriginimgurl(imageUrls);
+//
+//            return tourDataBasicDto;
+//        }).collect(Collectors.toList());
+//
+//        return tourDataBasicDtoList;
+//    }
+
 }
 

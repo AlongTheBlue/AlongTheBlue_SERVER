@@ -43,26 +43,31 @@ public class AccommodationController {
 
     @GetMapping("/overview/1")
     public void updateOverview() {
+
         accommodationService.updateFirstOverviews();
     }
 
     @GetMapping("/overview/all")
     public void updateAllOverview() {
+
         accommodationService.updateAllOverviews();
     }
 
     @GetMapping("/checkintime")
     public void updateCheckInTimes(){
+
         accommodationService.updateCheckInTimes();
     }
 
     @GetMapping("/infocenter")
     public void updateInfoCenter(){
+
         accommodationService.updateInfoCenterLodgings();
     }
 
     @GetMapping("/imgurl")
     public void updateImgUrl(){
+
         accommodationService.updateAllOriginImageUrls();
     }
 

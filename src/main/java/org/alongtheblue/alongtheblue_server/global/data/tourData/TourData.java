@@ -1,10 +1,11 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourData;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.TourImage;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -23,7 +24,6 @@ public class TourData {
     private String creditCard;
     private String babyCarriage;
     private String pet;
-
     @Builder
     public TourData(String id, String title, String roadAddress, String description, String infoCenter, String useTime, String restDate, String parking, String creditCard, String babyCarriage, String pet) {
         this.id = id;
@@ -38,6 +38,10 @@ public class TourData {
         this.babyCarriage = babyCarriage;
         this.pet = pet;
     }
+
+    @OneToMany(mappedBy = "tourData", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TourImage> images; // 추가된 부분
+
 
     public TourData() {
 
