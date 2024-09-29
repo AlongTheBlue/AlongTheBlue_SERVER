@@ -2,6 +2,10 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alongtheblue.alongtheblue_server.global.data.tourData.TourData;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -31,11 +35,11 @@ public class restaurantService {
     // API 호출 및 데이터 저장 로직
     public void fetchAndSaveData() {
 
-        for (int i = 1; i < 11; i++) {
+        for (int i = 3; i < 4; i++) { // 1 and 11
             URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
                     .path("/areaBasedList1")
                     .queryParam("serviceKey", apiKey)
-                    .queryParam("numOfRows", 2) //95
+                    .queryParam("numOfRows", 95) //95
                     .queryParam("pageNo", Integer.toString(i))
                     .queryParam("MobileOS", "ETC")
                     .queryParam("MobileApp", "AppTest")
@@ -195,11 +199,11 @@ public class restaurantService {
                 });
     }
 
-
     public List<RestaurantDTO> getRestaurant() {
         List<Restaurant> restaurants = restaurantRepository.findAll();
         List<RestaurantDTO> dtos = new ArrayList<>();
         for (Restaurant restaurant : restaurants) {
+            if(dtos.size() == 10) break;
             RestaurantDTO dto = new RestaurantDTO();
             List<RestaurantImage> imgs= restaurantImageRepository.findByrestaurant(restaurant);
             List<String> urls= new ArrayList<>();
@@ -239,7 +243,106 @@ public class restaurantService {
                     dtos.add(dto);}
             }
         }
+        System.out.println(dtos.size());
+        return dtos;
+    }
 
-    return dtos;
+    public void saveRestaurants() {
+        for (int i = 1; i < 2; i++) { // 1 and 11
+            URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                    .path("/areaBasedList1")
+                    .queryParam("serviceKey", apiKey)
+                    .queryParam("numOfRows", 95) //95
+                    .queryParam("pageNo", Integer.toString(i))
+                    .queryParam("MobileOS", "ETC")
+                    .queryParam("MobileApp", "AppTest")
+                    .queryParam("_type", "json")
+                    .queryParam("listYN", "Y")
+                    .queryParam("arrange", "A")
+                    .queryParam("contentTypeId", 39)
+                    .queryParam("areaCode", 39)
+                    .queryParam("cat1", "A05")
+                    .queryParam("cat2", "A0502")
+                    .build()
+                    .toUri();
+
+            webClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(this::parseJson)
+                    .doOnNext(this::processRestaurant)
+                    .then()
+                    .subscribe();
+        }
+    }
+
+    private void processRestaurant(JsonNode rootNode) {
+        JsonNode itemsNode = rootNode.path("response").path("body").path("items").path("item");
+        if (itemsNode.isArray()) {
+            for (JsonNode itemNode : itemsNode) {
+                Restaurant restaurant = parseRestaurant(itemNode);
+                if (restaurant != null) {
+                    restaurantRepository.save(restaurant);  // 예시로 saveRestaurant 메서드를 통해 저장
+                }
+            }
+        }
+    }
+
+    public void processSaveIntroduction() {
+        List<Restaurant> restaurants = restaurantRepository.findAll();
+        for (Restaurant restaurant : restaurants) {
+            String introduction = fetchIntroduction(restaurant).block();
+            restaurant.setIntroduction(introduction);
+            restaurantRepository.save(restaurant);
+        }
+    }
+
+    public void processSaveInfo() {
+        List<Restaurant> restaurants = restaurantRepository.findAll();  // 모든 레스토랑을 불러옴
+
+        for (Restaurant restaurant : restaurants) {
+            String jsonResponse = getInfo(restaurant).block();
+
+            JSONObject jsonObject = new JSONObject(jsonResponse);
+            JSONObject responseBody = jsonObject.getJSONObject("response").getJSONObject("body");
+            JSONObject items = responseBody.getJSONObject("items");
+            JSONArray itemArray = items.getJSONArray("item");
+            if (!itemArray.isEmpty()) {
+                JSONObject item = itemArray.getJSONObject(0);
+                String restdate = item.getString("restdatefood");
+                String infocenter = item.getString("infocenterfood");
+                restaurant.setRestDate(restdate);
+                restaurant.setInfoCenter(infocenter);
+                restaurantRepository.save(restaurant);
+            }
+        }
+    }
+
+    private Mono<String> getInfo(Restaurant restaurant){
+        URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .path("/detailIntro1")
+                .queryParam("serviceKey", apiKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("_type", "json")
+                .queryParam("contentId", restaurant.getContentId())
+                .queryParam("contentTypeId", "39")
+                .queryParam("numOfRows", "10")
+                .queryParam("pageNo", "1")
+                .build()
+                .toUri();
+
+        return webClient.get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    public void processSaveImage() {
+        List<Restaurant> restaurants = restaurantRepository.findAll();  // 모든 레스토랑을 불러옴
+        for (Restaurant restaurant : restaurants) {
+            fetchAndSaveRestaurantImage(restaurant).block();
+        }
     }
 }

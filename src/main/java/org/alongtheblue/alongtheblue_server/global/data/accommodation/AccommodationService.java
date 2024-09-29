@@ -289,8 +289,7 @@ public class AccommodationService {
                 // API 응답으로 introduction 필드가 있는 경우 업데이트
                 if (response != null && response.getIntroduction() != null) {
                     // 데이터베이스에서 해당 contentsid를 가진 Accommodation 객체를 찾아 업데이트
-                    Accommodation accommodation = accommodationRepository.findById(contentsid).orElseThrow(() ->
-                            new IllegalArgumentException("Accommodation not found for contentsid: " + contentsid));
+                    Accommodation accommodation = accommodationRepository.findByContentsid(contentsid);
                     accommodation.setIntroduction(response.getIntroduction());
                     accommodationRepository.save(accommodation);  // 데이터베이스에 저장
                 }
@@ -379,7 +378,8 @@ public class AccommodationService {
         // 각 contentsid에 대해 checkintime 업데이트
         for (Accommodation accommodation : accommodations) {
             String contentId = accommodation.getContentsid();
-            updateCheckInTime(contentId);  // checkintime 업데이트 메서드 호출
+//            updateCheckInTime(contentId);  // checkintime 업데이트 메서드 호출
+            updateAccommodationDetails(contentId);
         }
     }
 
@@ -517,8 +517,7 @@ public class AccommodationService {
     }
 
     public Accommodation findByContentId(String contentId){
-        Optional<Accommodation> accommodation = accommodationRepository.findById(contentId);
-        return accommodation.orElse(null);
+        return accommodationRepository.findByContentsid(contentId);
     }
 
     public void updateOriginImageUrls(String contentId) {
@@ -580,9 +579,8 @@ public class AccommodationService {
 
     public AccommodationDTO getAccommodationDetails(String contentsid) {
         // DB에서 Accommodation 조회
-        Optional<Accommodation> accommodationOptional = accommodationRepository.findById(contentsid);
-        if (accommodationOptional.isPresent()) {
-            Accommodation accommodation = accommodationOptional.get();
+        Accommodation accommodation = accommodationRepository.findByContentsid(contentsid);
+        if (accommodation != null) {
             // AccommodationDTO에 데이터를 매핑
             AccommodationDTO accommodationDTO = new AccommodationDTO();
             accommodationDTO.setContentsid(accommodation.getContentsid());
@@ -655,6 +653,76 @@ public class AccommodationService {
 
         return accommodationDTOList;
     }
+
+    public void updateAccommodationDetails(String contentId) {
+        String url = "https://apis.data.go.kr/B551011/KorService1/detailIntro1?serviceKey=GY8BQwWZJD6QX3tfaQTpfYMRjcRnaHoPAxn/7u6ZffwScPHeO3TYZgA0zMPfnO/iSc/PunU/5rZYIa5jj98sUw==&MobileOS=ETC&MobileApp=AppTest&_type=json&contentId="+contentId+"&contentTypeId=32&numOfRows=100&pageNo=1";
+
+        WebClient webClient = WebClient.builder().build();
+
+        try {
+            System.out.println("Requesting URL: " + url);
+
+            // API로부터 JSON 응답 가져오기
+            String jsonResponse = webClient.get()
+                    .uri(url)
+                    .retrieve()
+                    .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), clientResponse -> {
+                        return clientResponse.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    System.out.println("Error Response: " + errorBody);
+                                    return Mono.error(new RuntimeException("API 요청 실패"));
+                                });
+                    })
+                    .bodyToMono(String.class)
+                    .block();
+
+            // JSON 응답 형식 확인
+            if (!jsonResponse.startsWith("{") && !jsonResponse.startsWith("[")) {
+                throw new RuntimeException("예상치 못한 응답 형식: " + jsonResponse);
+            }
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(jsonResponse);
+
+            // checkintime과 infocenterlodging을 모두 추출
+            JsonNode checkinTimeNode = rootNode
+                    .path("response")
+                    .path("body")
+                    .path("items")
+                    .path("item")
+                    .get(0)
+                    .path("checkintime");
+            String checkintime = checkinTimeNode.asText();
+
+            JsonNode infocenterLodgingNode = rootNode
+                    .path("response")
+                    .path("body")
+                    .path("items")
+                    .path("item")
+                    .get(0)
+                    .path("infocenterlodging");
+            String infocenterlodging = infocenterLodgingNode.asText();
+
+            System.out.println("Check-in Time: " + checkintime);
+            System.out.println("Info Center Lodging: " + infocenterlodging);
+
+            // 해당 accommodation 객체를 업데이트
+            Accommodation accommodation = accommodationRepository.findByContentsid(contentId);
+            if (accommodation != null) {
+                accommodation.setCheckintime(checkintime); // checkintime 필드 업데이트
+                accommodation.setInfocenter(infocenterlodging); // infocenterlodging 필드 업데이트
+                accommodationRepository.save(accommodation); // 저장
+            } else {
+                System.out.println("Accommodation not found for contentId: " + contentId);
+            }
+
+        } catch (JsonProcessingException e) {
+            System.err.println("JSON 파싱 오류: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
 }

@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
-public interface AccommodationRepository extends JpaRepository<Accommodation,String> {
+public interface AccommodationRepository extends JpaRepository<Accommodation, Long> {
     List<Accommodation> findByIntroductionIsNull();
     @Query("SELECT a FROM Accommodation a WHERE a.introduction IS NULL")
     List<Accommodation> findAccommodationsWithNullIntroduction();

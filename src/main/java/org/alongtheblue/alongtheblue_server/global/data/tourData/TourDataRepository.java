@@ -12,7 +12,7 @@ public interface TourDataRepository extends JpaRepository<TourData, String> {
 
     // TourImageEntity를 저장할 메서드 추가
 
-    TourData findByContentId(String contentId);
+//    TourData findByContentId(String contentId);
 /*
     @Query(value = "SELECT a.* " +
             "FROM accommodation a " +

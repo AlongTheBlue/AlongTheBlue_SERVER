@@ -11,6 +11,9 @@ import java.util.List;
 @Data
 public class Accommodation {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String contentsid;
     private String title;
     private String roadaddress;

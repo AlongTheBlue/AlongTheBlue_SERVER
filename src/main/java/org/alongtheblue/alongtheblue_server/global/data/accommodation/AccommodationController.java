@@ -17,6 +17,7 @@ public class AccommodationController {
     @Autowired
     private AccommodationService accommodationService;
 
+    // visit jeju
     @GetMapping("/fetch-and-save")
     public String fetchAndSaveAccommodations() {
         accommodationService.saveAccommodations();

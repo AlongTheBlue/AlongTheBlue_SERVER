@@ -19,6 +19,27 @@ public class restaurantController {
         restaurantService.fetchAndSaveData();
 }
 
+    // 1단계 저장 100개만
+    @GetMapping("/save")
+    public void saveRestaurants() {
+        restaurantService.saveRestaurants();
+    }
+    // 2단계 저장
+    @GetMapping("/save/introduction")
+    public void saveRestaurantsIntroduction() {
+        restaurantService.processSaveIntroduction();
+    }
+    // 3단계 저장
+    @GetMapping("/save/info")
+    public void saveRestaurantsInfo() {
+        restaurantService.processSaveInfo();
+    }
+    // 4단계 저장
+    @GetMapping("/save/image")
+    public void saveRestaurantsImages() {
+        restaurantService.processSaveImage();
+    }
+
     @GetMapping("/detail/all")
     public List<RestaurantDTO> getRestaurant(){
         return restaurantService.getRestaurant();
@@ -26,7 +47,8 @@ public class restaurantController {
     }
 
     @GetMapping("/home")
-    public List<RestaurantDTO> homerestaurant(){
+    public List<RestaurantDTO> homeRestaurant(){
         return restaurantService.homerestaurant();
     }
+
 }
