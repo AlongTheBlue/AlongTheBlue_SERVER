@@ -31,7 +31,7 @@ public class TourCommunityService {
 
     public UserTourCourse createPost(UserTourCourse userTourCourse, List<MultipartFile> images, List<List<Integer>> index) {
         // 먼저 userTourCourse 저장
-        ;userTourCourse = userTourCourseRepository.save(userTourCourse);
+        userTourCourse = userTourCourseRepository.save(userTourCourse);
 
         // tags와 items가 null인 경우 빈 리스트로 초기화
         List<TourPostHashTag> tags = userTourCourse.getTourPostHashTags() != null ? userTourCourse.getTourPostHashTags() : new ArrayList<>();

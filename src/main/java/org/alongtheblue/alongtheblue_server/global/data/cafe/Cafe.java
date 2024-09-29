@@ -1,16 +1,15 @@
-package org.alongtheblue.alongtheblue_server.global.data.restaurant;
+package org.alongtheblue.alongtheblue_server.global.data.cafe;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.List;
 
-@Data
 @Entity
+@Data
 @NoArgsConstructor
-public class Restaurant {
+public class Cafe {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,18 +17,19 @@ public class Restaurant {
     private String contentId;
     private String title;
     private String addr;
+
     @Column(columnDefinition = "TEXT")
     private String introduction;
+
     private String restDate;
     private String infoCenter;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cafe", cascade = CascadeType.ALL)
     @JsonManagedReference
-    List<RestaurantImage> images;
+    List<CafeImage> cafeImages;
 
-    public Restaurant(String contentId, String title, String addr) {
+    public Cafe(String contentId, String title, String addr) {
         this.contentId = contentId;
         this.title = title;
-        this.addr = addr;
-    }
+        this.addr= addr;}
 }

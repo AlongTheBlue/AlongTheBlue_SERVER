@@ -12,10 +12,10 @@ public class TourImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String url;
+
     @ManyToOne
     @JoinColumn(name = "tourPostItem")
     @JsonBackReference
     private TourPostItem tourPostItem;
-
 
 }

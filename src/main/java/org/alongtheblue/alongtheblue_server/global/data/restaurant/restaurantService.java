@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 
 @Service
@@ -13,41 +17,51 @@ public class restaurantService {
     private final restaurantRepository restaurantRepository;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
-    private String apiKey = "GY8BQwWZJD6QX3tfaQTpfYMRjcRnaHoPAxn/7u6ZffwScPHeO3TYZgA0zMPfnO/iSc/PunU/5rZYIa5jj98sUw==";
+    private final RestaurantImageRepository restaurantImageRepository;
+    private final String apiKey = "GY8BQwWZJD6QX3tfaQTpfYMRjcRnaHoPAxn/7u6ZffwScPHeO3TYZgA0zMPfnO/iSc/PunU/5rZYIa5jj98sUw==";
+    private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
-    //빌더는 baseUrl을 설정하여 기본적으로 사용할 API의 URL을 지정하는 거임
-    public restaurantService(restaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper){
+    public restaurantService(restaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository) {
         this.restaurantRepository = restaurantRepository;
-        this.webClient = webClientBuilder.baseUrl("http://apis.data.go.kr/B551011/KorService1").build();
+        this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
+        this.restaurantImageRepository = restaurantImageRepository;
     }
 
-        // API 호출 및 데이터 저장 로직
-        public Mono<Void> fetchAndSaveData() {
-            return webClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/areaBasedList1")
-                            .queryParam("serviceKey", apiKey)
-                            .queryParam("numOfRows", 10) // 페이지당 10개의 아이템
-                            .queryParam("pageNo", 1) // 페이지 번호 1
-                            .queryParam("MobileOS", "ETC")
-                            .queryParam("MobileApp", "AppTest")
-                            .queryParam("_type", "json")
-                            .queryParam("listYN", "Y")
-                            .queryParam("arrange", "A")
-                            .queryParam("contentTypeId", 39)
-                            .queryParam("areaCode", 39)
-                            .queryParam("cat1", "A05")
-                            .queryParam("cat2", "A0502")
-                            .build())
+    // API 호출 및 데이터 저장 로직
+    public void fetchAndSaveData() {
+
+        for (int i = 1; i < 11; i++) {
+            URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                    .path("/areaBasedList1")
+                    .queryParam("serviceKey", apiKey)
+                    .queryParam("numOfRows", 2) //95
+                    .queryParam("pageNo", Integer.toString(i))
+                    .queryParam("MobileOS", "ETC")
+                    .queryParam("MobileApp", "AppTest")
+                    .queryParam("_type", "json")
+                    .queryParam("listYN", "Y")
+                    .queryParam("arrange", "A")
+                    .queryParam("contentTypeId", 39)
+                    .queryParam("areaCode", 39)
+                    .queryParam("cat1", "A05")
+                    .queryParam("cat2", "A0502")
+                    .build()
+                    .toUri();
+
+            webClient.get()
+                    .uri(uri)
                     .retrieve()
-                    .bodyToMono(String.class) // JSON 응답을 문자열로 받음
-                    .map(this::parseJson) // JSON 문자열을 JsonNode로 변환
-                    .doOnNext(this::processItems) // 아이템 처리
-                    .then(); // Mono<Void> 반환
+                    .bodyToMono(String.class)
+                    .map(this::parseJson)
+                    .doOnNext(this::processItems)
+                    .then()
+                    .subscribe();
         }
+    }
 
     private JsonNode parseJson(String response) {
+        System.out.println(response);
         try {
             return objectMapper.readTree(response);
         } catch (IOException e) {
@@ -55,48 +69,177 @@ public class restaurantService {
         }
     }
 
-    private void processItems(JsonNode rootNode) {
-        JsonNode itemsNode = rootNode.path("response").path("body").path("items").path("item");
-        List<Restaurant> restaurants = new ArrayList<>();
-
-        if (itemsNode.isArray()) {
-            Iterator<JsonNode> elements = itemsNode.elements();
-            while (elements.hasNext()) {
-                JsonNode itemNode = elements.next();
-                Restaurant restaurant = parseRestaurant(itemNode);
-                restaurants.add(restaurant);
-            }
-        }
-
-        if (!restaurants.isEmpty()) {
-            restaurantRepository.saveAll(restaurants);
-        }
-    }
-
-
     private Restaurant parseRestaurant(JsonNode itemNode) {
+        String cat3 = itemNode.path("cat3").asText();
+        if (cat3.equals("A05020900")) return null;
         String contentId = itemNode.path("contentid").asText();
         String title = itemNode.path("title").asText();
-        String cat1 = itemNode.path("cat1").asText();
-        String cat2 = itemNode.path("cat2").asText();
-        String cat3 = itemNode.path("cat3").asText();
-        String addr1 = itemNode.path("addr1").asText();
-        String addr2 = itemNode.has("addr2") ? itemNode.path("addr2").asText() : null;
-        String areaCode = itemNode.path("areacode").asText();
-
-        return new Restaurant(contentId, title, cat1, cat2, cat3, addr1, addr2, areaCode);
+        String addr = itemNode.path("addr1").asText();
+        return new Restaurant(contentId, title, addr);
     }
 
+    private void processItems(JsonNode rootNode) {
+        JsonNode itemsNode = rootNode.path("response").path("body").path("items").path("item");
+        if (itemsNode.isArray()) {
+            Flux.fromIterable(itemsNode)
+                    .flatMap(itemNode -> {
+                        Restaurant restaurant = parseRestaurant(itemNode);
+                        if (restaurant != null) {
+                            return fetchIntroduction(restaurant)
+                                    .flatMap(intro -> {
+                                        restaurant.setIntroduction(intro);
+                                        // 먼저 restaurant를 저장
+                                        return restdayAndInfo(restaurant)
+                                                .flatMap(restdayAndInfo -> {
+                                                    restaurant.setRestDate(restdayAndInfo.get("restdate"));  // "resttime" -> "restdate"로 수정
+                                                    restaurant.setInfoCenter(restdayAndInfo.get("infocenter"));  // "info" -> "infocenter"로 수정
+                                                    restaurantRepository.save(restaurant);
+                                                    return fetchAndSaveRestaurantImage(restaurant)  // 이미지 저장을 나중에 처리
+                                                            .then(Mono.just(restaurant));
+                                                });
+                                    });
+                        } else {
+                            return Mono.empty();
+                        }
+                    })
+                    .collectList()  // 모든 restaurant를 리스트로 수집
+                    .subscribe();
+        }
+    }
+
+    private Mono<String> fetchIntroduction(Restaurant restaurant) {
+
+        URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .path("/detailCommon1")
+                .queryParam("serviceKey", apiKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("_type", "json")
+                .queryParam("contentId", restaurant.getContentId())
+                .queryParam("contentTypeId", "39")
+                .queryParam("defaultYN", "Y")
+                .queryParam("overviewYN", "Y")
+                .build()
+                .toUri();
+
+        return webClient.get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(String.class)
+                .map(this::parseJson)
+                .map(rootNode -> rootNode.path("response").path("body").path("items").path("item").get(0).path("overview").asText());
+    }
+
+    private Mono<Void> fetchAndSaveRestaurantImage(Restaurant restaurant) {
+
+        URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .path("/detailImage1")
+                .queryParam("serviceKey", apiKey)
+                .queryParam("contentId", restaurant.getContentId())
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("_type", "json")
+                .queryParam("imageYN", "Y")
+                .queryParam("subImageYN", "Y")
+                .build()
+                .toUri();
+
+        return webClient.get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(String.class)
+                .map(this::parseJson)
+                .doOnNext(rootNode -> {
+                    JsonNode itemsNode = rootNode.path("response").path("body").path("items").path("item");
+                    if (itemsNode.isArray()) {
+                        for (JsonNode itemNode : itemsNode) {
+                            String imageUrl = itemNode.path("originimgurl").asText();
+                            RestaurantImage restaurantImage = new RestaurantImage(restaurant, imageUrl);
+                            restaurantImageRepository.save(restaurantImage);
+                        }
+                    }
+                })
+                .then();
+    }
+
+    private Mono<Map<String, String>> restdayAndInfo(Restaurant restaurant) {
+
+        URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .path("/detailIntro1")
+                .queryParam("serviceKey", apiKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("_type", "json")
+                .queryParam("contentId", restaurant.getContentId())
+                .queryParam("contentTypeId", "39")
+                .queryParam("numOfRows", "10")
+                .queryParam("pageNo", "1")
+                .build()
+                .toUri();
+
+        return webClient.get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(String.class)
+                .map(this::parseJson)
+                .map(rootNode -> {
+                    JsonNode jsonNode = rootNode.path("response").path("body").path("items").path("item").get(0);
+                    String restdate = jsonNode.path("restdatefood").asText();
+                    String infocenter = jsonNode.path("infocenterfood").asText();
+
+                    // 두 값을 Map에 담아서 반환
+                    Map<String, String> resultMap = new HashMap<>();
+                    resultMap.put("restdate", restdate);
+                    resultMap.put("infocenter", infocenter);
+                    return resultMap;
+                });
+    }
+
+
     public List<RestaurantDTO> getRestaurant() {
-        List<Restaurant> restaurants= restaurantRepository.findAll();
-        RestaurantDTO dto= new RestaurantDTO();
-        List<RestaurantDTO> dtos= new ArrayList<>();
-        for(Restaurant restaurant: restaurants){
-            dto.setAddress(restaurant.getAddr1().substring(8));
+        List<Restaurant> restaurants = restaurantRepository.findAll();
+        List<RestaurantDTO> dtos = new ArrayList<>();
+        for (Restaurant restaurant : restaurants) {
+            RestaurantDTO dto = new RestaurantDTO();
+            List<RestaurantImage> imgs= restaurantImageRepository.findByrestaurant(restaurant);
+            List<String> urls= new ArrayList<>();
+            for(RestaurantImage resimg : imgs)  urls.add(resimg.getOriginimgurl());
+            dto.setImgUrls(urls);
+            dto.setAddress(restaurant.getAddr().substring(8));
             dto.setContentid(restaurant.getContentId());
             dto.setTitle(restaurant.getTitle());
+            dto.setIntroduction(restaurant.getIntroduction());
+            dto.setInfoCenter(restaurant.getInfoCenter());
+            dto.setRestDate(restaurant.getRestDate());
             dtos.add(dto);
         }
         return dtos;
+    }
+
+    public List<RestaurantDTO> homerestaurant() {
+        Random random= new Random();
+        Set<Integer> randomNumbers = new HashSet<>();
+        List<RestaurantDTO> dtos= new ArrayList<>();
+        List<Restaurant> restaurants = restaurantRepository.findAll();
+        Restaurant res;
+        while (dtos.size() < 6) {
+            int randomNumber = random.nextInt(17) ; // 저장된 restaurant 수로 할 것
+            if (! randomNumbers.contains(randomNumber)) {
+                randomNumbers.add(randomNumber);
+                res= restaurants.get(randomNumber);
+                RestaurantDTO dto= new RestaurantDTO();
+                dto.setTitle(res.getTitle());
+                dto.setContentid(res.getContentId());
+                String addr= res.getAddr().substring(8).split(" ")[0]
+                        +" "+res.getAddr().substring(8).split(" ")[1];
+                dto.setAddress(addr);
+                List<RestaurantImage> imgs= restaurantImageRepository.findByrestaurant(res);
+                if(!imgs.isEmpty()) {
+                    dto.setImg(imgs.get(0).getOriginimgurl());
+                    dtos.add(dto);}
+            }
+        }
+
+    return dtos;
     }
 }

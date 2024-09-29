@@ -15,12 +15,18 @@ public class restaurantController {
     private final restaurantService restaurantService;
     // 데이터를 가져와서 데이터베이스에 저장하는 엔드포인트
     @GetMapping("/fetch")
-    public Mono<Void> fetchAndSaveRestaurants() {
-        return restaurantService.fetchAndSaveData();
+    public void fetchAndSaveRestaurants() {
+        restaurantService.fetchAndSaveData();
 }
 
-    @GetMapping("/home")
+    @GetMapping("/detail/all")
     public List<RestaurantDTO> getRestaurant(){
         return restaurantService.getRestaurant();
+
+    }
+
+    @GetMapping("/home")
+    public List<RestaurantDTO> homerestaurant(){
+        return restaurantService.homerestaurant();
     }
 }

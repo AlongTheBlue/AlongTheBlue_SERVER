@@ -1,4 +1,4 @@
-package org.alongtheblue.alongtheblue_server.global.data.restaurant;
+package org.alongtheblue.alongtheblue_server.global.data.cafe;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class RestaurantDTO {
+public class CafeDTO {
     private String address;
     private String title;
     private String contentid;
