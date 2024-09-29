@@ -12,16 +12,14 @@ public class TourImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String url;
 
     @ManyToOne
     @JoinColumn(name = "tourPostItem")
     @JsonBackReference
     private TourPostItem tourPostItem;
 
-    private String url;
-
     @ManyToOne
     @JoinColumn(name = "tour_data_id") // 외래 키 컬럼 이름
     private TourData tourData; // TourData와의 관계 설정
-
 }

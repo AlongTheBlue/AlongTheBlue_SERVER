@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.alongtheblue.alongtheblue_server.domain.courseLike.domain.CourseLike;
 import org.alongtheblue.alongtheblue_server.domain.hashTag_course.domain.HashTag_Course;
-import org.alongtheblue.alongtheblue_server.domain.search.domain.Search;
 import org.alongtheblue.alongtheblue_server.domain.tourCourse_item.domain.TourCourse_Item;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 

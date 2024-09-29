@@ -6,8 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,7 +37,7 @@ public class TourCommunityService {
     }
 
 
-    public UserTourCourse createPost(UserTourCourse userTourCourse) {
+    public UserTourCourse createPost(UserTourCourse userTourCourse, List<MultipartFile> images, List<List<Integer>> index) {
         // 먼저 userTourCourse 저장
         userTourCourse = userTourCourseRepository.save(userTourCourse);
 
@@ -42,23 +45,33 @@ public class TourCommunityService {
         List<TourPostHashTag> tags = userTourCourse.getTourPostHashTags() != null ? userTourCourse.getTourPostHashTags() : new ArrayList<>();
         List<TourPostItem> items = userTourCourse.getTourPostItems() != null ? userTourCourse.getTourPostItems() : new ArrayList<>();
 
+        // TourData와 이미지 파일 처리 (순서대로 처리)
+        for (int i = 0; i < index.size(); i++) {
+            for (int j = 0; j < index.get(i).size(); j++) {
+                TourPostItem data = items.get(i);
+                MultipartFile image = images.get(index.get(i).get(j));  // 인덱스로 매칭
+                String imageUrl = saveImage(image);  // 이미지 저장 로직 호출
+                TourImage tourImage= new TourImage();
+                tourImage.setUrl(imageUrl);
+                tourImage.setTourPostItem(data);
+                tourImageRepository.save(tourImage);
+            }
+        }
         // items 리스트가 비어있지 않은 경우 처리
         if (!items.isEmpty()) {
             for (TourPostItem item : items) {
                 // TourPostItem에 UserTourCourse 설정
                 item.setUserTourCourse(userTourCourse);
-
-                // TourImage가 null일 수 있으므로 null 체크 추가
-                List<TourImage> images = item.getTourImage() != null ? item.getTourImage() : new ArrayList<>();
-                if (!images.isEmpty()) {
-                    tourImageRepository.saveAll(images);
-                }
             }
             tourPostItemRepository.saveAll(items);
         }
 
         // tags 리스트가 비어있지 않은 경우 처리
         if (!tags.isEmpty()) {
+            for (TourPostHashTag hashtag : tags) {
+                // TourPostItem에 UserTourCourse 설정
+                hashtag.setTourCourseForHashTag(userTourCourse);
+            }
             tourPostHashTagRepository.saveAll(tags);
         }
 
@@ -66,6 +79,13 @@ public class TourCommunityService {
         return userTourCourse;
     }
 
+    // 이미지 파일 저장 로직
+    private String saveImage(MultipartFile image) {
+        // 실제로 파일을 서버에 저장하는 로직을 추가
+        String filePath = "/path/to/images/" + image.getOriginalFilename();
+        // 예시: File file = new File(filePath); image.transferTo(file);
+        return filePath;
+    }
 
     public List<UserTourCourse> allPost() {
         return userTourCourseRepository.findAll();
