@@ -18,6 +18,28 @@ public class CafeController {
         return cafeService.fetchAndSaveData();
     }
 
+    // 1단계 저장 100개만
+    @GetMapping("/save")
+    public void saveCafes() {
+        cafeService.saveCafes();
+    }
+    // 2단계 저장
+    @GetMapping("/save/introduction")
+    public void saveCafesIntroduction() {
+        cafeService.processSaveIntroduction();
+    }
+    // 3단계 저장
+    @GetMapping("/save/info")
+    public void saveCafesInfo() {
+        cafeService.processSaveInfo();
+    }
+    // 4단계 저장
+    @GetMapping("/save/image")
+    public void saveCafesImages() {
+        cafeService.processSaveImage();
+    }
+
+
     @GetMapping("/detail/all")
     public List<CafeDTO> getcafe(){
         return cafeService.getCafe();

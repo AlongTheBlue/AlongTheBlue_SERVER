@@ -2,13 +2,17 @@ package org.alongtheblue.alongtheblue_server.global.data.cafe;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantImage;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 
 @Service
@@ -18,6 +22,8 @@ public class CafeService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private String apiKey = "GY8BQwWZJD6QX3tfaQTpfYMRjcRnaHoPAxn/7u6ZffwScPHeO3TYZgA0zMPfnO/iSc/PunU/5rZYIa5jj98sUw==";
+
+    private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
     public CafeService(CafeRepository cafeRepository, CafeImageRepository cafeImageRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
         this.cafeRepository = cafeRepository;
@@ -225,5 +231,105 @@ public class CafeService {
         }
 
         return dtos;
+    }
+
+    public void saveCafes() {
+        for (int i = 1; i < 2; i++) { // 1 and 11
+            URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                    .path("/areaBasedList1")
+                    .queryParam("serviceKey", apiKey)
+                    .queryParam("numOfRows", 95) //95
+                    .queryParam("pageNo", Integer.toString(i))
+                    .queryParam("MobileOS", "ETC")
+                    .queryParam("MobileApp", "AppTest")
+                    .queryParam("_type", "json")
+                    .queryParam("listYN", "Y")
+                    .queryParam("arrange", "A")
+                    .queryParam("contentTypeId", 39)
+                    .queryParam("areaCode", 39)
+                    .queryParam("cat1", "A05")
+                    .queryParam("cat2", "A0502")
+                    .queryParam("cat3","A05020900")
+                    .build()
+                    .toUri();
+
+            webClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(this::parseJson)
+                    .doOnNext(this::processCafe)
+                    .then()
+                    .subscribe();
+        }
+    }
+
+    private void processCafe(JsonNode rootNode) {
+        JsonNode itemsNode = rootNode.path("response").path("body").path("items").path("item");
+        if (itemsNode.isArray()) {
+            for (JsonNode itemNode : itemsNode) {
+                Cafe cafe = parseCafe(itemNode);
+                if (cafe != null) {
+                    cafeRepository.save(cafe);  // 예시로 saveRestaurant 메서드를 통해 저장
+                }
+            }
+        }
+    }
+
+    public void processSaveIntroduction() {
+        List<Cafe> cafes = cafeRepository.findAll();
+        for (Cafe cafe : cafes) {
+            String introduction = fetchIntroduction(cafe).block();
+            cafe.setIntroduction(introduction);
+            cafeRepository.save(cafe);
+        }
+    }
+
+    public void processSaveInfo() {
+        List<Cafe> cafes = cafeRepository.findAll();  // 모든 레스토랑을 불러옴
+
+        for (Cafe cafe : cafes) {
+            String jsonResponse = getInfo(cafe).block();
+
+            JSONObject jsonObject = new JSONObject(jsonResponse);
+            JSONObject responseBody = jsonObject.getJSONObject("response").getJSONObject("body");
+            JSONObject items = responseBody.getJSONObject("items");
+            JSONArray itemArray = items.getJSONArray("item");
+            if (!itemArray.isEmpty()) {
+                JSONObject item = itemArray.getJSONObject(0);
+                String restdate = item.getString("restdatefood");
+                String infocenter = item.getString("infocenterfood");
+                cafe.setRestDate(restdate);
+                cafe.setInfoCenter(infocenter);
+                cafeRepository.save(cafe);
+            }
+        }
+    }
+
+    private Mono<String> getInfo(Cafe cafe){
+        URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .path("/detailIntro1")
+                .queryParam("serviceKey", apiKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("_type", "json")
+                .queryParam("contentId", cafe.getContentId())
+                .queryParam("contentTypeId", "39")
+                .queryParam("numOfRows", "10")
+                .queryParam("pageNo", "1")
+                .build()
+                .toUri();
+
+        return webClient.get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    public void processSaveImage() {
+        List<Cafe> cafes = cafeRepository.findAll();  // 모든 레스토랑을 불러옴
+        for (Cafe cafe : cafes) {
+            fetchAndSaveCafeImage(cafe).block();
+        }
     }
 }

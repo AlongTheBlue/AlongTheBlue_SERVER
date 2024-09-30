@@ -1,5 +1,6 @@
 package org.alongtheblue.alongtheblue_server.global.data.accommodation;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -12,10 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/accommodation")
 public class AccommodationController {
-    @Autowired
-    private AccommodationService accommodationService;
+    private final AccommodationService accommodationService;
 
     // visit jeju
     @GetMapping("/fetch-and-save")
@@ -93,5 +94,26 @@ public class AccommodationController {
     @GetMapping("/with-images") // 세부
     public List<AccommodationDTO> getAccommodationsWithTwoImages() {
         return accommodationService.getRandomAccommodationDetailsWithTwoImages();
+    }
+
+    // 1단계 저장 100개만
+    @GetMapping("/save")
+    public void saveAccommodations() {
+        accommodationService.saveAccommodations();
+    }
+    // 2단계 저장
+    @GetMapping("/save/introduction")
+    public void saveAccommodationsIntroduction() {
+        accommodationService.processSaveIntroduction();
+    }
+    // 3단계 저장
+    @GetMapping("/save/info")
+    public void saveAccommodationsInfo() {
+        accommodationService.processSaveInfo();
+    }
+    // 4단계 저장
+    @GetMapping("/save/image")
+    public void saveAccommodationsImages() {
+        accommodationService.processSaveImage();
     }
 }
