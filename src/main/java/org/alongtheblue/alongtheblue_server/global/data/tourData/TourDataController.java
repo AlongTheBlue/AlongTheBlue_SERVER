@@ -1,42 +1,45 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourData;
 
-import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/tourData")
 public class TourDataController {
     @Autowired
     private TourDataService tourDataService;
 
-    @GetMapping("/tourData")
+    @GetMapping("/save")
     public ArrayList<TourData> getTourData() {
         return tourDataService.getTourData();
     }
 
-    @GetMapping("/tourData/overview")
+    @GetMapping("/save/overview")
     public List<TourData> getTourDataOverview() {
         return tourDataService.updateOverviews();
     }
 
-    @GetMapping("/tourData/introduction")
+    @GetMapping("/save/info")
     public List<TourData> getTourDataIntroduction() {
-        return tourDataService.updateIntroduction();
+        return tourDataService.updateInfo();
     }
-    @GetMapping("/home/tourData")
-    public ArrayList<TourData> getHomeTourData() {
+    @GetMapping("save/images")
+    public void getTourDataImages(){
+        tourDataService.updateAllTourDataImageUrls();
+    }
+    @GetMapping("/home")
+    public List<TourDataDto> getHomeTourData() {
         return tourDataService.getHomeTourData();
     }
 
-    @GetMapping("/tourData/{contentsid}") // 상세보기
-    public TourDataBasicDto gettourData(@PathVariable String contentsid) {
+    @GetMapping("/{contentsid}") // 상세보기
+    public TourDataDto getTourDataById(@PathVariable String contentsid) {
         return tourDataService.getTourDataDetails(contentsid);
     }
 

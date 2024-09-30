@@ -13,15 +13,14 @@ public interface TourDataRepository extends JpaRepository<TourData, String> {
     // TourImageEntity를 저장할 메서드 추가
 
 //    TourData findByContentId(String contentId);
-/*
+
     @Query(value = "SELECT a.* " +
-            "FROM accommodation a " +
-            "JOIN accommodation_image ai ON a.contentsid = ai.accommodation " +
+            "FROM tour_data a " +
+            "JOIN tour_data_image ai ON a.contentsid = ai.tour_data " +
             "GROUP BY a.id " +
             "HAVING COUNT(ai.url) > 0 " +
             "ORDER BY RAND() " +
             "LIMIT 6",
             nativeQuery = true)
-            */
-    // List<TourData> findRandomTourDatasWithImages();
+     List<TourData> findRandomTourDatasWithImages();
 }
