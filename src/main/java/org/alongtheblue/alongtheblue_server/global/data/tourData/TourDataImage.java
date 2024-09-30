@@ -14,7 +14,7 @@ public class TourDataImage {
 
     // TourImageEntity에 맞추어 변경
     @ManyToOne
-    @JoinColumn(name = "tour_data") // TourImageEntity의 ID에 해당하는 외래 키
+    @JoinColumn(name = "tourData") // TourImageEntity의 ID에 해당하는 외래 키
     @JsonBackReference
     private TourData tourData; // Accommodation 대신 TourImage와 관계 설정
 }
