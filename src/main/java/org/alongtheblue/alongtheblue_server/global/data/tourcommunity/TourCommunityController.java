@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping("/tourpost")
+@RequestMapping("api/tourpost")
 @RequiredArgsConstructor
 public class TourCommunityController {
 
@@ -38,12 +38,12 @@ public class TourCommunityController {
 
 
     @GetMapping("/allpost")
-    public List<UserTourCourse> allPost(){
+    public List<TourDTO> allPost(){
         return tourCommunityService.allPost();
     }
 
     @GetMapping("/{postid}")
-    public UserTourCourse onepost(@PathVariable Long postid){
+    public TourDTO onepost(@PathVariable Long postid){
         return tourCommunityService.onepost(postid);
     }
 

@@ -2,8 +2,11 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueCourse;
+import org.alongtheblue.alongtheblue_server.global.data.tourData.TourData;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -16,14 +19,16 @@ import java.util.*;
 
 @Service
 public class RestaurantService {
-    private final restaurantRepository restaurantRepository;
+    private final RestaurantRepository restaurantRepository;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final RestaurantImageRepository restaurantImageRepository;
-    private final String apiKey = "GY8BQwWZJD6QX3tfaQTpfYMRjcRnaHoPAxn/7u6ZffwScPHeO3TYZgA0zMPfnO/iSc/PunU/5rZYIa5jj98sUw==";
+
+    @Value("${api.key}")
+    private String apiKey;
     private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
-    public RestaurantService(restaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository) {
+    public RestaurantService(RestaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository) {
         this.restaurantRepository = restaurantRepository;
         this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
@@ -196,8 +201,8 @@ public class RestaurantService {
                     return resultMap;
                 });
     }
-
-    public List<RestaurantDTO> getRestaurant() {
+    //딱 음식 눌렀을 때 식당 목록
+    public List<RestaurantDTO> getAll() {
         List<Restaurant> restaurants = restaurantRepository.findAll();
         List<RestaurantDTO> dtos = new ArrayList<>();
         for (Restaurant restaurant : restaurants) {
@@ -207,16 +212,15 @@ public class RestaurantService {
             List<String> urls= new ArrayList<>();
             for(RestaurantImage resimg : imgs)  urls.add(resimg.getOriginimgurl());
             dto.setImgUrls(urls);
-            dto.setAddress(restaurant.getAddr().substring(8));
+            dto.setAddress(restaurant.getAddr());
             dto.setContentid(restaurant.getContentId());
             dto.setTitle(restaurant.getTitle());
-            dto.setIntroduction(restaurant.getIntroduction());
-            dto.setInfoCenter(restaurant.getInfoCenter());
-            dto.setRestDate(restaurant.getRestDate());
             dtos.add(dto);
         }
         return dtos;
     }
+
+
 
     public List<RestaurantDTO> homerestaurant() {
         Random random= new Random();
@@ -342,5 +346,25 @@ public class RestaurantService {
         for (Restaurant restaurant : restaurants) {
             fetchAndSaveRestaurantImage(restaurant).block();
         }
+    }
+    //상세보기
+    public RestaurantDTO getRestaurant(Long id) {
+        Optional<Restaurant> temp= restaurantRepository.findById(id);
+        if (temp.isPresent()){
+            Restaurant restaurant= temp.get();
+            RestaurantDTO dto= new RestaurantDTO();
+            List<RestaurantImage> imgs= restaurantImageRepository.findByrestaurant(restaurant);
+            List<String> urls= new ArrayList<>();
+            for(RestaurantImage resimg : imgs)  urls.add(resimg.getOriginimgurl());
+            dto.setImgUrls(urls);
+            dto.setAddress(restaurant.getAddr().substring(8));
+            dto.setContentid(restaurant.getContentId());
+            dto.setTitle(restaurant.getTitle());
+            dto.setIntroduction(restaurant.getIntroduction());
+            dto.setInfoCenter(restaurant.getInfoCenter());
+            dto.setRestDate(restaurant.getRestDate());
+            return dto;
+        }
+        else return null;
     }
 }

@@ -6,4 +6,5 @@ import java.util.Optional;
 
 public interface UserTourCourseRepository extends JpaRepository<UserTourCourse, Long> {
 
+
 }

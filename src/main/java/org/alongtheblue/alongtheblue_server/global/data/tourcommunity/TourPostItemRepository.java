@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TourPostItemRepository extends JpaRepository<TourPostItem, Long> {
+    List<TourPostItem> findByuserTourCourse (UserTourCourse userTourCourse);
 }
