@@ -18,14 +18,14 @@ import java.util.*;
 
 @Service
 public class RestaurantService {
-    private final restaurantRepository restaurantRepository;
+    private final RestaurantRepository restaurantRepository;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final RestaurantImageRepository restaurantImageRepository;
     private final String apiKey = "GY8BQwWZJD6QX3tfaQTpfYMRjcRnaHoPAxn/7u6ZffwScPHeO3TYZgA0zMPfnO/iSc/PunU/5rZYIa5jj98sUw==";
     private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
-    public RestaurantService(restaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository) {
+    public RestaurantService(RestaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository) {
         this.restaurantRepository = restaurantRepository;
         this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
