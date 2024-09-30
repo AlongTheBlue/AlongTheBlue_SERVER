@@ -8,6 +8,7 @@ import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodat
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,8 @@ public class TourDataService {
     @Autowired
     private TourDataImageRepository tourDataImageRepository;
 
-    private static final String SERVICE_KEY = "GY8BQwWZJD6QX3tfaQTpfYMRjcRnaHoPAxn/7u6ZffwScPHeO3TYZgA0zMPfnO/iSc/PunU/5rZYIa5jj98sUw==";
+    @Value("${api.key}")
+    private String apiKey;
 
     public ArrayList<TourData> getTourData() {
         String url = "https://apis.data.go.kr/B551011/KorService1/areaBasedList1";
@@ -43,7 +45,7 @@ public class TourDataService {
             int finalPageNo = pageNo;
             Mono<String> response = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .queryParam("serviceKey", SERVICE_KEY)
+                            .queryParam("serviceKey", apiKey)
                             .queryParam("numOfRows", numOfRows)
                             .queryParam("pageNo", finalPageNo)  // 페이지 번호 변경
                             .queryParam("MobileOS", "ETC")
@@ -91,7 +93,7 @@ public class TourDataService {
         // 총 데이터 수를 가져오는 API 요청
         Mono<String> response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .queryParam("serviceKey", SERVICE_KEY)
+                        .queryParam("serviceKey", apiKey)
                         .queryParam("numOfRows", 1)  // 데이터는 1개만 요청
                         .queryParam("pageNo", 1)
                         .queryParam("MobileOS", "ETC")
@@ -129,7 +131,7 @@ public class TourDataService {
             System.out.println(contentId);
             Mono<String> response = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .queryParam("serviceKey", SERVICE_KEY)
+                            .queryParam("serviceKey", apiKey)
                             .queryParam("MobileOS", "ETC")
                             .queryParam("MobileApp", "AppTest")
                             .queryParam("_type", "json")
@@ -183,7 +185,7 @@ public class TourDataService {
 
             Mono<String> response = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .queryParam("serviceKey", SERVICE_KEY)  // Add your service key here
+                            .queryParam("serviceKey", apiKey)  // Add your service key here
                             .queryParam("MobileOS", "ETC")
                             .queryParam("MobileApp", "AppTest")
                             .queryParam("_type", "json")
@@ -315,7 +317,7 @@ public class TourDataService {
 
     public void updateTourDataImageUrls(TourData tourData) {
         String tourDataId = tourData.getContentId();  // id 필드를 사용
-        String url = "https://apis.data.go.kr/B551011/KorService1/detailImage1?serviceKey="+SERVICE_KEY+"&MobileOS=ETC&MobileApp=AppTest&_type=json&contentId=" + tourDataId + "&imageYN=Y&subImageYN=Y&numOfRows=10&pageNo=1";
+        String url = "https://apis.data.go.kr/B551011/KorService1/detailImage1?serviceKey="+apiKey+"&MobileOS=ETC&MobileApp=AppTest&_type=json&contentId=" + tourDataId + "&imageYN=Y&subImageYN=Y&numOfRows=10&pageNo=1";
 
         WebClient webClient = WebClient.builder().build();
 

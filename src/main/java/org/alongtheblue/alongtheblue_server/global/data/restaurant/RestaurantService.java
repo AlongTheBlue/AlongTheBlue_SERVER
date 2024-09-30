@@ -6,6 +6,7 @@ import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueCourse;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.TourData;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -22,7 +23,9 @@ public class RestaurantService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final RestaurantImageRepository restaurantImageRepository;
-    private final String apiKey = "GY8BQwWZJD6QX3tfaQTpfYMRjcRnaHoPAxn/7u6ZffwScPHeO3TYZgA0zMPfnO/iSc/PunU/5rZYIa5jj98sUw==";
+
+    @Value("${api.key}")
+    private String apiKey;
     private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
     public RestaurantService(RestaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository) {
