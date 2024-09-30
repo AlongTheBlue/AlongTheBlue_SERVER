@@ -19,7 +19,4 @@ public class TourImage {
     @JsonBackReference
     private TourPostItem tourPostItem;
 
-    @ManyToOne
-    @JoinColumn(name = "tour_data_id") // 외래 키 컬럼 이름
-    private TourData tourData; // TourData와의 관계 설정
 }
