@@ -3,7 +3,6 @@ package org.alongtheblue.alongtheblue_server.global.data.tourData;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
-import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.TourImage;
 
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class TourData {
     }
 
     @OneToMany(mappedBy = "tourData", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TourImage> images; // 추가된 부분
+    private List<TourDataImage> images; // 추가된 부분
 
 
     public TourData() {

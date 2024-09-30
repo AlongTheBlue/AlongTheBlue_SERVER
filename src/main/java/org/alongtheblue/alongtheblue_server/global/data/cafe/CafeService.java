@@ -2,6 +2,8 @@ package org.alongtheblue.alongtheblue_server.global.data.cafe;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantDTO;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantImage;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -178,7 +180,7 @@ public class CafeService {
         return new Cafe(contentId, title, addr);
     }
 
-    public List<CafeDTO> getCafe() {
+    public List<CafeDTO> getAll() {
         List<Cafe> cafes= cafeRepository.findAll();
         CafeDTO dto= new CafeDTO();
         List<CafeDTO> dtos= new ArrayList<>();
@@ -225,5 +227,25 @@ public class CafeService {
         }
 
         return dtos;
+    }
+
+    public CafeDTO getCafe(Long id) {
+        Optional<Cafe> temp= cafeRepository.findById(id);
+        if (temp.isPresent()){
+            Cafe cafe= temp.get();
+            CafeDTO dto= new CafeDTO();
+            List<CafeImage> imgs= cafeImageRepository.findBycafe(cafe);
+            List<String> urls= new ArrayList<>();
+            for(CafeImage resimg : imgs)  urls.add(resimg.getOriginimgurl());
+            dto.setImgUrls(urls);
+            dto.setAddress(cafe.getAddr());
+            dto.setContentid(cafe.getContentId());
+            dto.setTitle(cafe.getTitle());
+            dto.setIntroduction(cafe.getIntroduction());
+            dto.setInfoCenter(cafe.getInfoCenter());
+            dto.setRestDate(cafe.getRestDate());
+            return dto;
+        }
+        else return null;
     }
 }

@@ -2,6 +2,7 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
@@ -41,14 +42,19 @@ public class restaurantController {
     }
 
     @GetMapping("/detail/all")
-    public List<RestaurantDTO> getRestaurant(){
-        return restaurantService.getRestaurant();
+    public List<RestaurantDTO> getAll(){
+        return restaurantService.getAll();
 
     }
 
     @GetMapping("/home")
     public List<RestaurantDTO> homeRestaurant(){
         return restaurantService.homerestaurant();
+    }
+
+    @GetMapping("/detail/{id}")
+    public RestaurantDTO getRestaurant(@PathVariable Long id){
+        return restaurantService.getRestaurant(id);
     }
 
 }

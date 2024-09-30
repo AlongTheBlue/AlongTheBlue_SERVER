@@ -3,6 +3,7 @@ package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alongtheblue.alongtheblue_server.domain.item.domain.Item;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,19 +88,49 @@ public class TourCommunityService {
         return filePath;
     }
 
-    public List<UserTourCourse> allPost() {
-        return userTourCourseRepository.findAll();
+    public List<TourDTO> allPost() {
+        List<TourDTO> dtos= new ArrayList<>();
+        List<UserTourCourse> tours= userTourCourseRepository.findAll();
+        for(UserTourCourse tour: tours){
+            TourDTO dto= new TourDTO();
+            dto.setTitle(tour.getTitle());
+            dto.setContentid(tour.getContentId());
+            dto.setWriting(tour.getWriting());
+            dto.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(tour));
+            List<TourPostItem> items= tourPostItemRepository.findByuserTourCourse(tour);
+            dto.setImg(tourImageRepository.findBytourPostItem(items.get(0)).get(0).getUrl());
+            dtos.add(dto);
+        }
+
+        return dtos;
     }
 
-    public UserTourCourse onepost(Long postid) {
+    public TourDTO onepost(Long postid) {
         Optional<UserTourCourse> temp= userTourCourseRepository.findById(postid);
-        UserTourCourse userTourCourse;
+        UserTourCourse course;
+        TourDTO tourDTO= new TourDTO();
+        ItemDTO itemDTO= new ItemDTO();
+        List<ItemDTO> items= new ArrayList<>();
         if(temp.isPresent()) {
-            userTourCourse= temp.get();
-            return  userTourCourse;
+            course= temp.get();
+            tourDTO.setTitle(course.getTitle());
+            tourDTO.setWriting(course.getWriting());
+            tourDTO.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(course));
+            tourDTO.setContentid(course.getContentId());
+            for(TourPostItem item: tourPostItemRepository.findByuserTourCourse(course)){
+                itemDTO.setName(item.getName());
+                itemDTO.setCategory(item.getCategory());
+                itemDTO.setAddress(item.getAddress());
+                itemDTO.setComment(itemDTO.getComment());
+                List<String> imgs= new ArrayList<>();
+                for(TourImage img: tourImageRepository.findBytourPostItem(item)) imgs.add(img.getUrl());
+                itemDTO.setTourImage(imgs);
+                items.add(itemDTO);
+            }
+            tourDTO.setItems(items);
+            return tourDTO;
         }
         else return null;
-
     }
 
 
