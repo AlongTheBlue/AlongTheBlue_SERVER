@@ -13,27 +13,27 @@ public interface AccommodationRepository extends JpaRepository<Accommodation, Lo
     List<Accommodation> findByIntroductionIsNull();
     @Query("SELECT a FROM Accommodation a WHERE a.introduction IS NULL")
     List<Accommodation> findAccommodationsWithNullIntroduction();
-    @Query("SELECT a.contentsid FROM Accommodation a")
-    List<String> findAllContentsIds();
+    @Query("SELECT a.contentId FROM Accommodation a")
+    List<String> findAllContentId();
 
-    Accommodation findByContentsid(String contentsid);
+    Accommodation findByContentId(String contentId);
 
     @Query(value = "SELECT a.* " +
             "FROM accommodation a " +
-            "JOIN accommodation_image ai ON a.contentsid = ai.accommodation " +
-            "GROUP BY a.contentsid " +
+            "JOIN accommodation_image ai ON a.contentId = ai.accommodation " +
+            "GROUP BY a.contentId " +
             "HAVING COUNT(ai.url) > 0 " +
             "ORDER BY RAND() " +
             "LIMIT 6",
             nativeQuery = true)
     List<Accommodation> findRandomAccommodationsWithImages();
 
-    @Query(value = "SELECT a.contentsid, a.roadaddress, a.title, "
-            + "(SELECT GROUP_CONCAT(ai.url SEPARATOR ',') FROM accommodation_image ai WHERE ai.accommodation = a.contentsid) as imageUrls, "
+    @Query(value = "SELECT a.contentId, a.roadaddress, a.title, "
+            + "(SELECT GROUP_CONCAT(ai.url SEPARATOR ',') FROM accommodation_image ai WHERE ai.accommodation = a.contentId) as imageUrls, "
             + "a.introduction "
             + "FROM accommodation a "
-            + "JOIN accommodation_image ai ON a.contentsid = ai.accommodation "
-            + "GROUP BY a.contentsid "
+            + "JOIN accommodation_image ai ON a.contentId = ai.accommodation "
+            + "GROUP BY a.contentId "
             + "HAVING COUNT(ai.url) > 0 "
             + "ORDER BY RAND()", nativeQuery = true)
     List<AccommodationDTO> findAccommodationsWithTwoImages();
