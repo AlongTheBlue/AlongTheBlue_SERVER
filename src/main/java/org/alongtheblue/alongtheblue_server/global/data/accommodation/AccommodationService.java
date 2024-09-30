@@ -3,17 +3,18 @@ package org.alongtheblue.alongtheblue_server.global.data.accommodation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
-import org.springframework.http.HttpStatus;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -21,14 +22,18 @@ import java.util.stream.Collectors;
 public class AccommodationService {
     private final WebClient webClient;
 
-    @Autowired
+    private final ObjectMapper objectMapper;
+
     private final AccommodationRepository accommodationRepository;
-    @Autowired
     private final AccommodationImageRepository accommodationImageRepository;
 
+    private final String apiKey = "GY8BQwWZJD6QX3tfaQTpfYMRjcRnaHoPAxn/7u6ZffwScPHeO3TYZgA0zMPfnO/iSc/PunU/5rZYIa5jj98sUw==";
+    private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
+
     @Autowired
-    public AccommodationService(WebClient.Builder webClientBuilder, AccommodationRepository accommodationRepository, AccommodationImageRepository accommodationImageRepository) {
-        this.webClient = webClientBuilder.baseUrl("https://api.visitjeju.net").build();
+    public AccommodationService(WebClient.Builder webClientBuilder, AccommodationRepository accommodationRepository, AccommodationImageRepository accommodationImageRepository, ObjectMapper objectMapper) {
+        this.webClient = webClientBuilder.build();
+        this.objectMapper = objectMapper;
         this.accommodationRepository = accommodationRepository;
         this.accommodationImageRepository = accommodationImageRepository;
     }
@@ -65,9 +70,9 @@ public class AccommodationService {
 
     private void saveHotelData(String contentsid, String title, String roadaddress, String introduction) {
         Accommodation accommodation = new Accommodation();
-        accommodation.setContentsid(contentsid);
+        accommodation.setContentId(contentsid);
         accommodation.setTitle(title);
-        accommodation.setRoadaddress(roadaddress);
+        accommodation.setAddress(roadaddress);
         accommodation.setIntroduction(introduction);
 
         // 데이터를 데이터베이스에 저장
@@ -75,45 +80,105 @@ public class AccommodationService {
     }
 
     public void saveAccommodations() {
-        String url = "https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=ca0cc07e23f9458d8434fd02261340ad&locale=kr&category=c3";
-        RestTemplate restTemplate = new RestTemplate();
-        String jsonResponse = restTemplate.getForObject(url, String.class);
+        for (int i = 1; i < 2; i++) { // 1 and 11
+            URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                    .path("/areaBasedList1")
+                    .queryParam("serviceKey", apiKey)
+                    .queryParam("numOfRows", 95) //95
+                    .queryParam("pageNo", Integer.toString(i))
+                    .queryParam("MobileOS", "ETC")
+                    .queryParam("MobileApp", "AppTest")
+                    .queryParam("_type", "json")
+                    .queryParam("listYN", "Y")
+                    .queryParam("arrange", "A")
+                    .queryParam("contentTypeId", 32)
+                    .queryParam("areaCode", 39)
+                    .queryParam("cat1", "B02")
+                    .queryParam("cat2", "B0201")
+                    .build()
+                    .toUri();
 
-        try {
-            // JSON 데이터를 파싱하여 필요한 필드 추출
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(jsonResponse);
-            JsonNode itemsNode = rootNode.path("items");
-
-            List<Accommodation> accommodations = new ArrayList<>();
-
-            for (JsonNode itemNode : itemsNode) {
-                String contentsid = itemNode.path("contentsid").asText();
-                String title = itemNode.path("title").asText();
-                String roadaddress = itemNode.path("roadaddress").asText();
-                String introduction = itemNode.path("introduction").asText();
-
-                Accommodation accommodation = new Accommodation();
-                accommodation.setContentsid(contentsid);
-                accommodation.setTitle(title);
-                accommodation.setRoadaddress(roadaddress);
-                accommodation.setIntroduction(introduction);
-
-                accommodations.add(accommodation);
-
-                // 100개의 데이터만 저장
-                if (accommodations.size() >= 100) {
-                    break;
-                }
-            }
-
-            // 데이터베이스에 저장
-            accommodationRepository.saveAll(accommodations);
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            webClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(this::parseJson)
+                    .doOnNext(this::processAccommodation)
+                    .then()
+                    .subscribe();
         }
     }
+
+    private void processAccommodation(JsonNode rootNode) {
+        JsonNode itemsNode = rootNode.path("response").path("body").path("items").path("item");
+        if (itemsNode.isArray()) {
+            for (JsonNode itemNode : itemsNode) {
+                Accommodation accommodation = parseAccommodation(itemNode);
+                if (accommodation != null) {
+                    accommodationRepository.save(accommodation);  // 예시로 saveRestaurant 메서드를 통해 저장
+                }
+            }
+        }
+    }
+
+    private Accommodation parseAccommodation(JsonNode itemNode) {
+        String cat3 = itemNode.path("cat3").asText();
+//        if (cat3.equals("A05020900")) return null;
+        String contentId = itemNode.path("contentid").asText();
+        String title = itemNode.path("title").asText();
+        String addr = itemNode.path("addr1").asText();
+        return new Accommodation(contentId, title, addr);
+    }
+
+    private JsonNode parseJson(String response) {
+        System.out.println(response);
+        try {
+            return objectMapper.readTree(response);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to parse JSON", e);
+        }
+    }
+
+//    public void saveAccommodations() {
+//        String url = "https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=ca0cc07e23f9458d8434fd02261340ad&locale=kr&category=c3";
+//        RestTemplate restTemplate = new RestTemplate();
+//        String jsonResponse = restTemplate.getForObject(url, String.class);
+//
+//        try {
+//            // JSON 데이터를 파싱하여 필요한 필드 추출
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            JsonNode rootNode = objectMapper.readTree(jsonResponse);
+//            JsonNode itemsNode = rootNode.path("items");
+//
+//            List<Accommodation> accommodations = new ArrayList<>();
+//
+//            for (JsonNode itemNode : itemsNode) {
+//                String contentsid = itemNode.path("contentsid").asText();
+//                String title = itemNode.path("title").asText();
+//                String roadaddress = itemNode.path("roadaddress").asText();
+//                String introduction = itemNode.path("introduction").asText();
+//
+//                Accommodation accommodation = new Accommodation();
+//                accommodation.setContentsid(contentsid);
+//                accommodation.setTitle(title);
+//                accommodation.setRoadaddress(roadaddress);
+//                accommodation.setIntroduction(introduction);
+//
+//                accommodations.add(accommodation);
+//
+//                // 100개의 데이터만 저장
+//                if (accommodations.size() >= 100) {
+//                    break;
+//                }
+//            }
+//
+//            // 데이터베이스에 저장
+//            accommodationRepository.saveAll(accommodations);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public void updateOverview() {
         String url = "https://apis.data.go.kr/B551011/KorService1/areaBasedList1?serviceKey=GY8BQwWZJD6QX3tfaQTpfYMRjcRnaHoPAxn/7u6ZffwScPHeO3TYZgA0zMPfnO/iSc/PunU/5rZYIa5jj98sUw==&numOfRows=100&pageNo=1&MobileOS=ETC&MobileApp=AppTest&_type=json&listYN=Y&arrange=A&contentTypeId=32&areaCode=39";
@@ -159,8 +224,8 @@ public class AccommodationService {
                 String title = itemNode.path("title").asText();
 
                 Accommodation accommodation = new Accommodation();
-                accommodation.setContentsid(contentsid);
-                accommodation.setRoadaddress(addr1);
+                accommodation.setContentId(contentsid);
+                accommodation.setAddress(addr1);
                 accommodation.setTitle(title);
 
                 accommodations.add(accommodation);
@@ -203,13 +268,13 @@ public class AccommodationService {
             List<Accommodation> accommodations = new ArrayList<>();
 
             for (JsonNode itemNode : itemsNode) {
-                String contentsid = itemNode.path("contentid").asText();
+                String contentId = itemNode.path("contentid").asText();
                 String addr1 = itemNode.path("addr1").asText();
                 String title = itemNode.path("title").asText();
 
                 Accommodation accommodation = new Accommodation();
-                accommodation.setContentsid(contentsid);
-                accommodation.setRoadaddress(addr1);
+                accommodation.setContentId(contentId);
+                accommodation.setAddress(addr1);
                 accommodation.setTitle(title);
 
                 // 추가된 필드 설정
@@ -235,12 +300,127 @@ public class AccommodationService {
         AccommodationDTO dto = new AccommodationDTO();
         List<AccommodationDTO> dtos = new ArrayList<>();
         for (Accommodation accommodation : accommodations) {
-            dto.setRoadaddress(accommodation.getRoadaddress().substring(8));
-            dto.setContentsid(accommodation.getContentsid());
+            dto.setRoadaddress(accommodation.getAddress().substring(8));
+            dto.setContentsid(accommodation.getContentId());
             dto.setTitle(accommodation.getTitle());
             dtos.add(dto);
         }
         return dtos;
+    }
+
+    public void processSaveIntroduction() {
+        List<Accommodation> accommodations = accommodationRepository.findAll();
+        for(int i=0; i<accommodations.size(); i++) {
+//        for (Restaurant restaurant : restaurants) {
+            String introduction = fetchIntroduction(accommodations.get(i)).block();
+            accommodations.get(i).setIntroduction(introduction);
+            accommodationRepository.save(accommodations.get(i));
+        }
+    }
+
+    private Mono<String> fetchIntroduction(Accommodation accommodation) {
+
+        URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .path("/detailCommon1")
+                .queryParam("serviceKey", apiKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("_type", "json")
+                .queryParam("contentId", accommodation.getContentId())
+                .queryParam("contentTypeId", "32")
+                .queryParam("defaultYN", "Y")
+                .queryParam("overviewYN", "Y")
+                .build()
+                .toUri();
+
+        System.out.println(uri);
+
+        return webClient.get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(String.class)
+                .map(this::parseJson)
+                .map(rootNode -> rootNode.path("response").path("body").path("items").path("item").get(0).path("overview").asText());
+    }
+
+    public void processSaveInfo() {
+        List<Accommodation> accommodations = accommodationRepository.findAll();
+
+        for(Accommodation accommodation : accommodations) {
+            String jsonResponse = getInfo(accommodation).block();
+
+            JSONObject jsonObject = new JSONObject(jsonResponse);
+            JSONObject responseBody = jsonObject.getJSONObject("response").getJSONObject("body");
+            JSONObject items = responseBody.getJSONObject("items");
+            JSONArray itemArray = items.getJSONArray("item");
+            if (!itemArray.isEmpty()) {
+                JSONObject item = itemArray.getJSONObject(0);
+                String checkintime = item.getString("checkintime");
+                String infoCenter = item.getString("infocenterlodging");
+                accommodation.setCheckintime(checkintime);
+                accommodation.setInfoCenter(infoCenter);
+                accommodationRepository.save(accommodation);
+            }
+        }
+    }
+
+    private Mono<String> getInfo(Accommodation accommodation){
+        URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .path("/detailIntro1")
+                .queryParam("serviceKey", apiKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("_type", "json")
+                .queryParam("contentId", accommodation.getContentId())
+                .queryParam("contentTypeId", "32")
+                .queryParam("numOfRows", "10")
+                .queryParam("pageNo", "1")
+                .build()
+                .toUri();
+
+        return webClient.get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    public void processSaveImage() {
+        List<Accommodation> accommodations = accommodationRepository.findAll();  // 모든 레스토랑을 불러옴
+        for (Accommodation accommodation : accommodations) {
+            fetchAndSaveAccommodationImage(accommodation).block();
+        }
+    }
+
+    private Mono<Void> fetchAndSaveAccommodationImage(Accommodation accommodation) {
+
+        URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .path("/detailImage1")
+                .queryParam("serviceKey", apiKey)
+                .queryParam("contentId", accommodation.getContentId())
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("_type", "json")
+                .queryParam("imageYN", "Y")
+                .queryParam("subImageYN", "Y")
+                .build()
+                .toUri();
+
+        return webClient.get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(String.class)
+                .map(this::parseJson)
+                .doOnNext(rootNode -> {
+                    JsonNode itemsNode = rootNode.path("response").path("body").path("items").path("item");
+                    if (itemsNode.isArray()) {
+                        for (JsonNode itemNode : itemsNode) {
+                            String imageUrl = itemNode.path("originimgurl").asText();
+                            AccommodationImage accommodationImage = new AccommodationImage(accommodation, imageUrl);
+                            accommodationImageRepository.save(accommodationImage);
+                        }
+                    }
+                })
+                .then();
     }
 
 
@@ -260,7 +440,7 @@ public class AccommodationService {
 
     public void updateAccommodationsWithNullIntroduction() {
         // contentsid 값들만 가져옴
-        List<String> contentsIds = accommodationRepository.findAllContentsIds();
+        List<String> contentsIds = accommodationRepository.findAllContentId();
         WebClient webClient = WebClient.create();
 
         for (String contentsid : contentsIds) {
@@ -289,7 +469,7 @@ public class AccommodationService {
                 // API 응답으로 introduction 필드가 있는 경우 업데이트
                 if (response != null && response.getIntroduction() != null) {
                     // 데이터베이스에서 해당 contentsid를 가진 Accommodation 객체를 찾아 업데이트
-                    Accommodation accommodation = accommodationRepository.findByContentsid(contentsid);
+                    Accommodation accommodation = accommodationRepository.findByContentId(contentsid);
                     accommodation.setIntroduction(response.getIntroduction());
                     accommodationRepository.save(accommodation);  // 데이터베이스에 저장
                 }
@@ -305,7 +485,7 @@ public class AccommodationService {
 
         // 각 contentsid에 대해 overview 업데이트
         accommodations.forEach(accommodation -> {
-            String contentId = accommodation.getContentsid();
+            String contentId = accommodation.getContentId();
             updateOverviewonemoretime(contentId);
         });
     }
@@ -315,7 +495,7 @@ public class AccommodationService {
         List<Accommodation> accommodations = accommodationRepository.findAll();
 
         // 각 contentsid에 대해 overview 업데이트
-        String contentId = accommodations.get(0).getContentsid();
+        String contentId = accommodations.get(0).getContentId();
         updateOverviewonemoretime(contentId);
     }
 
@@ -356,7 +536,7 @@ public class AccommodationService {
             String overview = overviewNode.asText();
             System.out.println("overview: "+ overview);
             // 해당 accommodation 객체를 업데이트
-            Accommodation accommodation = accommodationRepository.findByContentsid(contentId);
+            Accommodation accommodation = accommodationRepository.findByContentId(contentId);
             if (accommodation != null) {
                 accommodation.setIntroduction(overview); // introduction 필드 업데이트
                 accommodationRepository.save(accommodation); // 저장
@@ -377,7 +557,7 @@ public class AccommodationService {
 
         // 각 contentsid에 대해 checkintime 업데이트
         for (Accommodation accommodation : accommodations) {
-            String contentId = accommodation.getContentsid();
+            String contentId = accommodation.getContentId();
 //            updateCheckInTime(contentId);  // checkintime 업데이트 메서드 호출
             updateAccommodationDetails(contentId);
         }
@@ -423,7 +603,7 @@ public class AccommodationService {
             System.out.println("Check-in Time: " + checkintime);
 
             // 해당 accommodation 객체를 업데이트
-            Accommodation accommodation = accommodationRepository.findByContentsid(contentId);
+            Accommodation accommodation = accommodationRepository.findByContentId(contentId);
             if (accommodation != null) {
                 accommodation.setCheckintime(checkintime); // checkintime 필드 업데이트
                 accommodationRepository.save(accommodation); // 저장
@@ -444,7 +624,7 @@ public class AccommodationService {
 
         // 각 contentsid에 대해 infocenterlodging 업데이트
         for (Accommodation accommodation : accommodations) {
-            String contentId = accommodation.getContentsid();
+            String contentId = accommodation.getContentId();
             updateInfoCenterLodging(contentId);  // infocenterlodging 업데이트 메서드 호출
         }
     }
@@ -489,9 +669,9 @@ public class AccommodationService {
             System.out.println("Info Center Lodging: " + infocenterlodging);
 
             // 해당 accommodation 객체를 업데이트
-            Accommodation accommodation = accommodationRepository.findByContentsid(contentId);
+            Accommodation accommodation = accommodationRepository.findByContentId(contentId);
             if (accommodation != null) {
-                accommodation.setInfocenter(infocenterlodging); // infocenterlodging 필드 업데이트
+                accommodation.setInfoCenter(infocenterlodging); // infocenterlodging 필드 업데이트
                 accommodationRepository.save(accommodation); // 저장
             } else {
                 System.out.println("Accommodation not found for contentId: " + contentId);
@@ -510,14 +690,14 @@ public class AccommodationService {
 
         // 각 contentsid에 대해 originimgurls 업데이트
         for (Accommodation accommodation : accommodations) {
-            String contentId = accommodation.getContentsid();
+            String contentId = accommodation.getContentId();
             updateOriginImageUrls(contentId);  // originimgurls 업데이트 메서드 호출
         }
 //        updateOriginImageUrls(accommodations.get(0).getContentsid());
     }
 
     public Accommodation findByContentId(String contentId){
-        return accommodationRepository.findByContentsid(contentId);
+        return accommodationRepository.findByContentId(contentId);
     }
 
     public void updateOriginImageUrls(String contentId) {
@@ -563,7 +743,7 @@ public class AccommodationService {
                     originImgUrls.add(originimgurl);
                     System.out.println(originimgurl);
                     AccommodationImage accommodationImage = new AccommodationImage();
-                    accommodationImage.setUrl(originimgurl);
+                    accommodationImage.setOriginimgurl(originimgurl);
                     accommodationImage.setAccommodation(findByContentId(contentId));
                     accommodationImageRepository.save(accommodationImage);
                 }
@@ -577,22 +757,22 @@ public class AccommodationService {
         }
     }
 
-    public AccommodationDTO getAccommodationDetails(String contentsid) {
+    public AccommodationDTO getAccommodationDetails(String contentId) {
         // DB에서 Accommodation 조회
-        Accommodation accommodation = accommodationRepository.findByContentsid(contentsid);
+        Accommodation accommodation = accommodationRepository.findByContentId(contentId);
         if (accommodation != null) {
             // AccommodationDTO에 데이터를 매핑
             AccommodationDTO accommodationDTO = new AccommodationDTO();
-            accommodationDTO.setContentsid(accommodation.getContentsid());
+            accommodationDTO.setContentsid(accommodation.getContentId());
             accommodationDTO.setTitle(accommodation.getTitle());
-            accommodationDTO.setRoadaddress(accommodation.getRoadaddress());
+            accommodationDTO.setRoadaddress(accommodation.getAddress());
             accommodationDTO.setIntroduction(accommodation.getIntroduction());
             accommodationDTO.setCheckintime(accommodation.getCheckintime());
-            accommodationDTO.setInfocenter(accommodation.getInfocenter());
+            accommodationDTO.setInfocenter(accommodation.getInfoCenter());
 
             // 이미지 리스트를 DTO에 추가
             List<String> imageUrls = accommodation.getAccommodationImage().stream()
-                    .map(AccommodationImage::getUrl)
+                    .map(AccommodationImage::getOriginimgurl)
                     .collect(Collectors.toList());
             accommodationDTO.setOriginimgurl(imageUrls);
 
@@ -610,15 +790,15 @@ public class AccommodationService {
         // AccommodationDTO 리스트에 데이터를 매핑
         List<AccommodationDTO> accommodationDTOList = accommodations.stream().map(accommodation -> {
             AccommodationDTO accommodationDTO = new AccommodationDTO();
-            accommodationDTO.setContentsid(accommodation.getContentsid());
+            accommodationDTO.setContentsid(accommodation.getContentId());
             accommodationDTO.setTitle(accommodation.getTitle());
-            accommodationDTO.setRoadaddress(accommodation.getRoadaddress());
+            accommodationDTO.setRoadaddress(accommodation.getAddress());
             accommodationDTO.setIntroduction(accommodation.getIntroduction());
             accommodationDTO.setCheckintime(accommodation.getCheckintime());
 
             // 이미지 리스트를 DTO에 추가
             List<String> imageUrls = accommodation.getAccommodationImage().stream()
-                    .map(AccommodationImage::getUrl)
+                    .map(AccommodationImage::getOriginimgurl)
                     .collect(Collectors.toList());
             accommodationDTO.setOriginimgurl(imageUrls);
 
@@ -635,14 +815,14 @@ public class AccommodationService {
         // AccommodationDTO 리스트에 데이터를 매핑
         List<AccommodationDTO> accommodationDTOList = accommodations.stream().map(accommodation -> {
             AccommodationDTO accommodationDTO = new AccommodationDTO();
-            accommodationDTO.setContentsid(accommodation.getContentsid());
+            accommodationDTO.setContentsid(accommodation.getContentId());
             accommodationDTO.setTitle(accommodation.getTitle());
-            accommodationDTO.setRoadaddress(accommodation.getRoadaddress());
+            accommodationDTO.setRoadaddress(accommodation.getAddress());
             accommodationDTO.setIntroduction(accommodation.getIntroduction());
 
             // 이미지 리스트에서 랜덤으로 두 개의 이미지 URL 가져오기
             List<String> imageUrls = accommodation.getAccommodationImage().stream()
-                    .map(AccommodationImage::getUrl)
+                    .map(AccommodationImage::getOriginimgurl)
                     .distinct() // 중복된 이미지 URL 제거
                     .limit(2)   // 최대 2개만 선택
                     .collect(Collectors.toList());
@@ -707,10 +887,10 @@ public class AccommodationService {
             System.out.println("Info Center Lodging: " + infocenterlodging);
 
             // 해당 accommodation 객체를 업데이트
-            Accommodation accommodation = accommodationRepository.findByContentsid(contentId);
+            Accommodation accommodation = accommodationRepository.findByContentId(contentId);
             if (accommodation != null) {
                 accommodation.setCheckintime(checkintime); // checkintime 필드 업데이트
-                accommodation.setInfocenter(infocenterlodging); // infocenterlodging 필드 업데이트
+                accommodation.setInfoCenter(infocenterlodging); // infocenterlodging 필드 업데이트
                 accommodationRepository.save(accommodation); // 저장
             } else {
                 System.out.println("Accommodation not found for contentId: " + contentId);
