@@ -21,23 +21,27 @@ public class TourCommunityController {
     @Operation(summary = "게시물 등록 API")
     @PostMapping
     public UserTourCourse createTourCourse(
-            @RequestPart("title") String title,
-            @RequestPart("writing") String writing,
-            @RequestPart("createdate") Date date,
-            @RequestPart List<TourPostItem> tourItems,
-            @RequestPart List<TourPostHashTag> hashTags,
-            @RequestPart List<MultipartFile> images,
-            @RequestPart List<List<Integer>> index) {
+            @RequestPart(value = "request") TourCourseRequestDto dto,
+//            @RequestPart("title") String title,
+//            @RequestPart("writing") String writing,
+//            @RequestPart("createdate") Date date,
+//            @RequestPart List<TourPostItem> tourItems,
+//            @RequestPart List<TourPostHashTag> hashTags,
+            @RequestPart(value = "file") List<MultipartFile> images
+//            ,
+//            @RequestPart List<List<Integer>> index
+    ) {
 
 
-        UserTourCourse userTourCourse= new UserTourCourse();
-        userTourCourse.setTitle(title);
-        userTourCourse.setTourPostItems(tourItems);
-        userTourCourse.setTourPostHashTags(hashTags);
-        userTourCourse.setCreatedate(date);
-        userTourCourse.setWriting(writing);
+//        UserTourCourse userTourCourse= new UserTourCourse();
+//        userTourCourse.setTitle(title);
+//        userTourCourse.setTourPostItems(tourItems);
+//        userTourCourse.setTourPostHashTags(hashTags);
+//        userTourCourse.setCreatedate(date);
+//        userTourCourse.setWriting(writing);
 
-        return tourCommunityService.createPost(userTourCourse, images, index);
+//        return tourCommunityService.createPost(userTourCourse, images, dto);
+        return tourCommunityService.createPost(dto, images);
     }
 
 
