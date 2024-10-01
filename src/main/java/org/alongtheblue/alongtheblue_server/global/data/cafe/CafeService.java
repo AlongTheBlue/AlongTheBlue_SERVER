@@ -182,8 +182,9 @@ public class CafeService {
         String contentId = itemNode.path("contentid").asText();
         String title = itemNode.path("title").asText();
         String addr = itemNode.path("addr1").asText();
-
-        return new Cafe(contentId, title, addr);
+        String x = itemNode.path("mapx").asText();
+        String y = itemNode.path("mapy").asText();
+        return new Cafe(contentId, title, addr, x, y);
     }
 
     public List<CafeDTO> getAll() {
