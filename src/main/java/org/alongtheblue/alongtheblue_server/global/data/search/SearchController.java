@@ -45,9 +45,14 @@ public class SearchController {
         return restaurantService.getRestaurantsByKeyword(keyword);
     }
 
-    @GetMapping("/list")
+    @GetMapping("/all")
     public ApiResponse<List<AllCategoryResponseDto>> searchAllCategoryByKeyword(@RequestParam String keyword){
         return searchService.searchAllCategoryByKeyword(keyword);
+    }
+
+    @GetMapping("/all/list")
+    public ApiResponse<List<AllCategoryResponseDto>> getAllCategory(){
+        return searchService.searchAllCategory();
     }
 
     @GetMapping("/cafe/list")
