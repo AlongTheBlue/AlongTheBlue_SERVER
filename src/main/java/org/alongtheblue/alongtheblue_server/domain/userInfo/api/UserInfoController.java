@@ -27,8 +27,14 @@ public class UserInfoController {
     }
     @Operation(summary = "UserInfo 전체 조회 API")
     @GetMapping("/userInfo")
-    public ApiResponse<List<UserInfo>> retrieveAllFaq() {
+    public ApiResponse<List<UserInfo>> retrieveAllUserInfo() {
         return userInfoService.retrieveAllUserInfo();
+    }
+
+    @Operation(summary = "ID로 UserInfo 조회 API")
+    @GetMapping("/user")
+    public ApiResponse<UserInfo> retrieveUserInfo(@RequestHeader("Authorization") String uid) {
+        return userInfoService.retrieveUserInfo(uid);
     }
 
 }
