@@ -1,17 +1,17 @@
 package org.alongtheblue.alongtheblue_server.global.data.accommodation;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
+@Tag(name = "숙소(Accommodation) API", description = "Accommodation 등록 / 수정 / 조회")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/accommodation")
@@ -19,6 +19,7 @@ public class AccommodationController {
     private final AccommodationService accommodationService;
 
     // visit jeju
+    @Operation(summary = "숙소 한번에 자동 등록 API")
     @GetMapping("/fetch-and-save")
     public String fetchAndSaveAccommodations() {
         accommodationService.saveAccommodations();
@@ -97,21 +98,25 @@ public class AccommodationController {
     }
 
     // 1단계 저장 100개만
+    @Operation(summary = "숙소 1단계 등록 API", description = "1단계 저장 100개만")
     @GetMapping("/save")
     public void saveAccommodations() {
         accommodationService.saveAccommodations();
     }
     // 2단계 저장
+    @Operation(summary = "숙소 2단계 등록 API", description = "2단계 저장")
     @GetMapping("/save/introduction")
     public void saveAccommodationsIntroduction() {
         accommodationService.processSaveIntroduction();
     }
     // 3단계 저장
+    @Operation(summary = "숙소 3단계 등록 API", description = "3단계 저장")
     @GetMapping("/save/info")
     public void saveAccommodationsInfo() {
         accommodationService.processSaveInfo();
     }
     // 4단계 저장
+    @Operation(summary = "숙소 4단계 등록 API", description = "4단계 저장")
     @GetMapping("/save/image")
     public void saveAccommodationsImages() {
         accommodationService.processSaveImage();

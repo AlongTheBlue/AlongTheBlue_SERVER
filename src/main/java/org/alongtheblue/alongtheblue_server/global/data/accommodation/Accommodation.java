@@ -24,14 +24,18 @@ public class Accommodation {
     private String introduction;
     private String infoCenter;
     private String checkintime;
+    private String xMap;
+    private String yMap;
 
     @OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<AccommodationImage> accommodationImage;
 
-    public Accommodation(String contentId, String title, String address) {
+    public Accommodation(String contentId, String title, String address, String xMap, String yMap) {
         this.contentId = contentId;
         this.title = title;
         this.address = address;
+        this.xMap = xMap;
+        this.yMap = yMap;
     }
 }

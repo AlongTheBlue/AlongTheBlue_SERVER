@@ -2,6 +2,10 @@ package org.alongtheblue.alongtheblue_server.global.data.cafe;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -354,5 +358,52 @@ public class CafeService {
         for (Cafe cafe : cafes) {
             fetchAndSaveCafeImage(cafe).block();
         }
+    }
+
+    public ApiResponse<List<PartCafeResponseDto>> getCafesHome() {
+        Random random= new Random();
+        Set<Integer> randomNumbers = new HashSet<>();
+        List<PartCafeResponseDto> dtos= new ArrayList<>();
+//        List<Restaurant> restaurants = restaurantRepository.findAll();
+        Long totalCount = cafeRepository.count();
+        while (dtos.size() < 6) {
+            int randomNumber = random.nextInt(totalCount.intValue()); // 저장된 restaurant 수로 할 것
+            if (randomNumbers.contains(randomNumber)) {
+                continue;
+            }
+            randomNumbers.add(randomNumber);
+            Optional<Cafe> optionalCafe = cafeRepository.findById(Long.valueOf(randomNumber));
+            if(optionalCafe.isEmpty()) {
+                continue;
+            }
+            Cafe cafe = optionalCafe.get();
+            String[] arr = cafe.getAddr().substring(8).split(" ");
+//                    restaurant.setAddr(arr[0] + " " + arr[1]);
+            PartCafeResponseDto responseDto = new PartCafeResponseDto(
+                    arr[0] + " " + arr[1],
+                    cafe.getTitle(),
+                    cafe.getContentId(),
+                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl()
+            );
+            dtos.add(responseDto);
+        }
+        System.out.println(dtos.size());
+        return ApiResponse.ok("카페 정보를 성공적으로 조회했습니다.", dtos);
+    }
+
+    public ApiResponse<List<PartCafeResponseDto>> getCafesByKeyword(String keyword) {
+        List<Cafe> optionalCafes = cafeRepository.findByTitleContaining(keyword);
+        List<PartCafeResponseDto> partCafeResponseDtoList = new ArrayList<>();
+        for(Cafe cafe: optionalCafes) {
+            String[] arr = cafe.getAddr().substring(8).split(" ");
+            PartCafeResponseDto partCafeResponseDto = new PartCafeResponseDto(
+                    arr[0] + " " + arr[1],
+                    cafe.getTitle(),
+                    cafe.getContentId(),
+                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl()
+            );
+            partCafeResponseDtoList.add(partCafeResponseDto);
+        }
+        return ApiResponse.ok("음식점 정보를 성공적으로 조회했습니다.", partCafeResponseDtoList);
     }
 }
