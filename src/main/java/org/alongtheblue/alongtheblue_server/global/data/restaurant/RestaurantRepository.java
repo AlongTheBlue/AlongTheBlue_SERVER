@@ -5,7 +5,11 @@
     import org.springframework.data.jpa.repository.JpaRepository;
     import org.springframework.data.jpa.repository.Query;
 
+    import java.util.List;
+
     public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         @Query("SELECT r.contentId AS contentId, r.title AS title, r.addr AS address, r.images AS images FROM Restaurant r")
         Page<RestaurantSimpleInformation> findAllSimple(Pageable pageable);
+
+        List<Restaurant> findByTitleContaining(String title);
     }

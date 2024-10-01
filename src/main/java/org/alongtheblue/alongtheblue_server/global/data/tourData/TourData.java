@@ -19,13 +19,18 @@ public class TourData {
     private String introduction;
     private String infoCenter;
     private String restDate;
+    private String xMap;
+    private String yMap;
+
     @Builder
-    public TourData(String contentId, String title, String address, String infoCenter, String restDate) {
+    public TourData(String contentId, String title, String address, String infoCenter, String restDate, String xMap, String yMap) {
         this.contentId = contentId;
         this.title = title;
         this.infoCenter = infoCenter;
         this.restDate = restDate;
         this.address = address;
+        this.xMap = xMap;
+        this.yMap = yMap;
     }
 
     @OneToMany(mappedBy = "tourData", cascade = CascadeType.ALL, orphanRemoval = true)

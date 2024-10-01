@@ -1,4 +1,4 @@
-package org.alongtheblue.alongtheblue_server.global.data.alongBlues;
+package org.alongtheblue.alongtheblue_server.global.data.blue;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,11 +12,9 @@ public class Blue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     private String xMap;
     private String yMap;
     private String address;
     private String city;
-
 }

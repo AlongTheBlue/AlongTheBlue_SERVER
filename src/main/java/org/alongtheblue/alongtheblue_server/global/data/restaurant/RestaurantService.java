@@ -3,6 +3,8 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.blue.Blue;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
 import org.alongtheblue.alongtheblue_server.global.error.ErrorCode;
 import org.json.JSONArray;
@@ -234,8 +236,6 @@ public class RestaurantService {
 //        return dtos;
 //    }
 
-
-
     public ApiResponse<List<PartRestaurantResponseDto>> homerestaurant() {
         Random random= new Random();
         Set<Integer> randomNumbers = new HashSet<>();
@@ -388,5 +388,21 @@ public class RestaurantService {
 //            return dto;
 //        }
 //        else return null;
+    }
+
+    public ApiResponse<List<PartRestaurantResponseDto>> getRestaurantsByKeyword(String keyword) {
+        List<Restaurant> optionalRestaurants = restaurantRepository.findByTitleContaining(keyword);
+        List<PartRestaurantResponseDto> partRestaurantResponseDtoList = new ArrayList<>();
+        for(Restaurant restaurant: optionalRestaurants) {
+            String[] arr = restaurant.getAddr().substring(8).split(" ");
+            PartRestaurantResponseDto restaurantResponseDto = new PartRestaurantResponseDto(
+                    arr[0] + " " + arr[1],
+                    restaurant.getTitle(),
+                    restaurant.getContentId(),
+                    restaurant.getImages().isEmpty() ? null : restaurant.getImages().get(0).getOriginimgurl()
+            );
+            partRestaurantResponseDtoList.add(restaurantResponseDto);
+        }
+        return ApiResponse.ok("음식점 정보를 성공적으로 조회했습니다.", partRestaurantResponseDtoList);
     }
 }

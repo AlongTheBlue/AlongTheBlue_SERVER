@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/tourpost")
+@RequestMapping("/api/tourpost")
 @RequiredArgsConstructor
 public class TourCommunityController {
 
