@@ -1,6 +1,7 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 
 import lombok.RequiredArgsConstructor;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,7 +18,7 @@ public class TourCommunityService {
     private final TourImageRepository tourImageRepository;
     private final TourPostHashTagRepository tourPostHashTagRepository;
 
-    public UserTourCourse createPost(TourCourseRequestDto dto, List<MultipartFile> images) {
+    public UserTourCourse createPost(UserInfo userInfo, TourCourseRequestDto dto, List<MultipartFile> images) {
 //    public UserTourCourse createPost(UserTourCourse userTourCourse, List<MultipartFile> images, List<List<Integer>> index) {
         // 먼저 userTourCourse 저장
 
@@ -29,6 +30,7 @@ public class TourCommunityService {
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
         userTourCourse.setCreatedate(new Date());
         userTourCourse.setWriting(dto.writing());
+        userTourCourse.setUserInfo(userInfo);
         userTourCourse = userTourCourseRepository.save(userTourCourse);
 
         // tags와 items가 null인 경우 빈 리스트로 초기화

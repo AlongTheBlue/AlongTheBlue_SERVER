@@ -3,6 +3,7 @@ package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.application.UserInfoService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,30 +17,15 @@ public class TourCommunityController {
 
     private final TourCommunityService tourCommunityService;
 
+    private final UserInfoService userInfoService;
+
     @Operation(summary = "게시물 등록 API")
     @PostMapping
     public UserTourCourse createTourCourse(
-            @RequestPart(value = "request") TourCourseRequestDto dto,
-//            @RequestPart("title") String title,
-//            @RequestPart("writing") String writing,
-//            @RequestPart("createdate") Date date,
-//            @RequestPart List<TourPostItem> tourItems,
-//            @RequestPart List<TourPostHashTag> hashTags,
-            @RequestPart(value = "file") List<MultipartFile> images
-//            ,
-//            @RequestPart List<List<Integer>> index
-    ) {
-
-
-//        UserTourCourse userTourCourse= new UserTourCourse();
-//        userTourCourse.setTitle(title);
-//        userTourCourse.setTourPostItems(tourItems);
-//        userTourCourse.setTourPostHashTags(hashTags);
-//        userTourCourse.setCreatedate(date);
-//        userTourCourse.setWriting(writing);
-
-//        return tourCommunityService.createPost(userTourCourse, images, dto);
-        return tourCommunityService.createPost(dto, images);
+            @RequestHeader("Authorization") String userId,
+            @RequestPart(value = "request", required = false) TourCourseRequestDto dto,
+            @RequestPart(value = "file", required = false) List<MultipartFile> images) {
+        return tourCommunityService.createPost(userInfoService.retrieveUserInfo(userId).getData(), dto, images);
     }
 
 
