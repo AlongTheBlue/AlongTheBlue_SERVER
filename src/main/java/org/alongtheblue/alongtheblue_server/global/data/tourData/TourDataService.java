@@ -13,8 +13,10 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,32 +32,96 @@ public class TourDataService {
     @Value("${api.key}")
     private String apiKey;
 
-    public ArrayList<TourData> getTourData() {
-        String url = "https://apis.data.go.kr/B551011/KorService1/areaBasedList1";
-        ArrayList<TourData> tourDataList = new ArrayList<>();
-        WebClient webClient = WebClient.builder().baseUrl(url).build();
+//    public ArrayList<TourData> getTourData() {
+//        String url = "https://apis.data.go.kr/B551011/KorService1/areaBasedList1";
+//        ArrayList<TourData> tourDataList = new ArrayList<>();
+//        WebClient webClient = WebClient.builder().baseUrl(url).build();
+//
+//        // 먼저 totalCount 값을 가져옴
+//        int totalCount = getTotalCount(webClient);
+//        int numOfRows = 10;  // 한 페이지에 가져올 데이터 수
+//        int totalPages = (int) Math.ceil((double) totalCount / numOfRows);  // 총 페이지 수 계산
+//
+//        // 페이지별로 데이터를 가져오는 반복문
+//        for (int pageNo = 1; pageNo <= 10; pageNo++) {
+//            int finalPageNo = pageNo;
+//            Mono<String> response = webClient.get()
+//                    .uri(uriBuilder -> uriBuilder
+//                            .queryParam("serviceKey", apiKey)
+//                            .queryParam("numOfRows", numOfRows)
+//                            .queryParam("pageNo", finalPageNo)  // 페이지 번호 변경
+//                            .queryParam("MobileOS", "ETC")
+//                            .queryParam("MobileApp", "AppTest")
+//                            .queryParam("_type", "json")
+//                            .queryParam("listYN", "Y")
+//                            .queryParam("arrange", "A")
+//                            .queryParam("contentTypeId", 12)
+//                            .queryParam("areaCode", 39)
+//                            .build())
+//                    .accept(MediaType.APPLICATION_JSON)
+//                    .retrieve()
+//                    .bodyToMono(String.class);
+//
+//            String jsonResponse = response.block();
+//
+//            // JSON 데이터 파싱
+//            JSONObject jsonObject = new JSONObject(jsonResponse);
+//            JSONObject responseBody = jsonObject.getJSONObject("response").getJSONObject("body");
+//            JSONObject items = responseBody.getJSONObject("items");
+//            JSONArray itemArray = items.getJSONArray("item");
+//
+//            // 관광지 정보 출력 및 리스트에 추가
+//            for (int i = 0; i < itemArray.length(); i++) {
+//                JSONObject item = itemArray.getJSONObject(i);
+//                String id = item.getString("contentid");
+//                String title = item.getString("title");
+//                String address = item.getString("addr1");
+//                String x = item.getString("mapx");
+//                String y = item.getString("mapy");
+//
+//                TourData tourData = TourData.builder()
+//                        .contentId(id)
+//                        .title(title)
+//                        .address(address)
+//                        .xMap(x)
+//                        .yMap(y)
+//                        .build();
+//                tourDataList.add(tourData);
+//                tourDataRepository.save(tourData);
+//            }
+//            System.out.println(pageNo);
+//
+//        }
+//        return tourDataList;
+//    }
 
-        // 먼저 totalCount 값을 가져옴
-        int totalCount = getTotalCount(webClient);
+    public ArrayList<TourData> getTourData() {
+        String baseUrl = "https://apis.data.go.kr/B551011/KorService1/areaBasedList1";
+        ArrayList<TourData> tourDataList = new ArrayList<>();
         int numOfRows = 10;  // 한 페이지에 가져올 데이터 수
-        int totalPages = (int) Math.ceil((double) totalCount / numOfRows);  // 총 페이지 수 계산
+
+        // WebClient 생성
+        WebClient webClient = WebClient.builder().build();
 
         // 페이지별로 데이터를 가져오는 반복문
         for (int pageNo = 1; pageNo <= 10; pageNo++) {
-            int finalPageNo = pageNo;
+            // URI 객체를 UriComponentsBuilder로 구성
+            URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                    .queryParam("serviceKey", apiKey)
+                    .queryParam("numOfRows", numOfRows)
+                    .queryParam("pageNo", pageNo)  // 페이지 번호 변경
+                    .queryParam("MobileOS", "ETC")
+                    .queryParam("MobileApp", "AppTest")
+                    .queryParam("_type", "json")
+                    .queryParam("listYN", "Y")
+                    .queryParam("arrange", "A")
+                    .queryParam("contentTypeId", 12)
+                    .queryParam("areaCode", 39)
+                    .build()
+                    .toUri();  // URI 객체로 변환
+
             Mono<String> response = webClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .queryParam("serviceKey", apiKey)
-                            .queryParam("numOfRows", numOfRows)
-                            .queryParam("pageNo", finalPageNo)  // 페이지 번호 변경
-                            .queryParam("MobileOS", "ETC")
-                            .queryParam("MobileApp", "AppTest")
-                            .queryParam("_type", "json")
-                            .queryParam("listYN", "Y")
-                            .queryParam("arrange", "A")
-                            .queryParam("contentTypeId", 12)
-                            .queryParam("areaCode", 39)
-                            .build())
+                    .uri(uri)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(String.class);
@@ -74,17 +140,20 @@ public class TourDataService {
                 String id = item.getString("contentid");
                 String title = item.getString("title");
                 String address = item.getString("addr1");
+                String x = item.getString("mapx");
+                String y = item.getString("mapy");
 
                 TourData tourData = TourData.builder()
                         .contentId(id)
                         .title(title)
                         .address(address)
+                        .xMap(x)
+                        .yMap(y)
                         .build();
                 tourDataList.add(tourData);
                 tourDataRepository.save(tourData);
             }
             System.out.println(pageNo);
-
         }
         return tourDataList;
     }
@@ -117,41 +186,97 @@ public class TourDataService {
     }
 
     @Transactional
+//    public List<TourData> updateOverviews() {
+//        String url = "https://apis.data.go.kr/B551011/KorService1/detailCommon1";
+//        // 1. 모든 TourData 엔티티 조회
+//        List<TourData> tourDataList = tourDataRepository.findAll();
+//        WebClient webClient = WebClient.builder().baseUrl(url).build();
+//
+//        // 2. 각 contentId로 API 호출 및 데이터 업데이트
+//        // for (int i = 0; i < 10; i++) {
+//        for (TourData tourData : tourDataList) {
+//        //    TourData tourData = tourDataList.get(i);
+//            String contentId = tourData.getContentId();
+//            System.out.println(contentId);
+//            Mono<String> response = webClient.get()
+//                    .uri(uriBuilder -> uriBuilder
+//                            .queryParam("serviceKey", apiKey)
+//                            .queryParam("MobileOS", "ETC")
+//                            .queryParam("MobileApp", "AppTest")
+//                            .queryParam("_type", "json")
+//                            .queryParam("contentId", contentId)
+//                            .queryParam("contentTypeId", 12)
+//                            .queryParam("defaultYN", "Y")
+//                            .queryParam("firstImageYN", "Y")
+//                            .queryParam("areacodeYN", "Y")
+//                            .queryParam("catcodeYN", "Y")
+//                            .queryParam("addrinfoYN", "Y")
+//                            .queryParam("mapinfoYN", "Y")
+//                            .queryParam("overviewYN", "Y")
+//                            .queryParam("numOfRows", 1)
+//                            .queryParam("pageNo", 1)
+//                            .build())
+//                    .retrieve()
+//                    .bodyToMono(String.class);
+//
+//            String jsonResponse = response.block();
+//            System.out.println("API Response: " + jsonResponse);
+//            // JSON 데이터 파싱하여 overview 가져오기
+//            JSONObject jsonObject = new JSONObject(jsonResponse);
+//            JSONObject responseBody = jsonObject.getJSONObject("response").getJSONObject("body");
+//            JSONObject items = responseBody.getJSONObject("items");
+//            JSONArray itemArray = items.getJSONArray("item");
+//            if (!itemArray.isEmpty()) {
+//                JSONObject item = itemArray.getJSONObject(0);
+//                String overview = item.getString("overview");
+//
+//                // 3. `overview` 데이터 업데이트
+//                tourData.setIntroduction(overview);
+//                tourDataRepository.save(tourData);  // JPA를 통해 저장
+//            }
+//        }
+//        return tourDataRepository.findAll();
+//    }
+
     public List<TourData> updateOverviews() {
-        String url = "https://apis.data.go.kr/B551011/KorService1/detailCommon1";
+        String baseUrl = "https://apis.data.go.kr/B551011/KorService1/detailCommon1";
         // 1. 모든 TourData 엔티티 조회
         List<TourData> tourDataList = tourDataRepository.findAll();
-        WebClient webClient = WebClient.builder().baseUrl(url).build();
+        WebClient webClient = WebClient.builder().build();
 
         // 2. 각 contentId로 API 호출 및 데이터 업데이트
-        // for (int i = 0; i < 10; i++) {
         for (TourData tourData : tourDataList) {
-        //    TourData tourData = tourDataList.get(i);
             String contentId = tourData.getContentId();
             System.out.println(contentId);
+
+            // URI 객체를 UriComponentsBuilder로 구성
+            URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                    .queryParam("serviceKey", apiKey)
+                    .queryParam("MobileOS", "ETC")
+                    .queryParam("MobileApp", "AppTest")
+                    .queryParam("_type", "json")
+                    .queryParam("contentId", contentId)
+                    .queryParam("contentTypeId", 12)
+                    .queryParam("defaultYN", "Y")
+                    .queryParam("firstImageYN", "Y")
+                    .queryParam("areacodeYN", "Y")
+                    .queryParam("catcodeYN", "Y")
+                    .queryParam("addrinfoYN", "Y")
+                    .queryParam("mapinfoYN", "Y")
+                    .queryParam("overviewYN", "Y")
+                    .queryParam("numOfRows", 1)
+                    .queryParam("pageNo", 1)
+                    .build()
+                    .toUri();  // URI 객체로 변환
+
             Mono<String> response = webClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .queryParam("serviceKey", apiKey)
-                            .queryParam("MobileOS", "ETC")
-                            .queryParam("MobileApp", "AppTest")
-                            .queryParam("_type", "json")
-                            .queryParam("contentId", contentId)
-                            .queryParam("contentTypeId", 12)
-                            .queryParam("defaultYN", "Y")
-                            .queryParam("firstImageYN", "Y")
-                            .queryParam("areacodeYN", "Y")
-                            .queryParam("catcodeYN", "Y")
-                            .queryParam("addrinfoYN", "Y")
-                            .queryParam("mapinfoYN", "Y")
-                            .queryParam("overviewYN", "Y")
-                            .queryParam("numOfRows", 1)
-                            .queryParam("pageNo", 1)
-                            .build())
+                    .uri(uri)
                     .retrieve()
                     .bodyToMono(String.class);
 
             String jsonResponse = response.block();
             System.out.println("API Response: " + jsonResponse);
+
             // JSON 데이터 파싱하여 overview 가져오기
             JSONObject jsonObject = new JSONObject(jsonResponse);
             JSONObject responseBody = jsonObject.getJSONObject("response").getJSONObject("body");
@@ -168,6 +293,7 @@ public class TourDataService {
         }
         return tourDataRepository.findAll();
     }
+
 
     @Transactional
     public List<TourData> updateInfo() {

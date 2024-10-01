@@ -12,7 +12,7 @@ import java.util.List;
 
 @Tag(name = "여행따라 API", description = "여행따라  코스 등록 / 게시물 목록 조회 / 게시물 상세 조회")
 @RestController
-@RequestMapping("api/tourpost")
+@RequestMapping("/api/tourpost")
 @RequiredArgsConstructor
 public class TourCommunityController {
 
