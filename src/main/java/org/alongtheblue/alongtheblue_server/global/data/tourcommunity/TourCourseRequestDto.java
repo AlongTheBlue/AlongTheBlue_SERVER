@@ -6,7 +6,7 @@ public record TourCourseRequestDto(
         String title,
         String writing,
         List<TourPostItem> tourItems,
-        List<TourPostHashTag> hashTags,
+//        List<TourPostHashTag> hashTags,
         List<List<Integer>> index
 ) {
 }
