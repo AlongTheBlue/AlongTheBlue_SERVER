@@ -1,38 +1,21 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alongtheblue.alongtheblue_server.domain.item.domain.Item;
-import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
-
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class TourCommunityService {
 
-    @Autowired
     private final UserTourCourseRepository userTourCourseRepository;
-    @Autowired
     private final TourPostItemRepository tourPostItemRepository;
-    @Autowired
     private final TourImageRepository tourImageRepository;
-    @Autowired
     private final TourPostHashTagRepository tourPostHashTagRepository;
-
-    public TourCommunityService(UserTourCourseRepository userTourCourseRepository, TourPostItemRepository tourPostItemRepository, TourImageRepository tourImageRepository, TourPostHashTagRepository tourPostHashTagRepository) {
-        this.userTourCourseRepository = userTourCourseRepository;
-        this.tourPostItemRepository = tourPostItemRepository;
-        this.tourImageRepository = tourImageRepository;
-        this.tourPostHashTagRepository = tourPostHashTagRepository;
-    }
 
     public UserTourCourse createPost(TourCourseRequestDto dto, List<MultipartFile> images) {
 //    public UserTourCourse createPost(UserTourCourse userTourCourse, List<MultipartFile> images, List<List<Integer>> index) {
