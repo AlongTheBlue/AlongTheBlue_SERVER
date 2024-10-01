@@ -23,13 +23,18 @@ public class Cafe {
 
     private String restDate;
     private String infoCenter;
+    private String xMap;
+    private String yMap;
 
     @OneToMany(mappedBy = "cafe", cascade = CascadeType.ALL)
     @JsonManagedReference
     List<CafeImage> cafeImages;
 
-    public Cafe(String contentId, String title, String addr) {
+    public Cafe(String contentId, String title, String addr, String xMap, String yMap) {
         this.contentId = contentId;
         this.title = title;
-        this.addr= addr;}
+        this.addr= addr;
+        this.xMap = xMap;
+        this.yMap = yMap;
+    }
 }
