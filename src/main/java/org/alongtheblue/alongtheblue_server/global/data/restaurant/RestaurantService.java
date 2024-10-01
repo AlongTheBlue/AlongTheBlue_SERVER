@@ -280,7 +280,9 @@ public class RestaurantService {
                     arr[0] + " " + arr[1],
                     restaurant.getTitle(),
                     restaurant.getContentId(),
-                    restaurant.getImages().isEmpty() ? null : restaurant.getImages().get(0).getOriginimgurl()
+                    restaurant.getImages().isEmpty() ? null : restaurant.getImages().get(0).getOriginimgurl(),
+                    restaurant.getXMap(),
+                    restaurant.getYMap()
             );
             dtos.add(responseDto);
         }
@@ -420,7 +422,9 @@ public class RestaurantService {
                     arr[0] + " " + arr[1],
                     restaurant.getTitle(),
                     restaurant.getContentId(),
-                    restaurant.getImages().isEmpty() ? null : restaurant.getImages().get(0).getOriginimgurl()
+                    restaurant.getImages().isEmpty() ? null : restaurant.getImages().get(0).getOriginimgurl(),
+                    restaurant.getXMap(),
+                    restaurant.getYMap()
             );
             partRestaurantResponseDtoList.add(restaurantResponseDto);
         }

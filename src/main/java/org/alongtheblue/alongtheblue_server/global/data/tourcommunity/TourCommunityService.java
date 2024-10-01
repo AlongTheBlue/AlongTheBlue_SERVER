@@ -107,7 +107,7 @@ public class TourCommunityService {
             tourDTO.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(course));
             tourDTO.setContentid(course.getContentId());
             for(TourPostItem item: tourPostItemRepository.findByuserTourCourse(course)){
-                itemDTO.setName(item.getName());
+                itemDTO.setTitle(item.getName());
                 itemDTO.setCategory(item.getCategory());
                 itemDTO.setAddress(item.getAddress());
                 itemDTO.setComment(itemDTO.getComment());

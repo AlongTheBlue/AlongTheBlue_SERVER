@@ -6,7 +6,7 @@ import java.util.List;
 @Data
 public class ItemDTO {
     private List<String> tourImage;
-    private String name;
+    private String title;
     private String category;
     private String address;
     private String comment;

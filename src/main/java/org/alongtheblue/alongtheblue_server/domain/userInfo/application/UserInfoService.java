@@ -46,7 +46,7 @@ public class UserInfoService {
 //            User newUser = new User();
 //            newUser.setId(uuid);
 //            newUser.setEmail(email);
-//            newUser.setNickname(name);
+//            newUser.setNickname(title);
 //            return userRepository.save(newUser);
 //        });
     }

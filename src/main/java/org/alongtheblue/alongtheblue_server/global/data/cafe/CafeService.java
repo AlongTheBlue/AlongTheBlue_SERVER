@@ -383,7 +383,9 @@ public class CafeService {
                     arr[0] + " " + arr[1],
                     cafe.getTitle(),
                     cafe.getContentId(),
-                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl()
+                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
+                    cafe.getXMap(),
+                    cafe.getYMap()
             );
             dtos.add(responseDto);
         }
@@ -400,7 +402,9 @@ public class CafeService {
                     arr[0] + " " + arr[1],
                     cafe.getTitle(),
                     cafe.getContentId(),
-                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl()
+                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
+                    cafe.getXMap(),
+                    cafe.getYMap()
             );
             partCafeResponseDtoList.add(partCafeResponseDto);
         }
