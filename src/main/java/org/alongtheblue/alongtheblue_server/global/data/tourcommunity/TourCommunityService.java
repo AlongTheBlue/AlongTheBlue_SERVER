@@ -16,23 +16,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class TourCommunityService {
 
-    @Autowired
     private final UserTourCourseRepository userTourCourseRepository;
-    @Autowired
     private final TourPostItemRepository tourPostItemRepository;
-    @Autowired
     private final TourImageRepository tourImageRepository;
-    @Autowired
     private final TourPostHashTagRepository tourPostHashTagRepository;
-
-    public TourCommunityService(UserTourCourseRepository userTourCourseRepository, TourPostItemRepository tourPostItemRepository, TourImageRepository tourImageRepository, TourPostHashTagRepository tourPostHashTagRepository) {
-        this.userTourCourseRepository = userTourCourseRepository;
-        this.tourPostItemRepository = tourPostItemRepository;
-        this.tourImageRepository = tourImageRepository;
-        this.tourPostHashTagRepository = tourPostHashTagRepository;
-    }
 
     public UserTourCourse createPost(TourCourseRequestDto dto, List<MultipartFile> images) {
 //    public UserTourCourse createPost(UserTourCourse userTourCourse, List<MultipartFile> images, List<List<Integer>> index) {
