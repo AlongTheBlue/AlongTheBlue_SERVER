@@ -14,8 +14,9 @@ public class Blue {
     private Long id;
 
     private String name;
-    private String x;
-    private String y;
+    private String xMap;
+    private String yMap;
     private String address;
+    private String city;
 
 }

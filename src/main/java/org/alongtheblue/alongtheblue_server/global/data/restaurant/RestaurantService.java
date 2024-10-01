@@ -2,11 +2,15 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueCourse;
-import org.alongtheblue.alongtheblue_server.global.data.tourData.TourData;
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
+import org.alongtheblue.alongtheblue_server.global.error.ErrorCode;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -82,7 +86,9 @@ public class RestaurantService {
         String contentId = itemNode.path("contentid").asText();
         String title = itemNode.path("title").asText();
         String addr = itemNode.path("addr1").asText();
-        return new Restaurant(contentId, title, addr);
+        String x = itemNode.path("mapx").asText();
+        String y = itemNode.path("mapy").asText();
+        return new Restaurant(contentId, title, addr, x, y);
     }
 
     private void processItems(JsonNode rootNode) {
@@ -201,52 +207,64 @@ public class RestaurantService {
                     return resultMap;
                 });
     }
-    //딱 음식 눌렀을 때 식당 목록
-    public List<RestaurantDTO> getAll() {
-        List<Restaurant> restaurants = restaurantRepository.findAll();
-        List<RestaurantDTO> dtos = new ArrayList<>();
-        for (Restaurant restaurant : restaurants) {
-            if(dtos.size() == 10) break;
-            RestaurantDTO dto = new RestaurantDTO();
-            List<RestaurantImage> imgs= restaurantImageRepository.findByrestaurant(restaurant);
-            List<String> urls= new ArrayList<>();
-            for(RestaurantImage resimg : imgs)  urls.add(resimg.getOriginimgurl());
-            dto.setImgUrls(urls);
-            dto.setAddress(restaurant.getAddr());
-            dto.setContentid(restaurant.getContentId());
-            dto.setTitle(restaurant.getTitle());
-            dtos.add(dto);
-        }
-        return dtos;
+
+//    //딱 음식 눌렀을 때 식당 목록
+    public ApiResponse<Page<RestaurantSimpleInformation>> retrieveAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<RestaurantSimpleInformation> restaurantPage = restaurantRepository.findAllSimple(pageable);
+        // TODO 이미지 그룹화 필요
+        return ApiResponse.ok("음식점 목록을 성공적으로 조회했습니다.", restaurantPage);
+        //introduction, restDate, infoCenter 없이 반환을 하고 싶음.
     }
+//    public List<RestaurantResponseDto> getAll() {
+//        List<Restaurant> restaurants = restaurantRepository.findAll();
+//        List<RestaurantResponseDto> dtos = new ArrayList<>();
+//        for (Restaurant restaurant : restaurants) {
+//            if(dtos.size() == 10) break;
+//            RestaurantResponseDto dto = new RestaurantResponseDto();
+//            List<RestaurantImage> imgs= restaurantImageRepository.findByrestaurant(restaurant);
+//            List<String> urls= new ArrayList<>();
+//            for(RestaurantImage resimg : imgs)  urls.add(resimg.getOriginimgurl());
+////            dto.setImgUrls(urls);
+////            dto.setAddress(restaurant.getAddr());
+////            dto.setContentid(restaurant.getContentId());
+////            dto.setTitle(restaurant.getTitle());
+//            dtos.add(dto);
+//        }
+//        return dtos;
+//    }
 
 
 
-    public List<RestaurantDTO> homerestaurant() {
+    public ApiResponse<List<PartRestaurantResponseDto>> homerestaurant() {
         Random random= new Random();
         Set<Integer> randomNumbers = new HashSet<>();
-        List<RestaurantDTO> dtos= new ArrayList<>();
-        List<Restaurant> restaurants = restaurantRepository.findAll();
-        Restaurant res;
+        List<PartRestaurantResponseDto> dtos= new ArrayList<>();
+//        List<Restaurant> restaurants = restaurantRepository.findAll();
+        Long totalCount = restaurantRepository.count();
         while (dtos.size() < 6) {
-            int randomNumber = random.nextInt(17) ; // 저장된 restaurant 수로 할 것
-            if (! randomNumbers.contains(randomNumber)) {
-                randomNumbers.add(randomNumber);
-                res= restaurants.get(randomNumber);
-                RestaurantDTO dto= new RestaurantDTO();
-                dto.setTitle(res.getTitle());
-                dto.setContentid(res.getContentId());
-                String addr= res.getAddr().substring(8).split(" ")[0]
-                        +" "+res.getAddr().substring(8).split(" ")[1];
-                dto.setAddress(addr);
-                List<RestaurantImage> imgs= restaurantImageRepository.findByrestaurant(res);
-                if(!imgs.isEmpty()) {
-                    dto.setImg(imgs.get(0).getOriginimgurl());
-                    dtos.add(dto);}
+            int randomNumber = random.nextInt(totalCount.intValue()); // 저장된 restaurant 수로 할 것
+            if (randomNumbers.contains(randomNumber)) {
+                continue;
             }
+            randomNumbers.add(randomNumber);
+            Optional<Restaurant> optionalRestaurant = restaurantRepository.findById(Long.valueOf(randomNumber));
+            if(optionalRestaurant.isEmpty()) {
+                continue;
+            }
+            Restaurant restaurant = optionalRestaurant.get();
+            String[] arr = restaurant.getAddr().substring(8).split(" ");
+//                    restaurant.setAddr(arr[0] + " " + arr[1]);
+            PartRestaurantResponseDto responseDto = new PartRestaurantResponseDto(
+                    arr[0] + " " + arr[1],
+                    restaurant.getTitle(),
+                    restaurant.getContentId(),
+                    restaurant.getImages().isEmpty() ? null : restaurant.getImages().get(0).getOriginimgurl()
+            );
+            dtos.add(responseDto);
         }
         System.out.println(dtos.size());
-        return dtos;
+        return ApiResponse.ok("음식점 정보를 성공적으로 조회했습니다.", dtos);
     }
 
     public void saveRestaurants() {
@@ -348,23 +366,27 @@ public class RestaurantService {
         }
     }
     //상세보기
-    public RestaurantDTO getRestaurant(Long id) {
-        Optional<Restaurant> temp= restaurantRepository.findById(id);
-        if (temp.isPresent()){
-            Restaurant restaurant= temp.get();
-            RestaurantDTO dto= new RestaurantDTO();
-            List<RestaurantImage> imgs= restaurantImageRepository.findByrestaurant(restaurant);
-            List<String> urls= new ArrayList<>();
-            for(RestaurantImage resimg : imgs)  urls.add(resimg.getOriginimgurl());
-            dto.setImgUrls(urls);
-            dto.setAddress(restaurant.getAddr().substring(8));
-            dto.setContentid(restaurant.getContentId());
-            dto.setTitle(restaurant.getTitle());
-            dto.setIntroduction(restaurant.getIntroduction());
-            dto.setInfoCenter(restaurant.getInfoCenter());
-            dto.setRestDate(restaurant.getRestDate());
-            return dto;
+    public ApiResponse<Restaurant> getRestaurant(Long id) {
+        Optional<Restaurant> optionalRestaurant= restaurantRepository.findById(id);
+        if(optionalRestaurant.isEmpty()) {
+            return ApiResponse.withError(ErrorCode.INVALID_RESTAURANT_ID);
         }
-        else return null;
+        Restaurant restaurant= optionalRestaurant.get();
+        restaurant.setAddr(restaurant.getAddr().substring(8));
+        return ApiResponse.ok("음식점 정보를 성공적으로 조회했습니다.", restaurant);
+//            RestaurantDTO dto= new RestaurantDTO();
+//            List<RestaurantImage> imgs= restaurantImageRepository.findByrestaurant(restaurant);
+//            List<String> urls= new ArrayList<>();
+//            for(RestaurantImage resimg : imgs)  urls.add(resimg.getOriginimgurl());
+//            dto.setImgUrls(urls);
+//            dto.setAddress(restaurant.getAddr().substring(8));
+//            dto.setContentid(restaurant.getContentId());
+//            dto.setTitle(restaurant.getTitle());
+//            dto.setIntroduction(restaurant.getIntroduction());
+//            dto.setInfoCenter(restaurant.getInfoCenter());
+//            dto.setRestDate(restaurant.getRestDate());
+//            return dto;
+//        }
+//        else return null;
     }
 }

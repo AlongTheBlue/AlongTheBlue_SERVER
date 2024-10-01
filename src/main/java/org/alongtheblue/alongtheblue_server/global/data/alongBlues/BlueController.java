@@ -1,28 +1,9 @@
 package org.alongtheblue.alongtheblue_server.global.data.alongBlues;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/blue")
 public class BlueController {
-    private final BlueService blueService;
-    @PostMapping("/create")
-    public void createCourse(@RequestBody BlueCourse blueCourse){
-        blueService.createCourse(blueCourse);
-    }
-
-    @GetMapping("/allcourse")
-    public List<BlueCourse> getAllCourse(){
-        return blueService.getAllCourse();
-    }
-
-    @GetMapping("/{courseid}")
-    public BlueCourse getCourse(@PathVariable Long id){
-        return blueService.getCourse(id);
-    }
 }
