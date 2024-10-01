@@ -3,7 +3,7 @@ package org.alongtheblue.alongtheblue_server.global.data.alongBlues;
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.blue.Blue;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.alongtheblue.alongtheblue_server.global.data.blue.BlueResponseDto;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
