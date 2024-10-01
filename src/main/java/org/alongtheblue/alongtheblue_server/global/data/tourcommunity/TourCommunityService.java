@@ -17,8 +17,8 @@ public class TourCommunityService {
     private final TourImageRepository tourImageRepository;
     private final TourPostHashTagRepository tourPostHashTagRepository;
 
-//    public UserTourCourse createPost(UserTourCourse userTourCourse, List<MultipartFile> images, List<List<Integer>> index) {
-        // 먼저 userTourCourse 저장
+    public UserTourCourse createPost(TourCourseRequestDto dto, List<MultipartFile> images) {
+//         먼저 userTourCourse 저장
 
         UserTourCourse userTourCourse = new UserTourCourse();
         userTourCourse.setTitle(dto.title());
