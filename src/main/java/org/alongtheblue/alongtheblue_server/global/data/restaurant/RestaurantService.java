@@ -3,6 +3,9 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.Cafe;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeRepository;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
 import org.alongtheblue.alongtheblue_server.global.error.ErrorCode;
 import org.json.JSONArray;
@@ -27,16 +30,18 @@ public class RestaurantService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final RestaurantImageRepository restaurantImageRepository;
+    private final CafeRepository cafeRepository;
 
     @Value("${api.key}")
     private String apiKey;
     private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
-    public RestaurantService(RestaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository) {
+    public RestaurantService(RestaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository, CafeRepository cafeRepository) {
         this.restaurantRepository = restaurantRepository;
         this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
         this.restaurantImageRepository = restaurantImageRepository;
+        this.cafeRepository = cafeRepository;
     }
 
     // API 호출 및 데이터 저장 로직
