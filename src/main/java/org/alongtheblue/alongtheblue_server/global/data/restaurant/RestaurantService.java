@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RestaurantService {
@@ -216,10 +218,26 @@ public class RestaurantService {
 //    //딱 음식 눌렀을 때 식당 목록
     public ApiResponse<Page<RestaurantSimpleInformation>> retrieveAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<RestaurantSimpleInformation> restaurantPage = restaurantRepository.findAllSimple(pageable);
-        // TODO 이미지 그룹화 필요
-        return ApiResponse.ok("음식점 목록을 성공적으로 조회했습니다.", restaurantPage);
-        //introduction, restDate, infoCenter 없이 반환을 하고 싶음.
+
+        // 1. Restaurant 기준으로 페이징 처리된 데이터를 조회
+        Page<Restaurant> restaurantPage = restaurantRepository.findAll(pageable);
+
+        // 2. RestaurantSimpleInformation으로 변환하여 이미지 그룹화
+        List<RestaurantSimpleInformation> groupedRestaurantList = restaurantPage.getContent().stream()
+                .map(restaurant -> new RestaurantSimpleInformationImpl(
+                        restaurant.getContentId(),
+                        restaurant.getTitle(),
+                        restaurant.getAddr(),
+                        restaurant.getImages()  // 이미지를 그룹화하지 않고 그대로 넣음
+                ))
+                .collect(Collectors.toList());
+
+        // 3. Restaurant 기준으로 페이징을 다시 적용하여 반환
+        Page<RestaurantSimpleInformation> pagedResult = new PageImpl<>(
+                groupedRestaurantList, pageable, restaurantPage.getTotalElements());
+
+        // 4. 결과를 ApiResponse로 반환
+        return ApiResponse.ok("음식점 목록을 성공적으로 조회했습니다.", pagedResult);
     }
 //    public List<RestaurantResponseDto> getAll() {
 //        List<Restaurant> restaurants = restaurantRepository.findAll();
