@@ -9,19 +9,19 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/blue")
 public class BlueCourseController {
-    private final BlueService blueService;
+    private final BlueCourseService blueCourseService;
     @PostMapping("/create")
     public void createCourse(@RequestBody BlueCourse blueCourse){
-        blueService.createCourse(blueCourse);
+        blueCourseService.createCourse(blueCourse);
     }
 
     @GetMapping("/allcourse")
     public List<BlueCourse> getAllCourse(){
-        return blueService.getAllCourse();
+        return blueCourseService.getAllCourse();
     }
 
     @GetMapping("/{courseid}")
     public BlueCourse getCourse(@PathVariable Long id){
-        return blueService.getCourse(id);
+        return blueCourseService.getCourse(id);
     }
 }

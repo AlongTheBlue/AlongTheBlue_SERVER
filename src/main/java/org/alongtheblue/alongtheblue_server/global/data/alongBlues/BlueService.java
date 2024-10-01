@@ -1,34 +1,33 @@
 package org.alongtheblue.alongtheblue_server.global.data.alongBlues;
 
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BlueService {
     @Autowired
-    private final BlueCourseRepository blueCourseRepository;
-    @Autowired
-    private final BlueItemRepository blueItemRepository;
+    private BlueRepository blueRepository;
 
-    public BlueService(BlueCourseRepository blueCourseRepository, BlueItemRepository blueItemRepository) {
-        this.blueCourseRepository = blueCourseRepository;
-        this.blueItemRepository = blueItemRepository;
+    public ApiResponse<List<BlueResponseDto>> getBlues() {
+        List<BlueResponseDto> blueResponseDtoList = new ArrayList<>();
+        for(Blue blue: blueRepository.findAll()) {
+            BlueResponseDto blueResponseDto = new BlueResponseDto(
+                    blue.getId(),
+                    blue.getName(),
+                    blue.getXMap(),
+                    blue.getYMap(),
+                    blue.getAddress(),
+                    blue.getCity()
+            );
+            blueResponseDtoList.add(blueResponseDto);
+        }
+
+        return ApiResponse.ok("해변 정보를 성공적으로 조회했습니다.", blueResponseDtoList);
     }
 
-    public void createCourse(BlueCourse blueCourse) {
-        blueCourseRepository.save(blueCourse);
-        blueItemRepository.saveAll(blueCourse.getBlueItems());
-    }
-
-    public List<BlueCourse> getAllCourse() {
-        return blueCourseRepository.findAll();
-    }
-
-    public BlueCourse getCourse(Long id) {
-        Optional<BlueCourse>course= blueCourseRepository.findById(id);
-        return course.orElse(null);
-    }
 }
