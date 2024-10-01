@@ -1,9 +1,4 @@
-package org.alongtheblue.alongtheblue_server.global.data.alongBlues;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.util.List;
+package org.alongtheblue.alongtheblue_server.global.data.blue;
 
 public record BlueResponseDto(
         Long id,
