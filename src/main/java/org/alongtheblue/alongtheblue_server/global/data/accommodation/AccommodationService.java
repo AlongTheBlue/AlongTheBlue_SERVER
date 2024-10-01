@@ -124,12 +124,14 @@ public class AccommodationService {
     }
 
     private Accommodation parseAccommodation(JsonNode itemNode) {
-        String cat3 = itemNode.path("cat3").asText();
+//        String cat3 = itemNode.path("cat3").asText();
 //        if (cat3.equals("A05020900")) return null;
         String contentId = itemNode.path("contentid").asText();
         String title = itemNode.path("title").asText();
         String addr = itemNode.path("addr1").asText();
-        return new Accommodation(contentId, title, addr);
+        String x = itemNode.path("mapx").asText();
+        String y = itemNode.path("mapy").asText();
+        return new Accommodation(contentId, title, addr, x, y);
     }
 
     private JsonNode parseJson(String response) {

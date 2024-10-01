@@ -3,8 +3,6 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
-import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueResponseDto;
-import org.alongtheblue.alongtheblue_server.global.data.blue.Blue;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
 import org.alongtheblue.alongtheblue_server.global.error.ErrorCode;
 import org.json.JSONArray;

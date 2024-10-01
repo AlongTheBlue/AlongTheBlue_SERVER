@@ -2,7 +2,7 @@ package org.alongtheblue.alongtheblue_server.global.data.search;
 
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
-import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.blue.BlueResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueService;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantService;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
