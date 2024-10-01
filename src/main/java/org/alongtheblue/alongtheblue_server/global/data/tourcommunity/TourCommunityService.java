@@ -1,17 +1,7 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alongtheblue.alongtheblue_server.domain.item.domain.Item;
-import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
-import org.springframework.beans.factory.annotation.Autowired;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
-
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
