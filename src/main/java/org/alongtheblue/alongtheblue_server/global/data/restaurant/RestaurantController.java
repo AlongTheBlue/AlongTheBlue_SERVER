@@ -1,10 +1,10 @@
 package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,19 +40,24 @@ public class RestaurantController {
         restaurantService.processSaveImage();
     }
 
+    // TODO 페이지네이션 구현 필요
     @GetMapping("/detail/all")
-    public List<RestaurantDTO> getAll(){
-        return restaurantService.getAll();
-
+    public ApiResponse<Page<RestaurantSimpleInformation>> getAll(@RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "10") int size) {
+        return restaurantService.retrieveAll(page, size);
     }
+//    public ApiResponse<List<RestaurantResponseDto>> getAll(){
+//        return restaurantService.getAll();
+//
+//    }
 
     @GetMapping("/home")
-    public List<RestaurantDTO> homeRestaurant(){
+    public ApiResponse<List<PartRestaurantResponseDto>> homeRestaurant(){
         return restaurantService.homerestaurant();
     }
 
     @GetMapping("/detail/{id}")
-    public RestaurantDTO getRestaurant(@PathVariable Long id){
+    public ApiResponse<Restaurant> getRestaurant(@PathVariable Long id){
         return restaurantService.getRestaurant(id);
     }
 

@@ -2,9 +2,6 @@ package org.alongtheblue.alongtheblue_server.global.data.cafe;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantDTO;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantImage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
