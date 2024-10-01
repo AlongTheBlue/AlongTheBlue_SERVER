@@ -17,11 +17,10 @@ public class TourCommunityService {
     private final TourImageRepository tourImageRepository;
     private final TourPostHashTagRepository tourPostHashTagRepository;
 
-    public UserTourCourse createPost(TourCourseRequestDto dto, List<MultipartFile> images) {
 //    public UserTourCourse createPost(UserTourCourse userTourCourse, List<MultipartFile> images, List<List<Integer>> index) {
         // 먼저 userTourCourse 저장
 
-        UserTourCourse userTourCourse= new UserTourCourse();
+        UserTourCourse userTourCourse = new UserTourCourse();
         userTourCourse.setTitle(dto.title());
         userTourCourse.setTourPostItems(dto.tourItems());
         userTourCourse.setTourPostHashTags(dto.hashTags());
@@ -35,16 +34,18 @@ public class TourCommunityService {
         List<TourPostHashTag> tags = userTourCourse.getTourPostHashTags() != null ? userTourCourse.getTourPostHashTags() : new ArrayList<>();
         List<TourPostItem> items = userTourCourse.getTourPostItems() != null ? userTourCourse.getTourPostItems() : new ArrayList<>();
 
-        // TourData와 이미지 파일 처리 (순서대로 처리)
-        for (int i = 0; i < dto.index().size(); i++) {
-            for (int j = 0; j < dto.index().get(i).size(); j++) {
-                TourPostItem data = items.get(i);
-                MultipartFile image = images.get(dto.index().get(i).get(j));  // 인덱스로 매칭
-                String imageUrl = saveImage(image);  // 이미지 저장 로직 호출
-                TourImage tourImage= new TourImage();
-                tourImage.setUrl(imageUrl);
-                tourImage.setTourPostItem(data);
-                tourImageRepository.save(tourImage);
+        if (dto.index() != null) {
+            // TourData와 이미지 파일 처리 (순서대로 처리)
+            for (int i = 0; i < dto.index().size(); i++) {
+                for (int j = 0; j < dto.index().get(i).size(); j++) {
+                    TourPostItem data = items.get(i);
+                    MultipartFile image = images.get(dto.index().get(i).get(j));  // 인덱스로 매칭
+                    String imageUrl = saveImage(image);  // 이미지 저장 로직 호출
+                    TourImage tourImage = new TourImage();
+                    tourImage.setUrl(imageUrl);
+                    tourImage.setTourPostItem(data);
+                    tourImageRepository.save(tourImage);
+                }
             }
         }
         // items 리스트가 비어있지 않은 경우 처리
