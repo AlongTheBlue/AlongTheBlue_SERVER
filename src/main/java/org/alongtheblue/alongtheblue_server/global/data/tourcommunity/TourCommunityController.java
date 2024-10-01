@@ -19,13 +19,13 @@ public class TourCommunityController {
     @Operation(summary = "게시물 등록 API")
     @PostMapping
     public UserTourCourse createTourCourse(
-            @RequestPart(value = "request") TourCourseRequestDto dto,
+            @RequestPart(value = "request", required = false) TourCourseRequestDto dto,
 //            @RequestPart("title") String title,
 //            @RequestPart("writing") String writing,
 //            @RequestPart("createdate") Date date,
 //            @RequestPart List<TourPostItem> tourItems,
 //            @RequestPart List<TourPostHashTag> hashTags,
-            @RequestPart(value = "file") List<MultipartFile> images
+            @RequestPart(value = "file", required = false) List<MultipartFile> images
 //            ,
 //            @RequestPart List<List<Integer>> index
     ) {
