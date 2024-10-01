@@ -1,5 +1,6 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourData;
 
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +35,7 @@ public class TourDataController {
         tourDataService.updateAllTourDataImageUrls();
     }
     @GetMapping("/home")
-    public List<TourDataDto> getHomeTourData() {
+    public ApiResponse<List<TourDataDto>> getHomeTourData() {
         return tourDataService.getHomeTourData();
     }
 

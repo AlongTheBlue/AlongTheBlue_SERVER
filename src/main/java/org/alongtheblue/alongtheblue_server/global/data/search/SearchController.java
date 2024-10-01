@@ -8,6 +8,8 @@ import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeService;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantService;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourData.TourDataDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourData.TourDataService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +26,7 @@ public class SearchController {
     private final RestaurantService restaurantService;
     private final SearchService searchService;
     private final CafeService cafeService;
+    private final TourDataService tourDataService;
 
     @GetMapping("/blue/list")
     public ApiResponse<List<BlueResponseDto>> searchBlues() {
@@ -51,7 +54,7 @@ public class SearchController {
     }
 
     @GetMapping("/all/list")
-    public ApiResponse<List<AllCategoryResponseDto>> getAllCategory(){
+    public ApiResponse<List<AllCategoryResponseDto>> getAllCategory() {
         return searchService.searchAllCategory();
     }
 
@@ -64,4 +67,14 @@ public class SearchController {
     public ApiResponse<List<PartCafeResponseDto>> searchCafesByKeyword(@RequestParam String keyword) {
         return cafeService.getCafesByKeyword(keyword);
     }
+
+    @GetMapping("/tourData/list")
+    public ApiResponse<List<TourDataDto>> getTourData() {
+        return tourDataService.getHomeTourData();
+    }
+
+//    @GetMapping("/tourData")
+//    public ApiResponse<List<TourDataDto>> searchTourDataByKeyword(@RequestParam String keyword) {
+//        return tourDataService.getTourDataByKeyword(keyword);
+//    }
 }

@@ -22,9 +22,9 @@ public class UserTourCourse {
     @JsonManagedReference
     private List<TourPostItem> tourPostItems;
 
-    @OneToMany(mappedBy = "tourCourseForHashTag", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<TourPostHashTag> tourPostHashTags;
+//    @OneToMany(mappedBy = "tourCourseForHashTag", cascade = CascadeType.ALL)
+//    @JsonManagedReference
+//    private List<TourPostHashTag> tourPostHashTags;
 
     private String contentId;
 }

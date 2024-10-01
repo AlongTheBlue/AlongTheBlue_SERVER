@@ -15,7 +15,7 @@ public class TourCommunityService {
     private final UserTourCourseRepository userTourCourseRepository;
     private final TourPostItemRepository tourPostItemRepository;
     private final TourImageRepository tourImageRepository;
-    private final TourPostHashTagRepository tourPostHashTagRepository;
+//    private final TourPostHashTagRepository tourPostHashTagRepository;
 
     public UserTourCourse createPost(TourCourseRequestDto dto, List<MultipartFile> images) {
 //         먼저 userTourCourse 저장
@@ -23,7 +23,7 @@ public class TourCommunityService {
         UserTourCourse userTourCourse = new UserTourCourse();
         userTourCourse.setTitle(dto.title());
         userTourCourse.setTourPostItems(dto.tourItems());
-        userTourCourse.setTourPostHashTags(dto.hashTags());
+//        userTourCourse.setTourPostHashTags(dto.hashTags());
 
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
         userTourCourse.setCreatedate(new Date());
@@ -31,7 +31,7 @@ public class TourCommunityService {
         userTourCourse = userTourCourseRepository.save(userTourCourse);
 
         // tags와 items가 null인 경우 빈 리스트로 초기화
-        List<TourPostHashTag> tags = userTourCourse.getTourPostHashTags() != null ? userTourCourse.getTourPostHashTags() : new ArrayList<>();
+//        List<TourPostHashTag> tags = userTourCourse.getTourPostHashTags() != null ? userTourCourse.getTourPostHashTags() : new ArrayList<>();
         List<TourPostItem> items = userTourCourse.getTourPostItems() != null ? userTourCourse.getTourPostItems() : new ArrayList<>();
 
         if (dto.index() != null) {
@@ -58,13 +58,13 @@ public class TourCommunityService {
         }
 
         // tags 리스트가 비어있지 않은 경우 처리
-        if (!tags.isEmpty()) {
-            for (TourPostHashTag hashtag : tags) {
-                // TourPostItem에 UserTourCourse 설정
-                hashtag.setTourCourseForHashTag(userTourCourse);
-            }
-            tourPostHashTagRepository.saveAll(tags);
-        }
+//        if (!tags.isEmpty()) {
+//            for (TourPostHashTag hashtag : tags) {
+//                // TourPostItem에 UserTourCourse 설정
+//                hashtag.setTourCourseForHashTag(userTourCourse);
+//            }
+//            tourPostHashTagRepository.saveAll(tags);
+//        }
 
         // userTourCourse 반환 (이미 저장되었으므로)
         return userTourCourse;
@@ -86,7 +86,7 @@ public class TourCommunityService {
             dto.setTitle(tour.getTitle());
             dto.setContentid(tour.getContentId());
             dto.setWriting(tour.getWriting());
-            dto.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(tour));
+//            dto.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(tour));
             List<TourPostItem> items= tourPostItemRepository.findByuserTourCourse(tour);
             dto.setImg(tourImageRepository.findBytourPostItem(items.get(0)).get(0).getUrl());
             dtos.add(dto);
@@ -105,7 +105,7 @@ public class TourCommunityService {
             course= temp.get();
             tourDTO.setTitle(course.getTitle());
             tourDTO.setWriting(course.getWriting());
-            tourDTO.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(course));
+//            tourDTO.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(course));
             tourDTO.setContentid(course.getContentId());
             for(TourPostItem item: tourPostItemRepository.findByuserTourCourse(course)){
                 itemDTO.setTitle(item.getName());

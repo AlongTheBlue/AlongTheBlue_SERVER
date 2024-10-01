@@ -23,4 +23,6 @@ public interface TourDataRepository extends JpaRepository<TourData, String> {
             "LIMIT 6",
             nativeQuery = true)
      List<TourData> findRandomTourDatasWithImages();
+
+    List<TourData> findByTitleContaining(String keyword);
 }

@@ -9,7 +9,7 @@ import java.util.List;
 public class TourDTO {
     private String title;
     private String writing;
-    private List<TourPostHashTag> tags;
+//    private List<TourPostHashTag> tags;
     private String contentid;
     private String img;
     private List<ItemDTO> items;

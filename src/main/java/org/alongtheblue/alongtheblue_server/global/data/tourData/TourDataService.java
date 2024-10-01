@@ -2,9 +2,12 @@ package org.alongtheblue.alongtheblue_server.global.data.tourData;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationDTO;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationImage;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.Cafe;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -353,7 +356,7 @@ public class TourDataService {
         return tourDataRepository.findAll();
     }
 
-    public List<TourDataDto> getHomeTourData() {
+    public ApiResponse<List<TourDataDto>> getHomeTourData() {
         List<TourData> tourDataList = tourDataRepository.findRandomTourDatasWithImages();
 
         // AccommodationDTO 리스트에 데이터를 매핑
@@ -375,7 +378,7 @@ public class TourDataService {
             return tourDataDto;
         }).collect(Collectors.toList());
 
-        return tourDataDtoList;
+        return ApiResponse.ok("관광지를 성공적으로 조회했습니다.", tourDataDtoList);
     }
 
     public TourDataDto getTourDataDetails(String contentsid) {
@@ -498,5 +501,22 @@ public class TourDataService {
         }
     }
 
+//    public ApiResponse<List> getTourDataByKeyword(String keyword) {
+//        List<TourData> tourDataList = tourDataRepository.findByTitleContaining(keyword);
+//        List<PartCafeResponseDto> partCafeResponseDtoList = new ArrayList<>();
+//        for(TourData tourData: tourDataList) {
+//            String[] arr = cafe.getAddr().substring(8).split(" ");
+//            PartCafeResponseDto partCafeResponseDto = new PartCafeResponseDto(
+//                    arr[0] + " " + arr[1],
+//                    cafe.getTitle(),
+//                    cafe.getContentId(),
+//                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
+//                    cafe.getXMap(),
+//                    cafe.getYMap()
+//            );
+//            partCafeResponseDtoList.add(partCafeResponseDto);
+//        }
+//        return ApiResponse.ok("음식점 정보를 성공적으로 조회했습니다.", partCafeResponseDtoList);
+//    }
 }
 
