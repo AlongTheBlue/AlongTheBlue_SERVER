@@ -55,14 +55,4 @@ public class TourCommunityController {
         return tourCommunityService.onepost(postid);
     }
 
-
-
-
-
-
-
-
-
-
-
 }
