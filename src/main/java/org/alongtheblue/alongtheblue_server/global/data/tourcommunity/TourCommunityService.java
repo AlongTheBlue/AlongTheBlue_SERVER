@@ -13,10 +13,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class TourCommunityService {
@@ -37,9 +34,18 @@ public class TourCommunityService {
         this.tourPostHashTagRepository = tourPostHashTagRepository;
     }
 
-
-    public UserTourCourse createPost(UserTourCourse userTourCourse, List<MultipartFile> images, List<List<Integer>> index) {
+    public UserTourCourse createPost(TourCourseRequestDto dto, List<MultipartFile> images) {
+//    public UserTourCourse createPost(UserTourCourse userTourCourse, List<MultipartFile> images, List<List<Integer>> index) {
         // 먼저 userTourCourse 저장
+
+        UserTourCourse userTourCourse= new UserTourCourse();
+        userTourCourse.setTitle(dto.title());
+        userTourCourse.setTourPostItems(dto.tourItems());
+        userTourCourse.setTourPostHashTags(dto.hashTags());
+
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
+        userTourCourse.setCreatedate(new Date());
+        userTourCourse.setWriting(dto.writing());
         userTourCourse = userTourCourseRepository.save(userTourCourse);
 
         // tags와 items가 null인 경우 빈 리스트로 초기화
@@ -47,10 +53,10 @@ public class TourCommunityService {
         List<TourPostItem> items = userTourCourse.getTourPostItems() != null ? userTourCourse.getTourPostItems() : new ArrayList<>();
 
         // TourData와 이미지 파일 처리 (순서대로 처리)
-        for (int i = 0; i < index.size(); i++) {
-            for (int j = 0; j < index.get(i).size(); j++) {
+        for (int i = 0; i < dto.index().size(); i++) {
+            for (int j = 0; j < dto.index().get(i).size(); j++) {
                 TourPostItem data = items.get(i);
-                MultipartFile image = images.get(index.get(i).get(j));  // 인덱스로 매칭
+                MultipartFile image = images.get(dto.index().get(i).get(j));  // 인덱스로 매칭
                 String imageUrl = saveImage(image);  // 이미지 저장 로직 호출
                 TourImage tourImage= new TourImage();
                 tourImage.setUrl(imageUrl);

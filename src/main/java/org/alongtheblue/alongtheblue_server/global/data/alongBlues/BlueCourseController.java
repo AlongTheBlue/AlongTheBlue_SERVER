@@ -7,7 +7,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/blue")
+@RequestMapping("/api/blueCourse")
 public class BlueCourseController {
     private final BlueCourseService blueCourseService;
     @PostMapping("/create")
