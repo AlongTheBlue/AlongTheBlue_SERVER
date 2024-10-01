@@ -22,14 +22,18 @@ public class Restaurant {
     private String introduction;
     private String restDate;
     private String infoCenter;
+    private String xMap;
+    private String yMap;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     @JsonManagedReference
     List<RestaurantImage> images;
 
-    public Restaurant(String contentId, String title, String addr) {
+    public Restaurant(String contentId, String title, String addr, String xMap, String yMap) {
         this.contentId = contentId;
         this.title = title;
         this.addr = addr;
+        this.xMap = xMap;
+        this.yMap = yMap;
     }
 }
