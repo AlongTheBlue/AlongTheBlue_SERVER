@@ -6,7 +6,7 @@ public record BlueResponseDto(
         String xMap,
         String yMap,
         String address,
-        String city
+        String city,
+        String category
 ) {
-
 }

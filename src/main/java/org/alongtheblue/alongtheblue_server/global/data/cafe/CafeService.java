@@ -385,7 +385,8 @@ public class CafeService {
                     cafe.getContentId(),
                     cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
                     cafe.getXMap(),
-                    cafe.getYMap()
+                    cafe.getYMap(),
+                    "cafe"
             );
             dtos.add(responseDto);
         }
@@ -404,7 +405,8 @@ public class CafeService {
                     cafe.getContentId(),
                     cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
                     cafe.getXMap(),
-                    cafe.getYMap()
+                    cafe.getYMap(),
+                    "cafe"
             );
             partCafeResponseDtoList.add(partCafeResponseDto);
         }
