@@ -12,7 +12,8 @@ public record PartRestaurantResponseDto(
         String contentid,
         String img,
         String xMap,
-        String yMap
+        String yMap,
+        String category
 ) {
 //    private String address;
 //    private String title;

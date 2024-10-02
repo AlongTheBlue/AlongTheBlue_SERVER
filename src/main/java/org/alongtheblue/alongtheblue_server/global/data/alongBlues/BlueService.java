@@ -26,7 +26,8 @@ public class BlueService {
                     blue.getXMap(),
                     blue.getYMap(),
                     blue.getAddress(),
-                    blue.getCity()
+                    blue.getCity(),
+                    "tour"
             );
             blueResponseDtoList.add(blueResponseDto);
         }
@@ -44,7 +45,8 @@ public class BlueService {
                     blue.getXMap(),
                     blue.getYMap(),
                     blue.getAddress(),
-                    blue.getCity()
+                    blue.getCity(),
+                    "tour"
             );
             return ApiResponse.ok("해변 정보를 성공적으로 조회했습니다.", blueResponseDto);
         }
@@ -62,7 +64,8 @@ public class BlueService {
                     blue.getXMap(),
                     blue.getYMap(),
                     blue.getAddress(),
-                    blue.getCity()
+                    blue.getCity(),
+                    "tour"
             );
             blueResponseDtoList.add(blueResponseDto);
         }

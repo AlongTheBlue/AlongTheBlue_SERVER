@@ -49,12 +49,12 @@ public class SearchController {
     }
 
     @GetMapping("/all")
-    public ApiResponse<List<AllCategoryResponseDto>> searchAllCategoryByKeyword(@RequestParam String keyword){
+    public ApiResponse<List<SearchResponseDto>> searchAllCategoryByKeyword(@RequestParam String keyword){
         return searchService.searchAllCategoryByKeyword(keyword);
     }
 
     @GetMapping("/all/list")
-    public ApiResponse<List<AllCategoryResponseDto>> getAllCategory() {
+    public ApiResponse<List<SearchResponseDto>> getAllCategory() {
         return searchService.searchAllCategory();
     }
 

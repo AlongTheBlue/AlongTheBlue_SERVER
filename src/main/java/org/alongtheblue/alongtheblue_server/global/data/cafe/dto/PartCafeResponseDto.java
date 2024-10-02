@@ -6,7 +6,8 @@ public record PartCafeResponseDto(
         String contentid,
         String img,
         String xMap,
-        String yMap
+        String yMap,
+        String category
 ) {
 
 }

@@ -282,7 +282,8 @@ public class RestaurantService {
                     restaurant.getContentId(),
                     restaurant.getImages().isEmpty() ? null : restaurant.getImages().get(0).getOriginimgurl(),
                     restaurant.getXMap(),
-                    restaurant.getYMap()
+                    restaurant.getYMap(),
+                    "restaurant"
             );
             dtos.add(responseDto);
         }
@@ -424,7 +425,8 @@ public class RestaurantService {
                     restaurant.getContentId(),
                     restaurant.getImages().isEmpty() ? null : restaurant.getImages().get(0).getOriginimgurl(),
                     restaurant.getXMap(),
-                    restaurant.getYMap()
+                    restaurant.getYMap(),
+                    "restaurant"
             );
             partRestaurantResponseDtoList.add(restaurantResponseDto);
         }
