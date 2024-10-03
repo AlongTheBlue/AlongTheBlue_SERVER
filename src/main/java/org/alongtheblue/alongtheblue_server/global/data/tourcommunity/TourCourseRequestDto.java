@@ -5,8 +5,9 @@ import java.util.List;
 public record TourCourseRequestDto(
         String title,
         String writing,
-        List<TourPostItem> tourItems,
+//        List<TourPostItem> tourItems,
+        List<TourPostItemRequestDto> tourItems,
 //        List<TourPostHashTag> hashTags,
-        List<List<Integer>> index
+        List<List<Integer>> imgIndexArr
 ) {
 }

@@ -28,5 +28,4 @@ public class TourPostItem {
     private String address;
     private String comment;
 
-
 }

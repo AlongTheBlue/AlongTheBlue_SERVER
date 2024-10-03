@@ -4,10 +4,11 @@ import lombok.Data;
 
 import java.util.List;
 @Data
-public class ItemDTO {
+public class TourPostItemDTO {
     private List<String> tourImage;
     private String title;
     private String category;
     private String address;
     private String comment;
+//    private String contentid;
 }
