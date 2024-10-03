@@ -20,17 +20,16 @@ public class TourCommunityController {
     @PostMapping
     public UserTourCourse createTourCourse(
             @RequestPart(value = "request", required = false) TourCourseRequestDto dto,
+            @RequestPart(value = "file", required = false) List<MultipartFile> images
 //            @RequestPart("title") String title,
 //            @RequestPart("writing") String writing,
 //            @RequestPart("createdate") Date date,
 //            @RequestPart List<TourPostItem> tourItems,
 //            @RequestPart List<TourPostHashTag> hashTags,
-            @RequestPart(value = "file", required = false) List<MultipartFile> images
 //            ,
-//            @RequestPart List<List<Integer>> index
+//            @RequestPart List<List<Integer>> imgIndexArr
     ) {
-
-
+        return tourCommunityService.createPost(dto, images);
 //        UserTourCourse userTourCourse= new UserTourCourse();
 //        userTourCourse.setTitle(title);
 //        userTourCourse.setTourPostItems(tourItems);
@@ -39,20 +38,18 @@ public class TourCommunityController {
 //        userTourCourse.setWriting(writing);
 
 //        return tourCommunityService.createPost(userTourCourse, images, dto);
-        return tourCommunityService.createPost(dto, images);
     }
 
-
     @Operation(summary = "전체 게시물 조회 API")
-    @GetMapping("/allpost")
-    public List<TourDTO> allPost(){
-        return tourCommunityService.allPost();
+    @GetMapping("/list")
+    public List<UserTourCourseDTO> getAllUserTourCourses(){
+        return tourCommunityService.getAllUserTourCourses();
     }
 
     @Operation(summary = "id로 게시물(여행코스 포함) 상세 조회")
     @GetMapping("/{postid}")
-    public TourDTO onepost(@PathVariable Long postid){
-        return tourCommunityService.onepost(postid);
+    public UserTourCourseDTO onepost(@PathVariable Long postid){
+        return tourCommunityService.getUserCourseByID(postid);
     }
 
 }
