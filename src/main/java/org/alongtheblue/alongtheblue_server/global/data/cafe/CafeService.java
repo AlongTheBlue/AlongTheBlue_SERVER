@@ -410,6 +410,6 @@ public class CafeService {
             );
             partCafeResponseDtoList.add(partCafeResponseDto);
         }
-        return ApiResponse.ok("음식점 정보를 성공적으로 조회했습니다.", partCafeResponseDtoList);
+        return ApiResponse.ok("음식점 정보를 성공적으로 검색했습니다.", partCafeResponseDtoList);
     }
 }

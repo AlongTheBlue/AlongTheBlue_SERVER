@@ -3,6 +3,9 @@ package org.alongtheblue.alongtheblue_server.global.data.accommodation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.tourData.TourData;
+import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +17,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -299,17 +301,38 @@ public class AccommodationService {
         }
     }
 
-    public List<AccommodationDTO> getAccommodationHomeInfo() {
-        List<Accommodation> accommodations = accommodationRepository.findAll();
-        AccommodationDTO dto = new AccommodationDTO();
-        List<AccommodationDTO> dtos = new ArrayList<>();
-        for (Accommodation accommodation : accommodations) {
-            dto.setRoadaddress(accommodation.getAddress().substring(8));
-            dto.setContentsid(accommodation.getContentId());
-            dto.setTitle(accommodation.getTitle());
-            dtos.add(dto);
+    public ApiResponse<List<AccommodationResponseDto>> getAccommodationHomeInfo() {
+        Random random= new Random();
+        Set<Integer> randomNumbers = new HashSet<>();
+        List<AccommodationResponseDto> dtos= new ArrayList<>();
+//        List<Restaurant> restaurants = restaurantRepository.findAll();
+        Long totalCount = accommodationRepository.count();
+        while (dtos.size() < 6) {
+            int randomNumber = random.nextInt(totalCount.intValue()); // 저장된 restaurant 수로 할 것
+            if (randomNumbers.contains(randomNumber)) {
+                continue;
+            }
+            randomNumbers.add(randomNumber);
+            Optional<Accommodation> optionalAccommodation = accommodationRepository.findById(Long.valueOf(randomNumber));
+            if(optionalAccommodation.isEmpty()) {
+                continue;
+            }
+            Accommodation accommodation = optionalAccommodation.get();
+            String[] arr = accommodation.getAddress().substring(8).split(" ");
+//                    restaurant.setAddr(arr[0] + " " + arr[1]);
+            AccommodationResponseDto accommodationResponseDto = new AccommodationResponseDto(
+                    arr[0] + " " + arr[1],
+                    accommodation.getTitle(),
+                    accommodation.getContentId(),
+                    accommodation.getAccommodationImage().isEmpty() ? null : accommodation.getAccommodationImage().get(0).getOriginimgurl(),
+                    accommodation.getXMap(),
+                    accommodation.getYMap(),
+                    "accommodation"
+            );
+            dtos.add(accommodationResponseDto);
         }
-        return dtos;
+        System.out.println(dtos.size());
+        return ApiResponse.ok("숙박 정보를 성공적으로 조회했습니다.", dtos);
     }
 
     public void processSaveIntroduction() {
@@ -427,9 +450,27 @@ public class AccommodationService {
                 .then();
     }
 
+    public ApiResponse<List<AccommodationResponseDto>> getAccommodationsByKeyword(String keyword) {
+        List<Accommodation> accommodations = accommodationRepository.findByTitleContaining(keyword);
+        List<AccommodationResponseDto> accommodationResponseDtoList = new ArrayList<>();
+        for(Accommodation accommodation : accommodations) {
+            String[] arr = accommodation.getAddress().substring(8).split(" ");
+            AccommodationResponseDto accommodationResponseDto = new AccommodationResponseDto(
+                    arr[0] + " " + arr[1],
+                    accommodation.getTitle(),
+                    accommodation.getContentId(),
+                    accommodation.getAccommodationImage().isEmpty() ? null : accommodation.getAccommodationImage().get(0).getOriginimgurl(),
+                    accommodation.getXMap(),
+                    accommodation.getYMap(),
+                    "tourData"
+            );
+            accommodationResponseDtoList.add(accommodationResponseDto);
+        }
+        return ApiResponse.ok("숙박 정보를 성공적으로 검색했습니다.", accommodationResponseDtoList);
+    }
 
     // API 응답을 매핑하기 위한 클래스
-    public static class ApiResponse {
+    public static class ApiResponse2 {
         private String introduction;
 
         // Getters and setters
@@ -449,7 +490,7 @@ public class AccommodationService {
 
         for (String contentsid : contentsIds) {
             try {
-                ApiResponse response = webClient.get()
+                ApiResponse2 response = webClient.get()
                         .uri(uriBuilder -> uriBuilder
                                 .scheme("https")
                                 .host("apis.data.go.kr")
@@ -467,7 +508,7 @@ public class AccommodationService {
                                 .queryParam("contentsid", contentsid)  // contentsid 추가
                                 .build())
                         .retrieve()
-                        .bodyToMono(ApiResponse.class)
+                        .bodyToMono(ApiResponse2.class)
                         .block();  // 동기 호출
 
                 // API 응답으로 introduction 필드가 있는 경우 업데이트

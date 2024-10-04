@@ -95,16 +95,14 @@ public class WeatherService {
         Optional<Weather> existingWeather = weatherRepository.findByJejuDivision(jejuDivision);
 
         Weather weather;
-        if (existingWeather.isPresent()) {
+        if (existingWeather.isPresent())
             weather = existingWeather.get();
-            weather.setWeatherCondition(weatherCondition);
-            weather.setTemperature(temperature);
-        } else {
+        else {
             weather = new Weather();
             weather.setJejuDivision(jejuDivision);
-            weather.setWeatherCondition(weatherCondition);
-            weather.setTemperature(temperature);
         }
+        weather.setWeatherCondition(weatherCondition);
+        weather.setTemperature(temperature);
         return weatherRepository.save(weather);
     }
 
@@ -112,9 +110,8 @@ public class WeatherService {
     private String extractCategoryData(JSONArray itemArray, String category) {
         for (int i = 0; i < itemArray.length(); i++) {
             JSONObject item = itemArray.getJSONObject(i);
-            if (item.getString("category").equals(category)) {
+            if (item.getString("category").equals(category))
                 return item.getString("fcstValue");
-            }
         }
         return null; // 해당 카테고리 데이터가 없는 경우
     }

@@ -8,6 +8,7 @@ import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodat
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationImage;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.Cafe;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -383,7 +382,7 @@ public class TourDataService {
 
     public TourDataDto getTourDataDetails(String contentsid) {
         // DB에서 TourData 조회
-        Optional<TourData> tourDataOptional = tourDataRepository.findById(contentsid);
+        Optional<TourData> tourDataOptional = tourDataRepository.findByContentId(contentsid);
         if (tourDataOptional.isPresent()) {
             TourData tourData = tourDataOptional.get();
 
@@ -499,6 +498,59 @@ public class TourDataService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public ApiResponse<List<TourDataResponseDto>> getTourDataListByKeyword(String keyword) {
+        List<TourData> tourDataList = tourDataRepository.findByTitleContaining(keyword);
+        List<TourDataResponseDto> tourDataDtoList = new ArrayList<>();
+        for(TourData tourData: tourDataList) {
+            String[] arr = tourData.getAddress().substring(8).split(" ");
+            TourDataResponseDto tourDataResponseDto = new TourDataResponseDto(
+                    arr[0] + " " + arr[1],
+                    tourData.getTitle(),
+                    tourData.getContentId(),
+                    tourData.getImages().isEmpty() ? null : tourData.getImages().get(0).getUrl(),
+                    tourData.getXMap(),
+                    tourData.getYMap(),
+                    "tourData"
+            );
+            tourDataDtoList.add(tourDataResponseDto);
+        }
+        return ApiResponse.ok("관광지 정보를 성공적으로 검색했습니다.", tourDataDtoList);
+    }
+
+    public ApiResponse<List<TourDataResponseDto>> getTourDataListHome() {
+        Random random= new Random();
+        Set<Integer> randomNumbers = new HashSet<>();
+        List<TourDataResponseDto> dtos= new ArrayList<>();
+//        List<Restaurant> restaurants = restaurantRepository.findAll();
+        Long totalCount = tourDataRepository.count();
+        while (dtos.size() < 6) {
+            int randomNumber = random.nextInt(totalCount.intValue()); // 저장된 restaurant 수로 할 것
+            if (randomNumbers.contains(randomNumber)) {
+                continue;
+            }
+            randomNumbers.add(randomNumber);
+            Optional<TourData> optionalTourData = tourDataRepository.findById(Long.valueOf(randomNumber));
+            if(optionalTourData.isEmpty()) {
+                continue;
+            }
+            TourData tourData = optionalTourData.get();
+            String[] arr = tourData.getAddress().substring(8).split(" ");
+//                    restaurant.setAddr(arr[0] + " " + arr[1]);
+            TourDataResponseDto tourDataResponseDto = new TourDataResponseDto(
+                    arr[0] + " " + arr[1],
+                    tourData.getTitle(),
+                    tourData.getContentId(),
+                    tourData.getImages().isEmpty() ? null : tourData.getImages().get(0).getUrl(),
+                    tourData.getXMap(),
+                    tourData.getYMap(),
+                    "tourData"
+            );
+            dtos.add(tourDataResponseDto);
+        }
+        System.out.println(dtos.size());
+        return ApiResponse.ok("관광지 정보를 성공적으로 조회했습니다.", dtos);
     }
 
 //    public ApiResponse<List> getTourDataByKeyword(String keyword) {

@@ -7,6 +7,7 @@ import lombok.Data;
 import java.util.Date;
 import java.util.List;
 
+// AlongCourse
 @Entity
 @Data
 public class UserTourCourse {
@@ -16,7 +17,7 @@ public class UserTourCourse {
 
     private Date createdate;
     private String title;
-    private String writing;
+    private String writing; // content로 변경
 
     @OneToMany(mappedBy = "userTourCourse", cascade = CascadeType.ALL)
     @JsonManagedReference
@@ -26,5 +27,5 @@ public class UserTourCourse {
 //    @JsonManagedReference
 //    private List<TourPostHashTag> tourPostHashTags;
 
-    private String contentId;
+    private String contentId; // 필요 없음
 }
