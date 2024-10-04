@@ -37,5 +37,7 @@ public interface AccommodationRepository extends JpaRepository<Accommodation, Lo
             + "HAVING COUNT(ai.url) > 0 "
             + "ORDER BY RAND()", nativeQuery = true)
     List<AccommodationDTO> findAccommodationsWithTwoImages();
+
+    List<Accommodation> findByTitleContaining(String keyword);
 }
 

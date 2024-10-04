@@ -1,6 +1,8 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 
 import lombok.RequiredArgsConstructor;
+import org.alongtheblue.alongtheblue_server.global.adapter.S3Adapter;
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +17,8 @@ public class TourCommunityService {
     private final UserTourCourseRepository userTourCourseRepository;
     private final TourPostItemRepository tourPostItemRepository;
     private final TourImageRepository tourImageRepository;
+    private final S3Adapter s3Adapter;
+
 //    private final TourPostHashTagRepository tourPostHashTagRepository;
 
     // 여행따라 저장
@@ -30,7 +34,7 @@ public class TourCommunityService {
 
         List<TourPostItem> tourItems = new ArrayList<>();
         List<TourPostItemRequestDto> tourItemDtoList = dto.tourItems();
-        for(TourPostItemRequestDto tourItemDto : tourItemDtoList) {
+        for (TourPostItemRequestDto tourItemDto : tourItemDtoList) {
             TourPostItem tourItem = new TourPostItem();
             tourItem.setName(tourItemDto.title());
             tourItem.setComment(tourItemDto.comment());
@@ -48,16 +52,19 @@ public class TourCommunityService {
 //        List<TourPostHashTag> tags = userTourCourse.getTourPostHashTags() != null ? userTourCourse.getTourPostHashTags() : new ArrayList<>();
 //        List<TourPostItem> items = userCourse.getTourPostItems() != null ? userCourse.getTourPostItems() : new ArrayList<>();
 
-        // 이미지 저장 예외처리
+        // 이미지 저장 - 예외처리
         if (dto.imgIndexArr() != null) {
             // 해당 TourPostItem에 이미지 저장 (순서대로 처리)
             for (int i = 0; i < dto.imgIndexArr().size(); i++) {
                 for (int j = 0; j < dto.imgIndexArr().get(i).size(); j++) {
                     TourPostItem tourItem = tourItems.get(i);
+                    System.out.println("i: " + i + " j: " + j);
+                    System.out.println(images.size());
                     MultipartFile image = images.get(dto.imgIndexArr().get(i).get(j));  // 인덱스로 매칭
-                    String imageUrl = saveImageToS3(image);  // 이미지 저장 로직 호출
+//                    String imageUrl = saveImageToS3(image);  // 이미지 저장 로직 호출
+                    ApiResponse<String> imageUrl = s3Adapter.uploadImage(image);
                     TourImage tourImage = new TourImage();
-                    tourImage.setUrl(imageUrl);
+                    tourImage.setUrl(imageUrl.getData());
                     tourImage.setTourPostItem(tourItem);
                     tourImageRepository.save(tourImage);
 
@@ -67,7 +74,7 @@ public class TourCommunityService {
         // items 리스트가 비어있지 않은 경우 처리
 //        if (!items.isEmpty()) {
 //            for (TourPostItem item : items) {
-                // TourPostItem에 UserTourCourse 설정
+        // TourPostItem에 UserTourCourse 설정
 //                item.setUserTourCourse(userCourse);
 //            }
 //            tourPostItemRepository.saveAll(items);
@@ -96,17 +103,17 @@ public class TourCommunityService {
 
     // 여행따라 전체 조회 - 페이지네이션 필요
     public List<UserTourCourseDTO> getAllUserTourCourses() {
-        List<UserTourCourse> userCourses= userTourCourseRepository.findAll();
-        List<UserTourCourseDTO> userCourseDtoList= new ArrayList<>();
-        for(UserTourCourse userCourse: userCourses){
-            UserTourCourseDTO userCourseDto= new UserTourCourseDTO();
+        List<UserTourCourse> userCourses = userTourCourseRepository.findAll();
+        List<UserTourCourseDTO> userCourseDtoList = new ArrayList<>();
+        for (UserTourCourse userCourse : userCourses) {
+            UserTourCourseDTO userCourseDto = new UserTourCourseDTO();
             userCourseDto.setTitle(userCourse.getTitle());
             userCourseDto.setWriting(userCourse.getWriting());
 //            dto.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(tour));
 
-            List<TourPostItem> items= tourPostItemRepository.findByuserTourCourse(userCourse);
+            List<TourPostItem> items = tourPostItemRepository.findByuserTourCourse(userCourse);
             List<TourImage> images = tourImageRepository.findBytourPostItem(items.get(0));
-            if(!images.isEmpty()) userCourseDto.setImgUrl(images.get(0).getUrl());
+            if (!images.isEmpty()) userCourseDto.setImgUrl(images.get(0).getUrl());
 //            userCourseDto.setImgUrl(tourImageRepository.findBytourPostItem(items.get(0)).get(0).getUrl());
             userCourseDtoList.add(userCourseDto);
         }
@@ -128,14 +135,14 @@ public class TourCommunityService {
         userCourseDto.setWriting(userCourse.getWriting());
 //            tourDTO.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(course));
 
-        for(TourPostItem postItem: tourPostItemRepository.findByuserTourCourse(userCourse)){
+        for (TourPostItem postItem : tourPostItemRepository.findByuserTourCourse(userCourse)) {
             tourPostItemDto.setTitle(postItem.getName());
             tourPostItemDto.setCategory(postItem.getCategory());
             tourPostItemDto.setAddress(postItem.getAddress());
             tourPostItemDto.setComment(tourPostItemDto.getComment());
 
-            List<String> imgUrls= new ArrayList<>();
-            for(TourImage img: tourImageRepository.findBytourPostItem(postItem))
+            List<String> imgUrls = new ArrayList<>();
+            for (TourImage img : tourImageRepository.findBytourPostItem(postItem))
                 imgUrls.add(img.getUrl());
             tourPostItemDto.setTourImage(imgUrls);
             postItems.add(tourPostItemDto);

@@ -430,6 +430,6 @@ public class RestaurantService {
             );
             partRestaurantResponseDtoList.add(restaurantResponseDto);
         }
-        return ApiResponse.ok("음식점 정보를 성공적으로 조회했습니다.", partRestaurantResponseDtoList);
+        return ApiResponse.ok("음식점 정보를 성공적으로 검색했습니다.", partRestaurantResponseDtoList);
     }
 }

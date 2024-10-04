@@ -7,9 +7,19 @@ import lombok.Data;
 
 import java.util.List;
 
+// AlongCourseItem
 @Entity
 @Data
 public class TourPostItem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;    // title로 변경
+    private String category;
+    private String address;
+    private String comment; // content로 변경
+
     @ManyToOne
     @JoinColumn(name = "userTourCourse")
     @JsonBackReference
@@ -19,13 +29,5 @@ public class TourPostItem {
     @JsonManagedReference
     private List<TourImage> tourImage;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String name;
-    private String category;
-    private String address;
-    private String comment;
-
+    // String contentId;
 }

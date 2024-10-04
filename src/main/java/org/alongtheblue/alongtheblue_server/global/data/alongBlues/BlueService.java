@@ -69,6 +69,6 @@ public class BlueService {
             );
             blueResponseDtoList.add(blueResponseDto);
         }
-        return ApiResponse.ok("해변 정보를 성공적으로 조회했습니다.", blueResponseDtoList);
+        return ApiResponse.ok("해변 정보를 성공적으로 검색했습니다.", blueResponseDtoList);
     }
 }
