@@ -220,14 +220,14 @@ public class RestaurantService {
         Pageable pageable = PageRequest.of(page, size);
 
         // 1. Restaurant 기준으로 페이징 처리된 데이터를 조회
-        Page<Restaurant> restaurantPage = restaurantRepository.findAll(pageable);
+        Page<RestaurantSimpleInformation> restaurantPage = restaurantRepository.findAllSimple(pageable);
 
         // 2. RestaurantSimpleInformation으로 변환하여 이미지 그룹화
         List<RestaurantSimpleInformation> groupedRestaurantList = restaurantPage.getContent().stream()
                 .map(restaurant -> new RestaurantSimpleInformationImpl(
                         restaurant.getContentId(),
                         restaurant.getTitle(),
-                        restaurant.getAddr(),
+                        restaurant.getAddress(),
                         restaurant.getImages()  // 이미지를 그룹화하지 않고 그대로 넣음
                 ))
                 .collect(Collectors.toList());
