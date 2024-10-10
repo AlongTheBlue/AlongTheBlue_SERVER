@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.request.CreateBlueCourseServiceRequestDto;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.request.CreateBlueItemRequestDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueCourseResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueItemResponseDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,10 +40,27 @@ public class BlueCourseService {
         return blueCourseRepository.findAll();
     }
 
-    public BlueCourse getCourse(Long id) {
-        Optional<BlueCourse>course= blueCourseRepository.findById(id);
-        return course.orElse(null);
+    public ApiResponse<BlueCourseResponseDto> getBlueCourse(Long id) {
+        Optional<BlueCourse> course = blueCourseRepository.findById(id);
+        if(course.isEmpty())
+            return ApiResponse.ok("해당 ID의 코스를 찾지 못했습니다.");
+
+        BlueCourse blueCourse = course.get();
+        List<BlueItemResponseDto> blueItemResponseDtoList = new ArrayList<>();
+        for(BlueItem blueItem :  blueCourse.getBlueItems()) {
+            BlueItemResponseDto blueItemResponseDto = new BlueItemResponseDto(
+                    blueItem.getName(),
+                    blueItem.getAddress(),
+                    blueItem.getX(),
+                    blueItem.getY(),
+                    blueItem.getCategory()
+            );
+            blueItemResponseDtoList.add(blueItemResponseDto);
+        }
+        BlueCourseResponseDto blueCourseResponseDto = new BlueCourseResponseDto(
+                blueCourse.getTitle(),
+                blueItemResponseDtoList
+        );
+        return ApiResponse.ok(blueCourseResponseDto);
     }
-
-
 }

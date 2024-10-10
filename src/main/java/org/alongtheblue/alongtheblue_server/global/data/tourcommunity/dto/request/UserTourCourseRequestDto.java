@@ -1,11 +1,10 @@
-package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
+package org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request;
 
 import java.util.List;
 
-public record TourCourseRequestDto(
+public record UserTourCourseRequestDto(
         String title,
         String writing,
-//        List<TourPostItem> tourItems,
         List<TourPostItemRequestDto> tourItems,
 //        List<TourPostHashTag> hashTags,
         List<List<Integer>> imgIndexArr
