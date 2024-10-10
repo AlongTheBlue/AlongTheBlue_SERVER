@@ -155,6 +155,7 @@ public class TourCommunityService {
                     tourPostItem.getY(),
                     tourPostItem.getComment(),
                     tourPostItem.getCategory(),
+                    tourPostItem.getContentId(),
                     tourImageResponseDtoList
             );
             tourPostItemResponseDtoList.add(tourPostItemResponseDto);

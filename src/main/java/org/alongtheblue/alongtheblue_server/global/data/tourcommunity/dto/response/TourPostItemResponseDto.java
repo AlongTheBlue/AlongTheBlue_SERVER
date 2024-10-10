@@ -9,6 +9,7 @@ public record TourPostItemResponseDto(
         String y,
         String comment,
         String category,
+        String contentId,
         List<TourImageResponseDto> tourImages
 ) {
 }

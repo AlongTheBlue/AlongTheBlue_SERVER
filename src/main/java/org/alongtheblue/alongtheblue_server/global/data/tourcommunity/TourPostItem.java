@@ -21,6 +21,7 @@ public class TourPostItem {
     private String comment; // content로 변경
     private String x;
     private String y;
+    private String contentId;
 
     @ManyToOne
     @JoinColumn(name = "userTourCourse")
@@ -31,5 +32,4 @@ public class TourPostItem {
     @JsonManagedReference
     private List<TourImage> tourImage;
 
-    // String contentId;
 }
