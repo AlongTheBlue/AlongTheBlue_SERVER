@@ -3,6 +3,11 @@ package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.adapter.S3Adapter;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.UserTourCourseRequestDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.TourPostItemRequestDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.TourImageResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.TourPostItemResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.UserTourCourseDetailDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,7 +27,7 @@ public class TourCommunityService {
 //    private final TourPostHashTagRepository tourPostHashTagRepository;
 
     // 여행따라 저장
-    public UserTourCourse createPost(TourCourseRequestDto dto, List<MultipartFile> images) {
+    public UserTourCourse createPost(UserTourCourseRequestDto dto, List<MultipartFile> images) {
 //        먼저 userTourCourse 저장
         UserTourCourse userCourse = new UserTourCourse();
         userCourse.setTitle(dto.title());
@@ -39,6 +44,8 @@ public class TourCommunityService {
             tourItem.setName(tourItemDto.title());
             tourItem.setComment(tourItemDto.comment());
             tourItem.setAddress(tourItemDto.address());
+            tourItem.setX(tourItemDto.x());
+            tourItem.setY(tourItemDto.y());
             tourItem.setCategory(tourItemDto.category());
             tourItem.setUserTourCourse(userCourse);
 //            tourItem.setContentId
@@ -126,29 +133,63 @@ public class TourCommunityService {
     }
 
     // 특정 여행따라 조회
-    public UserTourCourseDTO getUserCourseByID(Long id) {
+    public ApiResponse<UserTourCourseDetailDto> getUserCourseByID(Long id) {
         UserTourCourse userCourse = findById(id);
-        UserTourCourseDTO userCourseDto = new UserTourCourseDTO();
-        TourPostItemDTO tourPostItemDto = new TourPostItemDTO();
-        List<TourPostItemDTO> postItems = new ArrayList<>();
-        userCourseDto.setTitle(userCourse.getTitle());
-        userCourseDto.setWriting(userCourse.getWriting());
-//            tourDTO.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(course));
 
-        for (TourPostItem postItem : tourPostItemRepository.findByuserTourCourse(userCourse)) {
-            tourPostItemDto.setTitle(postItem.getName());
-            tourPostItemDto.setCategory(postItem.getCategory());
-            tourPostItemDto.setAddress(postItem.getAddress());
-            tourPostItemDto.setComment(tourPostItemDto.getComment());
+        List<TourPostItem> tourPostItems = userCourse.getTourPostItems();
+        List<TourPostItemResponseDto> tourPostItemResponseDtoList = new ArrayList<>();
+        for(TourPostItem tourPostItem : tourPostItems) {
+            List<TourImageResponseDto> tourImageResponseDtoList = new ArrayList<>();
+            for(TourImage tourImage : tourImageRepository.findBytourPostItem(tourPostItem)) {
+                TourImageResponseDto tourImageResponseDto = new TourImageResponseDto(
+                        tourImage.getId(),
+                        tourImage.getUrl()
+                );
+                tourImageResponseDtoList.add(tourImageResponseDto);
+            }
 
-            List<String> imgUrls = new ArrayList<>();
-            for (TourImage img : tourImageRepository.findBytourPostItem(postItem))
-                imgUrls.add(img.getUrl());
-            tourPostItemDto.setTourImage(imgUrls);
-            postItems.add(tourPostItemDto);
+            TourPostItemResponseDto tourPostItemResponseDto = new TourPostItemResponseDto(
+                    tourPostItem.getName(),
+                    tourPostItem.getAddress(),
+                    tourPostItem.getX(),
+                    tourPostItem.getY(),
+                    tourPostItem.getComment(),
+                    tourPostItem.getCategory(),
+                    tourImageResponseDtoList
+            );
+            tourPostItemResponseDtoList.add(tourPostItemResponseDto);
         }
 
-        userCourseDto.setPostItems(postItems);
-        return userCourseDto;
+        UserTourCourseDetailDto userTourCourseDetailDto = new UserTourCourseDetailDto(
+                userCourse.getTitle(),
+                userCourse.getWriting(),
+                tourPostItemResponseDtoList
+        );
+
+        return ApiResponse.ok(userTourCourseDetailDto);
+
+
+//        UserTourCourseDTO userCourseDto = new UserTourCourseDTO();
+//        TourPostItemDTO tourPostItemDto = new TourPostItemDTO();
+//        List<TourPostItemDTO> postItems = new ArrayList<>();
+//        userCourseDto.setTitle(userCourse.getTitle());
+//        userCourseDto.setWriting(userCourse.getWriting());
+////            tourDTO.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(course));
+//
+//        for (TourPostItem postItem : tourPostItemRepository.findByuserTourCourse(userCourse)) {
+//            tourPostItemDto.setTitle(postItem.getName());
+//            tourPostItemDto.setCategory(postItem.getCategory());
+//            tourPostItemDto.setAddress(postItem.getAddress());
+//            tourPostItemDto.setComment(tourPostItemDto.getComment());
+//
+//            List<String> imgUrls = new ArrayList<>();
+//            for (TourImage img : tourImageRepository.findBytourPostItem(postItem))
+//                imgUrls.add(img.getUrl());
+//            tourPostItemDto.setTourImage(imgUrls);
+//            postItems.add(tourPostItemDto);
+//        }
+//
+//        userCourseDto.setPostItems(postItems);
+//        return userCourseDto;
     }
 }

@@ -3,6 +3,9 @@ package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.UserTourCourseRequestDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.UserTourCourseDetailDto;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,10 +19,10 @@ public class TourCommunityController {
 
     private final TourCommunityService tourCommunityService;
 
-    @Operation(summary = "게시물 등록 API")
+    @Operation(summary = "여행따라 게시물 등록 API")
     @PostMapping
     public UserTourCourse createTourCourse(
-            @RequestPart(value = "request", required = false) TourCourseRequestDto dto,
+            @RequestPart(value = "request", required = false) UserTourCourseRequestDto dto,
             @RequestPart(value = "file", required = false) List<MultipartFile> images
 //            @RequestPart("title") String title,
 //            @RequestPart("writing") String writing,
@@ -40,16 +43,16 @@ public class TourCommunityController {
 //        return tourCommunityService.createPost(userTourCourse, images, dto);
     }
 
-    @Operation(summary = "전체 게시물 조회 API")
+    @Operation(summary = "여행따라 전체 게시물 조회 API")
     @GetMapping("/list")
     public List<UserTourCourseDTO> getAllUserTourCourses(){
         return tourCommunityService.getAllUserTourCourses();
     }
 
-    @Operation(summary = "id로 게시물(여행코스 포함) 상세 조회")
-    @GetMapping("/{postid}")
-    public UserTourCourseDTO onepost(@PathVariable Long postid){
-        return tourCommunityService.getUserCourseByID(postid);
+    @Operation(summary = "id로 여행따라 게시물(여행코스 포함) 상세 조회")
+    @GetMapping("/{id}")
+    public ApiResponse<UserTourCourseDetailDto> getUserCourseById(@PathVariable Long id){
+        return tourCommunityService.getUserCourseByID(id);
     }
 
 }
