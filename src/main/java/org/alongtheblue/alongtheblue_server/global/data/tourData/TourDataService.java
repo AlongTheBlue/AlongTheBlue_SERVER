@@ -2,15 +2,20 @@ package org.alongtheblue.alongtheblue_server.global.data.tourData;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationDTO;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationImage;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.Cafe;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeService;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +35,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TourDataService {
-    @Autowired
-    private TourDataRepository tourDataRepository;
-    @Autowired
-    private TourDataImageRepository tourDataImageRepository;
+
+    private final TourDataRepository tourDataRepository;
+    private final TourDataImageRepository tourDataImageRepository;
+    private final WeatherService weatherService;
 
     @Value("${api.key}")
     private String apiKey;
@@ -588,6 +594,35 @@ public class TourDataService {
         }
         return ApiResponse.ok("이미지를 포함한 관광지 정보를 성공적으로 조회했습니다.", homeResponseDtoList);
     }
+
+    public ApiResponse<DetailResponseDto> getTourDataDetail(String id) {
+        TourData tourData = findByContentId(id);
+        WeatherResponseDto weather = weatherService.getWeatherByAddress(tourData.getAddress());
+
+        DetailResponseDto detailResponseDto = new DetailResponseDto(
+                tourData.getContentId(),
+                tourData.getTitle(),
+                tourData.getAddress(),
+                tourData.getRestDate(),
+                weather.weatherCondition(),
+                weather.temperature(),
+                tourData.getInfoCenter(),
+                tourData.getIntroduction(),
+                tourData.getImages().get(0).getUrl(),
+                tourData.getXMap(),
+                tourData.getYMap()
+        );
+        return ApiResponse.ok("해당 관광지의 상세 정보를 조회하였습니다", detailResponseDto);
+    }
+
+    public TourData findByContentId(String contentId) {
+        Optional<TourData> tourDataOptional = tourDataRepository.findByContentId(contentId);
+        if(tourDataOptional.isPresent())
+            return tourDataOptional.get();
+        else
+            throw new RuntimeException("해당 ID의 관광지가 없습니다.");
+    }
+
 
 //    public ApiResponse<List> getTourDataByKeyword(String keyword) {
 //        List<TourData> tourDataList = tourDataRepository.findByTitleContaining(keyword);

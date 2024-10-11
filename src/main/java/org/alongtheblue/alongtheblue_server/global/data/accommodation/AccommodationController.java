@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -127,5 +128,10 @@ public class AccommodationController {
     @GetMapping("/home/list")
     public ApiResponse<List<HomeResponseDto>> getHomeAccommodationList() {
         return accommodationService.getHomeAccommodationList();
+    }
+
+    @GetMapping("/detail/{id}")
+    public ApiResponse<DetailResponseDto> getAccommodationDetail(@PathVariable String id) {
+        return accommodationService.getAccommodationDetail(id);
     }
 }

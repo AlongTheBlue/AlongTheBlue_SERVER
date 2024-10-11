@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,17 +31,19 @@ public class CafeService {
     private final CafeImageRepository cafeImageRepository;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
+    private final WeatherService weatherService;
 
     @Value("${api.key}")
     private String apiKey;
 
     private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
-    public CafeService(CafeRepository cafeRepository, CafeImageRepository cafeImageRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
+    public CafeService(CafeRepository cafeRepository, CafeImageRepository cafeImageRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, WeatherService weatherService) {
         this.cafeRepository = cafeRepository;
         this.cafeImageRepository = cafeImageRepository;
         this.webClient = webClientBuilder.baseUrl("http://apis.data.go.kr/B551011/KorService1").build();
         this.objectMapper = objectMapper;
+        this.weatherService = weatherService;
     }
 
     //빌더는 baseUrl을 설정하여 기본적으로 사용할 API의 URL을 지정하는 거임
@@ -447,5 +450,34 @@ public class CafeService {
             homeResponseDtoList = homeResponseDtoList.stream().distinct().limit(2).collect(Collectors.toList());
         }
         return ApiResponse.ok("이미지를 포함한 카페 정보를 성공적으로 조회했습니다.", homeResponseDtoList);
+    }
+
+
+    public ApiResponse<DetailResponseDto> getCafeDetail(String id) {
+        Cafe cafe = findByContentId(id);
+        WeatherResponseDto weather = weatherService.getWeatherByAddress(cafe.getAddr());
+
+        DetailResponseDto detailResponseDto = new DetailResponseDto(
+                cafe.getContentId(),
+                cafe.getTitle(),
+                cafe.getAddr(),
+                cafe.getRestDate(),
+                weather.weatherCondition(),
+                weather.temperature(),
+                cafe.getInfoCenter(),
+                cafe.getIntroduction(),
+                cafe.getCafeImages().get(0).getOriginimgurl(),
+                cafe.getXMap(),
+                cafe.getYMap()
+        );
+        return ApiResponse.ok("해당 카페의 상세 정보를 조회하였습니다", detailResponseDto);
+    }
+
+    public Cafe findByContentId(String  id) {
+        Optional<Cafe> optionalCafe = cafeRepository.findByContentId(id);
+        if(optionalCafe.isEmpty())
+            throw new RuntimeException("존재하지 않는 카페 ID");
+        else
+            return optionalCafe.get();
     }
 }
