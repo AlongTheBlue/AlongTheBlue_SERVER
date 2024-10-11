@@ -8,6 +8,7 @@ import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.reques
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.TourImageResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.TourPostItemResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.UserTourCourseDetailDto;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +24,7 @@ public class TourCommunityService {
     private final TourPostItemRepository tourPostItemRepository;
     private final TourImageRepository tourImageRepository;
     private final S3Adapter s3Adapter;
+    private final ConversionService conversionService;
 
 //    private final TourPostHashTagRepository tourPostHashTagRepository;
 
@@ -31,21 +33,23 @@ public class TourCommunityService {
 //        먼저 userTourCourse 저장
         UserTourCourse userCourse = new UserTourCourse();
         userCourse.setTitle(dto.title());
-        userCourse.setWriting(dto.writing());
+        userCourse.setWriting(dto.content());
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
         userCourse.setCreatedate(new Date());
-        userCourse.setWriting(dto.writing());
+        userCourse.setWriting(dto.content());
         userCourse = userTourCourseRepository.save(userCourse);
 
+        System.out.println(dto);
+
         List<TourPostItem> tourItems = new ArrayList<>();
-        List<TourPostItemRequestDto> tourItemDtoList = dto.tourItems();
+        List<TourPostItemRequestDto> tourItemDtoList = dto.tourPostItems();
         for (TourPostItemRequestDto tourItemDto : tourItemDtoList) {
             TourPostItem tourItem = new TourPostItem();
             tourItem.setName(tourItemDto.title());
             tourItem.setComment(tourItemDto.comment());
             tourItem.setAddress(tourItemDto.address());
-            tourItem.setX(tourItemDto.x());
-            tourItem.setY(tourItemDto.y());
+            tourItem.setXMap(tourItemDto.xMap());
+            tourItem.setYMap(tourItemDto.yMap());
             tourItem.setCategory(tourItemDto.category());
             tourItem.setUserTourCourse(userCourse);
 //            tourItem.setContentId
@@ -151,8 +155,8 @@ public class TourCommunityService {
             TourPostItemResponseDto tourPostItemResponseDto = new TourPostItemResponseDto(
                     tourPostItem.getName(),
                     tourPostItem.getAddress(),
-                    tourPostItem.getX(),
-                    tourPostItem.getY(),
+                    tourPostItem.getXMap(),
+                    tourPostItem.getYMap(),
                     tourPostItem.getComment(),
                     tourPostItem.getCategory(),
                     tourPostItem.getContentId(),

@@ -5,8 +5,8 @@ import java.util.List;
 public record TourPostItemResponseDto(
         String title,
         String address,
-        String x,
-        String y,
+        String xMap,
+        String yMap,
         String comment,
         String category,
         String contentId,

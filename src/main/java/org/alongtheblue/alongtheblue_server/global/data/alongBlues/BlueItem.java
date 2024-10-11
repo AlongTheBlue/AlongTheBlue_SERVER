@@ -15,8 +15,8 @@ public class BlueItem {
     private Long id;
     private String name;
     private String address;
-    private String x;
-    private String y;
+    private String xMap;
+    private String yMap;
     private String category;
 
     @ManyToOne
@@ -25,11 +25,11 @@ public class BlueItem {
     private BlueCourse blueCourse;
 
     @Builder
-    public BlueItem(String name, String address, String x, String y, String category) {
+    public BlueItem(String name, String address, String xMap, String yMap, String category) {
         this.name = name;
         this.address = address;
-        this.x = x;
-        this.y = y;
+        this.xMap = xMap;
+        this.yMap = yMap;
         this.category = category;
     }
 }

@@ -51,8 +51,8 @@ public class BlueCourseService {
             BlueItemResponseDto blueItemResponseDto = new BlueItemResponseDto(
                     blueItem.getName(),
                     blueItem.getAddress(),
-                    blueItem.getX(),
-                    blueItem.getY(),
+                    blueItem.getXMap(),
+                    blueItem.getYMap(),
                     blueItem.getCategory()
             );
             blueItemResponseDtoList.add(blueItemResponseDto);

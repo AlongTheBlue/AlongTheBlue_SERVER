@@ -19,8 +19,8 @@ public class TourPostItem {
     private String category;
     private String address;
     private String comment; // content로 변경
-    private String x;
-    private String y;
+    private String xMap;
+    private String yMap;
     private String contentId;
 
     @ManyToOne

@@ -4,8 +4,8 @@ public record TourPostItemRequestDto(
         String title,
         String category,
         String address,
-        String x,
-        String y,
+        String xMap,
+        String yMap,
         String comment
 //        String contentsId
 ) {
