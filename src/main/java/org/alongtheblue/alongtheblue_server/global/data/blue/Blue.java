@@ -1,10 +1,11 @@
 package org.alongtheblue.alongtheblue_server.global.data.blue;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeImage;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -17,4 +18,8 @@ public class Blue {
     private String yMap;
     private String address;
     private String city;
+
+    @OneToMany(mappedBy = "blue", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    List<BlueImage> blueImages;
 }
