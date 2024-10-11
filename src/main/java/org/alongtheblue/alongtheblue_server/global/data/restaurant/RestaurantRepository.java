@@ -12,4 +12,6 @@
         Page<RestaurantSimpleInformation> findAllSimple(Pageable pageable);
 
         List<Restaurant> findByTitleContaining(String title);
+
+        Page<Restaurant> findAll(Pageable pageable);
     }

@@ -2,6 +2,7 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -61,4 +62,8 @@ public class RestaurantController {
         return restaurantService.getRestaurant(id);
     }
 
+    @GetMapping("/home/list")
+    public ApiResponse<List<HomeResponseDto>> getHomeRestaurant(){
+        return restaurantService.getHomeRestaurant();
+    }
 }

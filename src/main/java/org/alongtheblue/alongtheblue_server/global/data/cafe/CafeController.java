@@ -1,6 +1,8 @@
 package org.alongtheblue.alongtheblue_server.global.data.cafe;
 
 import lombok.RequiredArgsConstructor;
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,5 +60,10 @@ public class CafeController {
     @GetMapping("/detail/{id}")
     public CafeDTO getCafe(@PathVariable Long id) {
         return cafeService.getCafe(id);
+    }
+
+    @GetMapping("/home/list")
+    public ApiResponse<List<HomeResponseDto>> getHomeCafeList() {
+        return cafeService.getHomeCafeList();
     }
 }

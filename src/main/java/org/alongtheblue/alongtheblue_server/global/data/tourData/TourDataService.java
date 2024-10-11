@@ -8,11 +8,16 @@ import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodat
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationImage;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.Cafe;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -551,6 +556,37 @@ public class TourDataService {
         }
         System.out.println(dtos.size());
         return ApiResponse.ok("관광지 정보를 성공적으로 조회했습니다.", dtos);
+    }
+
+    public ApiResponse<List<HomeResponseDto>> getHomeTourDataList() {
+        long totalCount = tourDataRepository.count();
+        Random random = new Random();
+        List<HomeResponseDto> homeResponseDtoList = new ArrayList<>();
+
+        // 3개의 이미지를 가진 레코드를 모을 때까지 반복
+        while (homeResponseDtoList.size() < 3) {
+            int randomOffset = random.nextInt((int) totalCount - 3); // 총 레코드 수에서 3개를 제외한 범위 내에서 랜덤 시작점 선택
+            Pageable pageable = PageRequest.of(randomOffset, 3); // 한 번에 3개의 레코드 가져오기
+            Page<TourData> tourDataPage = tourDataRepository.findAll(pageable); // Page 객체로 받음
+
+            // 이미지를 가진 레코드만 필터링하여 DTO로 변환
+            List<HomeResponseDto> filteredList = tourDataPage.getContent().stream()
+                    .filter(tourData -> !tourData.getImages().isEmpty()) // 이미지를 가진 레코드만 필터링
+                    .map(tourData -> {
+                        String[] arr = tourData.getAddress().substring(8).split(" ");
+                        return new HomeResponseDto(
+                                tourData.getContentId(),
+                                tourData.getTitle(),
+                                arr[0] + " " + arr[1],
+                                tourData.getImages().get(0).getUrl() // 첫 번째 이미지 가져오기
+                        );
+                    })
+                    .toList();
+
+            homeResponseDtoList.addAll(filteredList);
+            homeResponseDtoList = homeResponseDtoList.stream().distinct().limit(3).collect(Collectors.toList());
+        }
+        return ApiResponse.ok("이미지를 포함한 관광지 정보를 성공적으로 조회했습니다.", homeResponseDtoList);
     }
 
 //    public ApiResponse<List> getTourDataByKeyword(String keyword) {
