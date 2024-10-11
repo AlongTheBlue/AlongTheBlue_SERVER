@@ -18,4 +18,16 @@ public class JejuDivision {
 
     @OneToOne(mappedBy = "jejuDivision", cascade = CascadeType.ALL)
     private Weather weather;
+
+    public JejuDivision(String divisionId, String province, String city, String district, String x, String y) {
+        this.divisionId = divisionId;
+        this.province = province;
+        this.city = city;
+        this.district = district;
+        this.x = x;
+        this.y = y;
+    }
+
+    // Default constructor required by JPA
+    public JejuDivision() {}
 }

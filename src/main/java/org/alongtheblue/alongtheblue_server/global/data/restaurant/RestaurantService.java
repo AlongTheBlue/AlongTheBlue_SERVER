@@ -3,10 +3,15 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.Cafe;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeRepository;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.alongtheblue.alongtheblue_server.global.error.ErrorCode;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,18 +37,18 @@ public class RestaurantService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final RestaurantImageRepository restaurantImageRepository;
-    private final CafeRepository cafeRepository;
+    private final WeatherService weatherService;
 
     @Value("${api.key}")
     private String apiKey;
     private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
-    public RestaurantService(RestaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository, CafeRepository cafeRepository) {
+    public RestaurantService(RestaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository, WeatherService  weatherService) {
         this.restaurantRepository = restaurantRepository;
         this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
         this.restaurantImageRepository = restaurantImageRepository;
-        this.cafeRepository = cafeRepository;
+        this.weatherService = weatherService;
     }
 
     // API 호출 및 데이터 저장 로직
@@ -431,5 +436,64 @@ public class RestaurantService {
             partRestaurantResponseDtoList.add(restaurantResponseDto);
         }
         return ApiResponse.ok("음식점 정보를 성공적으로 검색했습니다.", partRestaurantResponseDtoList);
+    }
+
+    public ApiResponse<List<HomeResponseDto>> getHomeRestaurant() {
+        long totalCount = restaurantRepository.count();
+        Random random = new Random();
+        List<HomeResponseDto> homeResponseDtoList = new ArrayList<>();
+
+        // 2개의 이미지를 가진 레코드를 모을 때까지 반복
+        while (homeResponseDtoList.size() < 2) {
+            int randomOffset = random.nextInt((int) totalCount - 2); // 총 레코드 수에서 2개를 제외한 범위 내에서 랜덤 시작점 선택
+            Pageable pageable = PageRequest.of(randomOffset, 2); // 한 번에 2개의 레코드 가져오기
+            Page<Restaurant> restaurantPage = restaurantRepository.findAll(pageable); // Page 객체로 받음
+
+            // 이미지를 가진 레코드만 필터링하여 DTO로 변환
+            List<HomeResponseDto> filteredList = restaurantPage.getContent().stream()
+                    .filter(restaurant -> !restaurant.getImages().isEmpty()) // 이미지를 가진 레코드만 필터링
+                    .map(restaurant -> {
+                        String[] arr = restaurant.getAddr().substring(8).split(" ");
+                        return new HomeResponseDto(
+                                restaurant.getContentId(),
+                                restaurant.getTitle(),
+                                arr[0] + " " + arr[1],
+                                restaurant.getImages().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
+                        );
+                    })
+                    .toList();
+
+            homeResponseDtoList.addAll(filteredList);
+            homeResponseDtoList = homeResponseDtoList.stream().distinct().limit(2).collect(Collectors.toList());
+        }
+        return ApiResponse.ok("이미지를 포함한 음식점 정보를 성공적으로 조회했습니다.", homeResponseDtoList);
+    }
+
+    public ApiResponse<DetailResponseDto> getRestaurantDetail(String id) {
+        Restaurant restaurant = findByContentId(id);
+        WeatherResponseDto weather = weatherService.getWeatherByAddress(restaurant.getAddr());
+
+        DetailResponseDto detailResponseDto = new DetailResponseDto(
+                restaurant.getContentId(),
+                restaurant.getTitle(),
+                restaurant.getAddr(),
+                restaurant.getRestDate(),
+                weather.weatherCondition(),
+                weather.temperature(),
+                restaurant.getInfoCenter(),
+                restaurant.getIntroduction(),
+                restaurant.getImages().get(0).getOriginimgurl(),
+                restaurant.getXMap(),
+                restaurant.getYMap()
+        );
+        return ApiResponse.ok("해당 음식점의 상세 정보를 조회하였습니다", detailResponseDto);
+    }
+
+    public Restaurant findByContentId(String id) {
+        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByContentId(id);
+        if(optionalRestaurant.isEmpty())
+            throw new RuntimeException("해당 ID의 음식점이 없습니다.");
+        else
+            return optionalRestaurant.get();
     }
 }

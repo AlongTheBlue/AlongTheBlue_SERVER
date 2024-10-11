@@ -4,8 +4,8 @@ import java.util.List;
 
 public record UserTourCourseRequestDto(
         String title,
-        String writing,
-        List<TourPostItemRequestDto> tourItems,
+        String content,
+        List<TourPostItemRequestDto> tourPostItems,
 //        List<TourPostHashTag> hashTags,
         List<List<Integer>> imgIndexArr
 ) {

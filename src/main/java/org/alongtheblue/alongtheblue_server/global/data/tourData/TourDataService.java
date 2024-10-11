@@ -2,17 +2,27 @@ package org.alongtheblue.alongtheblue_server.global.data.tourData;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationDTO;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationImage;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.Cafe;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeService;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +35,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TourDataService {
-    @Autowired
-    private TourDataRepository tourDataRepository;
-    @Autowired
-    private TourDataImageRepository tourDataImageRepository;
+
+    private final TourDataRepository tourDataRepository;
+    private final TourDataImageRepository tourDataImageRepository;
+    private final WeatherService weatherService;
 
     @Value("${api.key}")
     private String apiKey;
@@ -552,6 +563,66 @@ public class TourDataService {
         System.out.println(dtos.size());
         return ApiResponse.ok("관광지 정보를 성공적으로 조회했습니다.", dtos);
     }
+
+    public ApiResponse<List<HomeResponseDto>> getHomeTourDataList() {
+        long totalCount = tourDataRepository.count();
+        Random random = new Random();
+        List<HomeResponseDto> homeResponseDtoList = new ArrayList<>();
+
+        // 3개의 이미지를 가진 레코드를 모을 때까지 반복
+        while (homeResponseDtoList.size() < 3) {
+            int randomOffset = random.nextInt((int) totalCount - 3); // 총 레코드 수에서 3개를 제외한 범위 내에서 랜덤 시작점 선택
+            Pageable pageable = PageRequest.of(randomOffset, 3); // 한 번에 3개의 레코드 가져오기
+            Page<TourData> tourDataPage = tourDataRepository.findAll(pageable); // Page 객체로 받음
+
+            // 이미지를 가진 레코드만 필터링하여 DTO로 변환
+            List<HomeResponseDto> filteredList = tourDataPage.getContent().stream()
+                    .filter(tourData -> !tourData.getImages().isEmpty()) // 이미지를 가진 레코드만 필터링
+                    .map(tourData -> {
+                        String[] arr = tourData.getAddress().substring(8).split(" ");
+                        return new HomeResponseDto(
+                                tourData.getContentId(),
+                                tourData.getTitle(),
+                                arr[0] + " " + arr[1],
+                                tourData.getImages().get(0).getUrl() // 첫 번째 이미지 가져오기
+                        );
+                    })
+                    .toList();
+
+            homeResponseDtoList.addAll(filteredList);
+            homeResponseDtoList = homeResponseDtoList.stream().distinct().limit(3).collect(Collectors.toList());
+        }
+        return ApiResponse.ok("이미지를 포함한 관광지 정보를 성공적으로 조회했습니다.", homeResponseDtoList);
+    }
+
+    public ApiResponse<DetailResponseDto> getTourDataDetail(String id) {
+        TourData tourData = findByContentId(id);
+        WeatherResponseDto weather = weatherService.getWeatherByAddress(tourData.getAddress());
+
+        DetailResponseDto detailResponseDto = new DetailResponseDto(
+                tourData.getContentId(),
+                tourData.getTitle(),
+                tourData.getAddress(),
+                tourData.getRestDate(),
+                weather.weatherCondition(),
+                weather.temperature(),
+                tourData.getInfoCenter(),
+                tourData.getIntroduction(),
+                tourData.getImages().get(0).getUrl(),
+                tourData.getXMap(),
+                tourData.getYMap()
+        );
+        return ApiResponse.ok("해당 관광지의 상세 정보를 조회하였습니다", detailResponseDto);
+    }
+
+    public TourData findByContentId(String contentId) {
+        Optional<TourData> tourDataOptional = tourDataRepository.findByContentId(contentId);
+        if(tourDataOptional.isPresent())
+            return tourDataOptional.get();
+        else
+            throw new RuntimeException("해당 ID의 관광지가 없습니다.");
+    }
+
 
 //    public ApiResponse<List> getTourDataByKeyword(String keyword) {
 //        List<TourData> tourDataList = tourDataRepository.findByTitleContaining(keyword);

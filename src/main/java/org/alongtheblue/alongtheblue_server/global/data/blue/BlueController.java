@@ -23,8 +23,14 @@ public class BlueController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<BlueResponseDto> getBlueById2(@PathVariable Long id){
+    public ApiResponse<BlueResponseDto> getBlueById(@PathVariable Long id){
         return blueService.getBlueById(id);
     }
+
+    @GetMapping("/recommend")
+    public ApiResponse< List<RecommendBlueDto>> getRecommendBlues(){
+        return blueService.getRecommendBlues();
+    }
+
 
 }

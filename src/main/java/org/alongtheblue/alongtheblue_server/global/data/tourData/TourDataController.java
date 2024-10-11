@@ -1,6 +1,8 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourData;
 
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +36,7 @@ public class TourDataController {
     public void getTourDataImages(){
         tourDataService.updateAllTourDataImageUrls();
     }
+
     @GetMapping("/home")
     public ApiResponse<List<TourDataDto>> getHomeTourData() {
         return tourDataService.getHomeTourData();
@@ -42,6 +45,17 @@ public class TourDataController {
     @GetMapping("/{contentsid}") // 상세보기
     public TourDataDto getTourDataById(@PathVariable String contentsid) {
         return tourDataService.getTourDataDetails(contentsid);
+    }
+
+    @GetMapping("/home/list")
+    public ApiResponse<List<HomeResponseDto>> getHomeTourDataList() {
+        return tourDataService.getHomeTourDataList();
+    }
+
+    @GetMapping("/detail/{id}")
+    public ApiResponse<DetailResponseDto> getTourDataDetail(@PathVariable String id){
+        return tourDataService.getTourDataDetail(id);
+//        return restaurantService.getRestaurant(id);
     }
 
 //    @GetMapping("/random-details")

@@ -4,12 +4,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
-import org.alongtheblue.alongtheblue_server.global.data.tourData.TourData;
-import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherRepository;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -29,17 +35,19 @@ public class AccommodationService {
 
     private final AccommodationRepository accommodationRepository;
     private final AccommodationImageRepository accommodationImageRepository;
+    private final WeatherService weatherService;
 
     @Value("${api.key}")
     private String apiKey;
     private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
     @Autowired
-    public AccommodationService(WebClient.Builder webClientBuilder, AccommodationRepository accommodationRepository, AccommodationImageRepository accommodationImageRepository, ObjectMapper objectMapper) {
+    public AccommodationService(WebClient.Builder webClientBuilder, AccommodationRepository accommodationRepository, AccommodationImageRepository accommodationImageRepository, ObjectMapper objectMapper, WeatherService weatherService) {
         this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
         this.accommodationRepository = accommodationRepository;
         this.accommodationImageRepository = accommodationImageRepository;
+        this.weatherService = weatherService;
     }
 
     public void fetchHotelData() {
@@ -948,6 +956,56 @@ public class AccommodationService {
         }
     }
 
+    public ApiResponse<List<HomeResponseDto>> getHomeAccommodationList() {
+        long totalCount = accommodationRepository.count();
+        Random random = new Random();
+        List<HomeResponseDto> homeResponseDtoList = new ArrayList<>();
+
+        // 2개의 이미지를 가진 레코드를 모을 때까지 반복
+        while (homeResponseDtoList.size() < 2) {
+            int randomOffset = random.nextInt((int) totalCount - 2); // 총 레코드 수에서 2개를 제외한 범위 내에서 랜덤 시작점 선택
+            Pageable pageable = PageRequest.of(randomOffset, 2); // 한 번에 2개의 레코드 가져오기
+            Page<Accommodation> accommodationPage = accommodationRepository.findAll(pageable); // Page 객체로 받음
+
+            // 이미지를 가진 레코드만 필터링하여 DTO로 변환
+            List<HomeResponseDto> filteredList = accommodationPage.getContent().stream()
+                    .filter(accommodation -> !accommodation.getAccommodationImage().isEmpty()) // 이미지를 가진 레코드만 필터링
+                    .map(accommodation -> {
+                        String[] arr = accommodation.getAddress().substring(8).split(" ");
+                        return new HomeResponseDto(
+                                accommodation.getContentId(),
+                                accommodation.getTitle(),
+                                arr[0] + " " + arr[1],
+                                accommodation.getAccommodationImage().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
+                        );
+                    })
+                    .toList();
+
+            homeResponseDtoList.addAll(filteredList);
+            homeResponseDtoList = homeResponseDtoList.stream().distinct().limit(2).collect(Collectors.toList());
+        }
+        return ApiResponse.ok("이미지를 포함한 숙박 정보를 성공적으로 조회했습니다.", homeResponseDtoList);
+    }
+
+    public ApiResponse<DetailResponseDto> getAccommodationDetail(String id) {
+        Accommodation accommodation = findByContentId(id);
+        WeatherResponseDto weather = weatherService.getWeatherByAddress(accommodation.getAddress());
+
+        DetailResponseDto detailResponseDto = new DetailResponseDto(
+                accommodation.getContentId(),
+                accommodation.getTitle(),
+                accommodation.getAddress(),
+                accommodation.getCheckintime(),
+                weather.weatherCondition(),
+                weather.temperature(),
+                accommodation.getInfoCenter(),
+                accommodation.getIntroduction(),
+                accommodation.getAccommodationImage().get(0).getOriginimgurl(),
+                accommodation.getXMap(),
+                accommodation.getYMap()
+        );
+        return ApiResponse.ok("해당 숙박의 상세 정보를 조회하였습니다", detailResponseDto);
+    }
 
 
 }
