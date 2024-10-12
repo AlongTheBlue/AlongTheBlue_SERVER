@@ -16,6 +16,7 @@ import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
+import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ public class TourDataService {
     private final TourDataRepository tourDataRepository;
     private final TourDataImageRepository tourDataImageRepository;
     private final WeatherService weatherService;
+    private final OpenAIService openAIService;
 
     @Value("${api.key}")
     private String apiKey;
@@ -621,6 +623,12 @@ public class TourDataService {
             return tourDataOptional.get();
         else
             throw new RuntimeException("해당 ID의 관광지가 없습니다.");
+    }
+
+    public ApiResponse<List<String>> getHashtagsById(String id) {
+        TourData tourData = findByContentId(id);
+        List<String> hashtags = openAIService.getHashtags(tourData.getIntroduction());
+        return ApiResponse.ok(hashtags);
     }
 
 

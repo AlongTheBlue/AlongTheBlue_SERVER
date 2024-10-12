@@ -3,11 +3,13 @@ package org.alongtheblue.alongtheblue_server.global.data.cafe;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
+import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,18 +34,20 @@ public class CafeService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final WeatherService weatherService;
+    private final OpenAIService openAIService;
 
     @Value("${api.key}")
     private String apiKey;
 
     private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
-    public CafeService(CafeRepository cafeRepository, CafeImageRepository cafeImageRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, WeatherService weatherService) {
+    public CafeService(CafeRepository cafeRepository, CafeImageRepository cafeImageRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, WeatherService weatherService, OpenAIService openAIService) {
         this.cafeRepository = cafeRepository;
         this.cafeImageRepository = cafeImageRepository;
         this.webClient = webClientBuilder.baseUrl("http://apis.data.go.kr/B551011/KorService1").build();
         this.objectMapper = objectMapper;
         this.weatherService = weatherService;
+        this.openAIService = openAIService;
     }
 
     //빌더는 baseUrl을 설정하여 기본적으로 사용할 API의 URL을 지정하는 거임
@@ -479,5 +483,11 @@ public class CafeService {
             throw new RuntimeException("존재하지 않는 카페 ID");
         else
             return optionalCafe.get();
+    }
+
+    public ApiResponse<List<String>> getHashtagsById(String id) {
+        Cafe cafe = findByContentId(id);
+        List<String> hashtags = openAIService.getHashtags(cafe.getIntroduction());
+        return ApiResponse.ok(hashtags);
     }
 }

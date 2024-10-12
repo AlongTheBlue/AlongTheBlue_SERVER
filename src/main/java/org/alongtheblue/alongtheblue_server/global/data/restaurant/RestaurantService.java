@@ -13,6 +13,7 @@ import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.alongtheblue.alongtheblue_server.global.error.ErrorCode;
+import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,17 +39,19 @@ public class RestaurantService {
     private final ObjectMapper objectMapper;
     private final RestaurantImageRepository restaurantImageRepository;
     private final WeatherService weatherService;
+    private final OpenAIService openAIService;
 
     @Value("${api.key}")
     private String apiKey;
     private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
-    public RestaurantService(RestaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository, WeatherService  weatherService) {
+    public RestaurantService(RestaurantRepository restaurantRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, RestaurantImageRepository restaurantImageRepository, WeatherService  weatherService, OpenAIService openAIService) {
         this.restaurantRepository = restaurantRepository;
         this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
         this.restaurantImageRepository = restaurantImageRepository;
         this.weatherService = weatherService;
+        this.openAIService = openAIService;
     }
 
     // API 호출 및 데이터 저장 로직
@@ -472,7 +475,6 @@ public class RestaurantService {
     public ApiResponse<DetailResponseDto> getRestaurantDetail(String id) {
         Restaurant restaurant = findByContentId(id);
         WeatherResponseDto weather = weatherService.getWeatherByAddress(restaurant.getAddr());
-
         DetailResponseDto detailResponseDto = new DetailResponseDto(
                 restaurant.getContentId(),
                 restaurant.getTitle(),
@@ -495,5 +497,11 @@ public class RestaurantService {
             throw new RuntimeException("해당 ID의 음식점이 없습니다.");
         else
             return optionalRestaurant.get();
+    }
+
+    public ApiResponse<List<String>> getHashtagsById(String id) {
+        Restaurant restaurant = findByContentId(id);
+        List<String> hashtags = openAIService.getHashtags(restaurant.getIntroduction());
+        return ApiResponse.ok(hashtags);
     }
 }

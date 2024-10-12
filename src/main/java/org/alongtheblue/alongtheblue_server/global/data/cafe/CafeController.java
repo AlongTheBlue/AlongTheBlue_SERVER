@@ -68,4 +68,9 @@ public class CafeController {
     public ApiResponse<List<HomeResponseDto>> getHomeCafeList() {
         return cafeService.getHomeCafeList();
     }
+
+    @GetMapping("/hashtags/{id}")
+    public ApiResponse<List<String>> getHashtagsById(@PathVariable String id) {
+        return cafeService.getHashtagsById(id);
+    }
 }

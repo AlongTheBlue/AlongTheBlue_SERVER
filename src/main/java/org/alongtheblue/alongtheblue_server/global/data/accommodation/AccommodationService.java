@@ -9,6 +9,7 @@ import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.Home
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherRepository;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
+import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,18 +37,20 @@ public class AccommodationService {
     private final AccommodationRepository accommodationRepository;
     private final AccommodationImageRepository accommodationImageRepository;
     private final WeatherService weatherService;
+    private final OpenAIService openAIService;
 
     @Value("${api.key}")
     private String apiKey;
     private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
     @Autowired
-    public AccommodationService(WebClient.Builder webClientBuilder, AccommodationRepository accommodationRepository, AccommodationImageRepository accommodationImageRepository, ObjectMapper objectMapper, WeatherService weatherService) {
+    public AccommodationService(WebClient.Builder webClientBuilder, AccommodationRepository accommodationRepository, AccommodationImageRepository accommodationImageRepository, ObjectMapper objectMapper, WeatherService weatherService, OpenAIService openAIService) {
         this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
         this.accommodationRepository = accommodationRepository;
         this.accommodationImageRepository = accommodationImageRepository;
         this.weatherService = weatherService;
+        this.openAIService = openAIService;
     }
 
     public void fetchHotelData() {
@@ -476,6 +479,7 @@ public class AccommodationService {
         }
         return ApiResponse.ok("숙박 정보를 성공적으로 검색했습니다.", accommodationResponseDtoList);
     }
+
 
     // API 응답을 매핑하기 위한 클래스
     public static class ApiResponse2 {
@@ -1007,5 +1011,10 @@ public class AccommodationService {
         return ApiResponse.ok("해당 숙박의 상세 정보를 조회하였습니다", detailResponseDto);
     }
 
+    public ApiResponse<List<String>> getHashtagsById(String id) {
+        Accommodation accommodation = findByContentId(id);
+        List<String> hashtags = openAIService.getHashtags(accommodation.getIntroduction());
+        return ApiResponse.ok(hashtags);
+    }
 
 }
