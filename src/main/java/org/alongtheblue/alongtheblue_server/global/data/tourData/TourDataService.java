@@ -2,13 +2,28 @@ package org.alongtheblue.alongtheblue_server.global.data.tourData;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationDTO;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationImage;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.Cafe;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeService;
+import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
+import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
+import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,17 +32,17 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TourDataService {
-    @Autowired
-    private TourDataRepository tourDataRepository;
-    @Autowired
-    private TourDataImageRepository tourDataImageRepository;
+
+    private final TourDataRepository tourDataRepository;
+    private final TourDataImageRepository tourDataImageRepository;
+    private final WeatherService weatherService;
+    private final OpenAIService openAIService;
 
     @Value("${api.key}")
     private String apiKey;
@@ -353,7 +368,7 @@ public class TourDataService {
         return tourDataRepository.findAll();
     }
 
-    public List<TourDataDto> getHomeTourData() {
+    public ApiResponse<List<TourDataDto>> getHomeTourData() {
         List<TourData> tourDataList = tourDataRepository.findRandomTourDatasWithImages();
 
         // AccommodationDTO 리스트에 데이터를 매핑
@@ -375,12 +390,12 @@ public class TourDataService {
             return tourDataDto;
         }).collect(Collectors.toList());
 
-        return tourDataDtoList;
+        return ApiResponse.ok("관광지를 성공적으로 조회했습니다.", tourDataDtoList);
     }
 
     public TourDataDto getTourDataDetails(String contentsid) {
         // DB에서 TourData 조회
-        Optional<TourData> tourDataOptional = tourDataRepository.findById(contentsid);
+        Optional<TourData> tourDataOptional = tourDataRepository.findByContentId(contentsid);
         if (tourDataOptional.isPresent()) {
             TourData tourData = tourDataOptional.get();
 
@@ -498,5 +513,141 @@ public class TourDataService {
         }
     }
 
+    public ApiResponse<List<TourDataResponseDto>> getTourDataListByKeyword(String keyword) {
+        List<TourData> tourDataList = tourDataRepository.findByTitleContaining(keyword);
+        List<TourDataResponseDto> tourDataDtoList = new ArrayList<>();
+        for(TourData tourData: tourDataList) {
+            String[] arr = tourData.getAddress().substring(8).split(" ");
+            TourDataResponseDto tourDataResponseDto = new TourDataResponseDto(
+                    arr[0] + " " + arr[1],
+                    tourData.getTitle(),
+                    tourData.getContentId(),
+                    tourData.getImages().isEmpty() ? null : tourData.getImages().get(0).getUrl(),
+                    tourData.getXMap(),
+                    tourData.getYMap(),
+                    "tourData"
+            );
+            tourDataDtoList.add(tourDataResponseDto);
+        }
+        return ApiResponse.ok("관광지 정보를 성공적으로 검색했습니다.", tourDataDtoList);
+    }
+
+    public ApiResponse<List<TourDataResponseDto>> getTourDataListHome() {
+        Random random= new Random();
+        Set<Integer> randomNumbers = new HashSet<>();
+        List<TourDataResponseDto> dtos= new ArrayList<>();
+//        List<Restaurant> restaurants = restaurantRepository.findAll();
+        Long totalCount = tourDataRepository.count();
+        while (dtos.size() < 6) {
+            int randomNumber = random.nextInt(totalCount.intValue()); // 저장된 restaurant 수로 할 것
+            if (randomNumbers.contains(randomNumber)) {
+                continue;
+            }
+            randomNumbers.add(randomNumber);
+            Optional<TourData> optionalTourData = tourDataRepository.findById(Long.valueOf(randomNumber));
+            if(optionalTourData.isEmpty()) {
+                continue;
+            }
+            TourData tourData = optionalTourData.get();
+            String[] arr = tourData.getAddress().substring(8).split(" ");
+//                    restaurant.setAddr(arr[0] + " " + arr[1]);
+            TourDataResponseDto tourDataResponseDto = new TourDataResponseDto(
+                    arr[0] + " " + arr[1],
+                    tourData.getTitle(),
+                    tourData.getContentId(),
+                    tourData.getImages().isEmpty() ? null : tourData.getImages().get(0).getUrl(),
+                    tourData.getXMap(),
+                    tourData.getYMap(),
+                    "tourData"
+            );
+            dtos.add(tourDataResponseDto);
+        }
+        System.out.println(dtos.size());
+        return ApiResponse.ok("관광지 정보를 성공적으로 조회했습니다.", dtos);
+    }
+
+    public ApiResponse<List<HomeResponseDto>> getHomeTourDataList() {
+        long totalCount = tourDataRepository.count();
+        Random random = new Random();
+        List<HomeResponseDto> homeResponseDtoList = new ArrayList<>();
+
+        // 3개의 이미지를 가진 레코드를 모을 때까지 반복
+        while (homeResponseDtoList.size() < 3) {
+            int randomOffset = random.nextInt((int) totalCount - 3); // 총 레코드 수에서 3개를 제외한 범위 내에서 랜덤 시작점 선택
+            Pageable pageable = PageRequest.of(randomOffset, 3); // 한 번에 3개의 레코드 가져오기
+            Page<TourData> tourDataPage = tourDataRepository.findAll(pageable); // Page 객체로 받음
+
+            // 이미지를 가진 레코드만 필터링하여 DTO로 변환
+            List<HomeResponseDto> filteredList = tourDataPage.getContent().stream()
+                    .filter(tourData -> !tourData.getImages().isEmpty()) // 이미지를 가진 레코드만 필터링
+                    .map(tourData -> {
+                        String[] arr = tourData.getAddress().substring(8).split(" ");
+                        return new HomeResponseDto(
+                                tourData.getContentId(),
+                                tourData.getTitle(),
+                                arr[0] + " " + arr[1],
+                                tourData.getImages().get(0).getUrl() // 첫 번째 이미지 가져오기
+                        );
+                    })
+                    .toList();
+
+            homeResponseDtoList.addAll(filteredList);
+            homeResponseDtoList = homeResponseDtoList.stream().distinct().limit(3).collect(Collectors.toList());
+        }
+        return ApiResponse.ok("이미지를 포함한 관광지 정보를 성공적으로 조회했습니다.", homeResponseDtoList);
+    }
+
+    public ApiResponse<DetailResponseDto> getTourDataDetail(String id) {
+        TourData tourData = findByContentId(id);
+        WeatherResponseDto weather = weatherService.getWeatherByAddress(tourData.getAddress());
+
+        DetailResponseDto detailResponseDto = new DetailResponseDto(
+                tourData.getContentId(),
+                tourData.getTitle(),
+                tourData.getAddress(),
+                tourData.getRestDate(),
+                weather.weatherCondition(),
+                weather.temperature(),
+                tourData.getInfoCenter(),
+                tourData.getIntroduction(),
+                tourData.getImages().get(0).getUrl(),
+                tourData.getXMap(),
+                tourData.getYMap()
+        );
+        return ApiResponse.ok("해당 관광지의 상세 정보를 조회하였습니다", detailResponseDto);
+    }
+
+    public TourData findByContentId(String contentId) {
+        Optional<TourData> tourDataOptional = tourDataRepository.findByContentId(contentId);
+        if(tourDataOptional.isPresent())
+            return tourDataOptional.get();
+        else
+            throw new RuntimeException("해당 ID의 관광지가 없습니다.");
+    }
+
+    public ApiResponse<List<String>> getHashtagsById(String id) {
+        TourData tourData = findByContentId(id);
+        List<String> hashtags = openAIService.getHashtags(tourData.getIntroduction());
+        return ApiResponse.ok(hashtags);
+    }
+
+
+//    public ApiResponse<List> getTourDataByKeyword(String keyword) {
+//        List<TourData> tourDataList = tourDataRepository.findByTitleContaining(keyword);
+//        List<PartCafeResponseDto> partCafeResponseDtoList = new ArrayList<>();
+//        for(TourData tourData: tourDataList) {
+//            String[] arr = cafe.getAddr().substring(8).split(" ");
+//            PartCafeResponseDto partCafeResponseDto = new PartCafeResponseDto(
+//                    arr[0] + " " + arr[1],
+//                    cafe.getTitle(),
+//                    cafe.getContentId(),
+//                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
+//                    cafe.getXMap(),
+//                    cafe.getYMap()
+//            );
+//            partCafeResponseDtoList.add(partCafeResponseDto);
+//        }
+//        return ApiResponse.ok("음식점 정보를 성공적으로 조회했습니다.", partCafeResponseDtoList);
+//    }
 }
 

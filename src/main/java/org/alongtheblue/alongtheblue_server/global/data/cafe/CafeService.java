@@ -3,12 +3,19 @@ package org.alongtheblue.alongtheblue_server.global.data.cafe;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
+import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -18,6 +25,7 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CafeService {
@@ -25,17 +33,21 @@ public class CafeService {
     private final CafeImageRepository cafeImageRepository;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
+    private final WeatherService weatherService;
+    private final OpenAIService openAIService;
 
     @Value("${api.key}")
     private String apiKey;
 
     private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
 
-    public CafeService(CafeRepository cafeRepository, CafeImageRepository cafeImageRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
+    public CafeService(CafeRepository cafeRepository, CafeImageRepository cafeImageRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, WeatherService weatherService, OpenAIService openAIService) {
         this.cafeRepository = cafeRepository;
         this.cafeImageRepository = cafeImageRepository;
         this.webClient = webClientBuilder.baseUrl("http://apis.data.go.kr/B551011/KorService1").build();
         this.objectMapper = objectMapper;
+        this.weatherService = weatherService;
+        this.openAIService = openAIService;
     }
 
     //빌더는 baseUrl을 설정하여 기본적으로 사용할 API의 URL을 지정하는 거임
@@ -383,7 +395,10 @@ public class CafeService {
                     arr[0] + " " + arr[1],
                     cafe.getTitle(),
                     cafe.getContentId(),
-                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl()
+                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
+                    cafe.getXMap(),
+                    cafe.getYMap(),
+                    "cafe"
             );
             dtos.add(responseDto);
         }
@@ -400,10 +415,79 @@ public class CafeService {
                     arr[0] + " " + arr[1],
                     cafe.getTitle(),
                     cafe.getContentId(),
-                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl()
+                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
+                    cafe.getXMap(),
+                    cafe.getYMap(),
+                    "cafe"
             );
             partCafeResponseDtoList.add(partCafeResponseDto);
         }
-        return ApiResponse.ok("음식점 정보를 성공적으로 조회했습니다.", partCafeResponseDtoList);
+        return ApiResponse.ok("카페 정보를 성공적으로 검색했습니다.", partCafeResponseDtoList);
+    }
+
+    public ApiResponse<List<HomeResponseDto>> getHomeCafeList() {
+        long totalCount = cafeRepository.count();
+        Random random = new Random();
+        List<HomeResponseDto> homeResponseDtoList = new ArrayList<>();
+
+        // 2개의 이미지를 가진 레코드를 모을 때까지 반복
+        while (homeResponseDtoList.size() < 2) {
+            int randomOffset = random.nextInt((int) totalCount - 2); // 총 레코드 수에서 2개를 제외한 범위 내에서 랜덤 시작점 선택
+            Pageable pageable = PageRequest.of(randomOffset, 2); // 한 번에 2개의 레코드 가져오기
+            Page<Cafe> cafePage = cafeRepository.findAll(pageable); // Page 객체로 받음
+
+            // 이미지를 가진 레코드만 필터링하여 DTO로 변환
+            List<HomeResponseDto> filteredList = cafePage.getContent().stream()
+                    .filter(cafe -> !cafe.getCafeImages().isEmpty()) // 이미지를 가진 레코드만 필터링
+                    .map(cafe -> {
+                        String[] arr = cafe.getAddr().substring(8).split(" ");
+                        return new HomeResponseDto(
+                                cafe.getContentId(),
+                                cafe.getTitle(),
+                                arr[0] + " " + arr[1],
+                                cafe.getCafeImages().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
+                        );
+                    })
+                    .toList();
+
+            homeResponseDtoList.addAll(filteredList);
+            homeResponseDtoList = homeResponseDtoList.stream().distinct().limit(2).collect(Collectors.toList());
+        }
+        return ApiResponse.ok("이미지를 포함한 카페 정보를 성공적으로 조회했습니다.", homeResponseDtoList);
+    }
+
+
+    public ApiResponse<DetailResponseDto> getCafeDetail(String id) {
+        Cafe cafe = findByContentId(id);
+        WeatherResponseDto weather = weatherService.getWeatherByAddress(cafe.getAddr());
+
+        DetailResponseDto detailResponseDto = new DetailResponseDto(
+                cafe.getContentId(),
+                cafe.getTitle(),
+                cafe.getAddr(),
+                cafe.getRestDate(),
+                weather.weatherCondition(),
+                weather.temperature(),
+                cafe.getInfoCenter(),
+                cafe.getIntroduction(),
+                cafe.getCafeImages().get(0).getOriginimgurl(),
+                cafe.getXMap(),
+                cafe.getYMap()
+        );
+        return ApiResponse.ok("해당 카페의 상세 정보를 조회하였습니다", detailResponseDto);
+    }
+
+    public Cafe findByContentId(String  id) {
+        Optional<Cafe> optionalCafe = cafeRepository.findByContentId(id);
+        if(optionalCafe.isEmpty())
+            throw new RuntimeException("존재하지 않는 카페 ID");
+        else
+            return optionalCafe.get();
+    }
+
+    public ApiResponse<List<String>> getHashtagsById(String id) {
+        Cafe cafe = findByContentId(id);
+        List<String> hashtags = openAIService.getHashtags(cafe.getIntroduction());
+        return ApiResponse.ok(hashtags);
     }
 }

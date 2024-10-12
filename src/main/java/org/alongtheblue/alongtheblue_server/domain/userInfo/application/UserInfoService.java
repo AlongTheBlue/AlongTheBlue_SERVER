@@ -46,7 +46,7 @@ public class UserInfoService {
 //            User newUser = new User();
 //            newUser.setId(uuid);
 //            newUser.setEmail(email);
-//            newUser.setNickname(name);
+//            newUser.setNickname(title);
 //            return userRepository.save(newUser);
 //        });
     }
@@ -55,11 +55,13 @@ public class UserInfoService {
         Map<String, Object> kakao_account = (Map<String, Object>) userInfo.get("kakao_account");
         Map<String, Object> profile = (Map<String, Object>) kakao_account.get("profile");
         String uuid = userInfo.get("id").toString();
+        String profile_image_url = (String) profile.get("profile_image_url");
         String name = (String) profile.get("nickname");
         System.out.println(name);
         UserInfo user = UserInfo.builder()
                 .uid(uuid)
                 .userName(name)
+                .profileImageUrl(profile_image_url)
                 .build();
         UserInfo savedUser = userInfoRepository.save(user);
         return ApiResponse.ok("사용자 정보를 성공적으로 등록했습니다.", savedUser);

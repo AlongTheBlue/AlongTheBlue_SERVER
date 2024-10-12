@@ -31,6 +31,9 @@ public class UserInfo {
     @NotNull
     private String uid;
 
+    @NotNull
+    private String profileImageUrl;
+
     @OneToMany(mappedBy = "userInfo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Search> searches = new ArrayList<>();
@@ -52,8 +55,9 @@ public class UserInfo {
     private List<UserTourCourse> userTourCourses = new ArrayList<>();
 
     @Builder
-    public UserInfo(String userName, String uid) {
+    public UserInfo(String userName, String uid, String profileImageUrl) {
         this.userName = userName;
         this.uid = uid;
+        this.profileImageUrl = profileImageUrl;
     }
 }

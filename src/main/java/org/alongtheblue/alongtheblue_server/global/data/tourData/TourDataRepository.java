@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface TourDataRepository extends JpaRepository<TourData, String> {
+public interface TourDataRepository extends JpaRepository<TourData, Long> {
 
     // TourImageEntity를 저장할 메서드 추가
 
@@ -23,4 +23,8 @@ public interface TourDataRepository extends JpaRepository<TourData, String> {
             "LIMIT 6",
             nativeQuery = true)
      List<TourData> findRandomTourDatasWithImages();
+
+    List<TourData> findByTitleContaining(String keyword);
+
+    Optional<TourData> findByContentId(String contentsid);
 }

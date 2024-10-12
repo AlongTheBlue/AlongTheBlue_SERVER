@@ -26,7 +26,14 @@ public class WeatherService {
 
     public WeatherResponseDto getWeatherByAddress(String address) {
         String regionCode = addressSearchService.searchRegionCodeByAddress(address);
+        System.out.println("regionCode: "+regionCode);
+        if(regionCode.isEmpty()) {
+            String[] addressArr = address.split(" ");
+            String city = addressArr[1];
+            regionCode = jejuDivisonRepository.findByCityAndDistrict(city,"").getDivisionId();
+        }
         JejuDivision jejuDivision = jejuDivisonRepository.findByDivisionId(regionCode);
+        System.out.println("jejuDivision: "+jejuDivision.getDivisionId());
         Optional<Weather> weather = weatherRepository.findByJejuDivision(jejuDivision);
         return weather.map(value -> new WeatherResponseDto(
                 value.getWeatherCondition(),
@@ -51,8 +58,7 @@ public class WeatherService {
         WebClient webClient = WebClient.builder().build();
 
         // 1. 현재 날짜와 시간을 기반으로 baseDate와 baseTime 계산
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        String baseDate = dateFormat.format(date); // 현재 날짜를 yyyyMMdd 형식으로 변환
+        String baseDate = getBaseDate(); // 날짜를 하루 전날로 계산할 수 있도록 변경된 부분
         String baseTime = getBaseTime(); // 3시간 간격으로 계산된 baseTime을 가져옴
         String nx = jejuDivision.getX();
         String ny = jejuDivision.getY();
@@ -63,7 +69,7 @@ public class WeatherService {
                 .queryParam("pageNo", "1")
                 .queryParam("numOfRows", "12")
                 .queryParam("dataType", "JSON")
-                .queryParam("base_date", baseDate)
+                .queryParam("base_date", baseDate) // 계산된 baseDate 사용
                 .queryParam("base_time", baseTime)
                 .queryParam("nx", nx)
                 .queryParam("ny", ny)
@@ -95,47 +101,46 @@ public class WeatherService {
         Optional<Weather> existingWeather = weatherRepository.findByJejuDivision(jejuDivision);
 
         Weather weather;
-        if (existingWeather.isPresent()) {
+        if (existingWeather.isPresent())
             weather = existingWeather.get();
-            weather.setWeatherCondition(weatherCondition);
-            weather.setTemperature(temperature);
-        } else {
+        else {
             weather = new Weather();
             weather.setJejuDivision(jejuDivision);
-            weather.setWeatherCondition(weatherCondition);
-            weather.setTemperature(temperature);
         }
+        weather.setWeatherCondition(weatherCondition);
+        weather.setTemperature(temperature);
         return weatherRepository.save(weather);
     }
+
 
     // 특정 카테고리 데이터를 추출하는 헬퍼 메서드
     private String extractCategoryData(JSONArray itemArray, String category) {
         for (int i = 0; i < itemArray.length(); i++) {
             JSONObject item = itemArray.getJSONObject(i);
-            if (item.getString("category").equals(category)) {
+            if (item.getString("category").equals(category))
                 return item.getString("fcstValue");
-            }
         }
         return null; // 해당 카테고리 데이터가 없는 경우
     }
 
     // 하늘 상태(SKY)와 강수 형태(PTY)를 기반으로 날씨 상태를 결정하는 메서드
     private String determineWeatherCondition(String sky, String pty) {
-        if ("4".equals(sky)) { // 흐림일 때
-            return switch (pty) {
-                case "0" -> "흐림";   // 강수형태 없음
-                case "1" -> "비";     // 비
-                case "2" -> "비/눈";  // 비/눈
-                case "3" -> "눈";     // 눈
-                case "4" -> "소나기"; // 소나기
-                default -> "알 수 없음";
-            };
-        } else if ("1".equals(sky)) {
-            return "맑음"; // 맑음
-        } else if ("3".equals(sky)) {
-            return "구름많음"; // 구름많음
+        // 강수 형태(PTY) 우선적으로 판단
+        if (!"0".equals(pty)) {
+            switch (pty) {
+                case "1", "4" -> { return "비"; }     // 비 또는 소나기
+                case "2" -> { return "비"; }          // 비/눈도 비로 처리
+                case "3" -> { return "눈"; }          // 눈
+            }
         }
-        return "알 수 없음"; // 알 수 없는 날씨 상태
+
+        // 강수 형태가 없을 때 하늘 상태(SKY) 판단
+        switch (sky) {
+            case "1" -> { return "맑음"; }        // 맑음
+            case "3" -> { return "구름많음"; }   // 구름많음
+            case "4" -> { return "흐림"; }       // 흐림
+            default -> { return "알 수 없음"; }  // 알 수 없는 날씨 상태
+        }
     }
 
     private String getBaseTime() {
@@ -166,4 +171,19 @@ public class WeatherService {
 
         return baseTime;
     }
+
+    private String getBaseDate() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.HOUR_OF_DAY, -2); // 현재 시간에서 2시간을 뺌
+
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+        // 만약 시간대가 02시 이전이라면 하루 전날을 기준으로 함
+        if (hour < 2) {
+            cal.add(Calendar.DATE, -1);
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        return dateFormat.format(cal.getTime());
+    }
+
 }

@@ -1,6 +1,10 @@
 package org.alongtheblue.alongtheblue_server.global.data.alongBlues;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.request.CreateBlueCourseRequestDto;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueCourseResponseDto;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -9,19 +13,24 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/blueCourse")
 public class BlueCourseController {
+
     private final BlueCourseService blueCourseService;
+
     @PostMapping("/create")
-    public void createCourse(@RequestBody BlueCourse blueCourse){
-        blueCourseService.createCourse(blueCourse);
+    @Operation(summary = "바당따라 코스 추가")
+    public ApiResponse<BlueCourse> createCourse(@RequestBody CreateBlueCourseRequestDto dto){
+        return blueCourseService.createCourse(dto.toServiceRequest());
     }
 
-    @GetMapping("/allcourse")
+    @GetMapping("/list")
+    @Operation(summary = "바당따라 코스 전체 조회")
     public List<BlueCourse> getAllCourse(){
         return blueCourseService.getAllCourse();
     }
 
-    @GetMapping("/{courseid}")
-    public BlueCourse getCourse(@PathVariable Long id){
-        return blueCourseService.getCourse(id);
+    @GetMapping("/{id}")
+    @Operation(summary = "특정 바당따라 코스 조회")
+    public ApiResponse<BlueCourseResponseDto> getBlueCourse(@PathVariable Long id){
+        return blueCourseService.getBlueCourse(id);
     }
 }

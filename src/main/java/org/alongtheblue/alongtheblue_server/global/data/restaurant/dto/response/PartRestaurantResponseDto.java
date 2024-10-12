@@ -10,7 +10,10 @@ public record PartRestaurantResponseDto(
         String address,
         String title,
         String contentid,
-        String img
+        String img,
+        String xMap,
+        String yMap,
+        String category
 ) {
 //    private String address;
 //    private String title;
