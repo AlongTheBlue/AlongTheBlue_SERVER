@@ -58,6 +58,11 @@ public class TourDataController {
 //        return restaurantService.getRestaurant(id);
     }
 
+    @GetMapping("/hashtags/{id}")
+    public ApiResponse<List<String>> getHashtagsById(@PathVariable String id) {
+        return tourDataService.getHashtagsById(id);
+    }
+
 //    @GetMapping("/random-details")
 //    public ResponseEntity<List<TourDataBasicDto>> getRandomTourDataDetails() {
 ////        List<TourDataBasicDto> tourDataList = tourDataService.getRandomTourDataDetailsWithImages();

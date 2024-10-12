@@ -134,4 +134,9 @@ public class AccommodationController {
     public ApiResponse<DetailResponseDto> getAccommodationDetail(@PathVariable String id) {
         return accommodationService.getAccommodationDetail(id);
     }
+
+    @GetMapping("/hashtags/{id}")
+    public ApiResponse<List<String>> getHashtagsById(@PathVariable String id) {
+        return accommodationService.getHashtagsById(id);
+    }
 }

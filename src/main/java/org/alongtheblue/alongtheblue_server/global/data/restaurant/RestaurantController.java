@@ -68,4 +68,9 @@ public class RestaurantController {
     public ApiResponse<List<HomeResponseDto>> getHomeRestaurant(){
         return restaurantService.getHomeRestaurant();
     }
+
+    @GetMapping("/hashtags/{id}")
+    public ApiResponse<List<String>> getHashtagsById(@PathVariable String id) {
+        return restaurantService.getHashtagsById(id);
+    }
 }
