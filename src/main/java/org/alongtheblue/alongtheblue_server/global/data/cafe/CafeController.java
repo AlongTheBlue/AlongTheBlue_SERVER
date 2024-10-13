@@ -2,6 +2,7 @@ package org.alongtheblue.alongtheblue_server.global.data.cafe;
 
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.springframework.data.domain.Page;
@@ -45,8 +46,8 @@ public class CafeController {
 
 
     @GetMapping("/detail/all")
-    public ApiResponse<Page<CafeSimpleInformation>> retrieveAll(@RequestParam(defaultValue = "0") int page,
-                                                                @RequestParam(defaultValue = "10") int size) {
+    public ApiResponse<Page<SimpleInformation>> retrieveAll(@RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int size) {
         return cafeService.retrieveAll(page, size);
     }
 

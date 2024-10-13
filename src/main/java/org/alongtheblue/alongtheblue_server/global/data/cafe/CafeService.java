@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.Category;
+import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
+import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantSimpleInformation;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantSimpleInformationImpl;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
@@ -15,7 +16,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -205,28 +205,38 @@ public class CafeService {
         return new Cafe(contentId, title, addr, x, y);
     }
 
-    public ApiResponse<Page<CafeSimpleInformation>> retrieveAll(int page, int size) {
+    public ApiResponse<Page<SimpleInformation>> retrieveAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         // 1. Cafe 기준으로 페이징 처리된 데이터를 조회
-        Page<CafeSimpleInformation> cafePage = cafeRepository.findAllSimple(pageable);
+        Page<SimpleInformation> cafePage = cafeRepository.findAllSimple(pageable);
+
+        // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
+        CustomPage<SimpleInformation> customPage = new CustomPage<>(
+                cafePage.getContent(), pageable, cafePage.getTotalElements(), Category.CAFE.getValue());
+
+        // 로깅 추가: CustomPage의 상태 확인
+        System.out.println("CustomPage category: " + customPage.getCategory());
+
+        // ApiResponse로 반환
+        return ApiResponse.ok("카페 목록을 성공적으로 조회했습니다.", customPage);
 
         // 2. CafeSimpleInformation으로 변환하여 이미지 그룹화
-        List<CafeSimpleInformation> groupedCafeList = cafePage.getContent().stream()
-                .map(cafe -> new CafeSimpleInformationImpl(
-                        cafe.getContentId(),
-                        cafe.getTitle(),
-                        cafe.getAddress(),
-                        cafe.getImages()  // 이미지를 그룹화하지 않고 그대로 넣음
-                ))
-                .collect(Collectors.toList());
-
-        // 3. Restaurant 기준으로 페이징을 다시 적용하여 반환
-        Page<CafeSimpleInformation> pagedResult = new PageImpl<>(
-                groupedCafeList, pageable, cafePage.getTotalElements());
+//        List<CafeSimpleInformation> groupedCafeList = cafePage.getContent().stream()
+//                .map(cafe -> new CafeSimpleInformationImpl(
+//                        cafe.getContentId(),
+//                        cafe.getTitle(),
+//                        cafe.getAddress(),
+//                        cafe.getImages()  // 이미지를 그룹화하지 않고 그대로 넣음
+//                ))
+//                .collect(Collectors.toList());
+//
+//        // 3. Restaurant 기준으로 페이징을 다시 적용하여 반환
+//        Page<CafeSimpleInformation> pagedResult = new PageImpl<>(
+//                groupedCafeList, pageable, cafePage.getTotalElements());
 
         // 4. 결과를 ApiResponse로 반환
-        return ApiResponse.ok("카페 목록을 성공적으로 조회했습니다.", pagedResult);
+//        return ApiResponse.ok("카페 목록을 성공적으로 조회했습니다.", cafePage);
 
 //        List<Cafe> cafes= cafeRepository.findAll();
 //        CafeDTO dto= new CafeDTO();
