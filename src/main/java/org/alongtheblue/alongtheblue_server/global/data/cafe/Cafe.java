@@ -28,7 +28,7 @@ public class Cafe {
 
     @OneToMany(mappedBy = "cafe", cascade = CascadeType.ALL)
     @JsonManagedReference
-    List<CafeImage> cafeImages;
+    List<CafeImage> images;
 
     public Cafe(String contentId, String title, String addr, String xMap, String yMap) {
         this.contentId = contentId;

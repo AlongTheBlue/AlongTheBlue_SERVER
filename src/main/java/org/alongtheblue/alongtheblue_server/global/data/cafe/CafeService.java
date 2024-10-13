@@ -419,7 +419,7 @@ public class CafeService {
                     arr[0] + " " + arr[1],
                     cafe.getTitle(),
                     cafe.getContentId(),
-                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
+                    cafe.getImages().isEmpty() ? null : cafe.getImages().get(0).getOriginimgurl(),
                     cafe.getXMap(),
                     cafe.getYMap(),
                     "cafe"
@@ -439,7 +439,7 @@ public class CafeService {
                     arr[0] + " " + arr[1],
                     cafe.getTitle(),
                     cafe.getContentId(),
-                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
+                    cafe.getImages().isEmpty() ? null : cafe.getImages().get(0).getOriginimgurl(),
                     cafe.getXMap(),
                     cafe.getYMap(),
                     "cafe"
@@ -462,14 +462,14 @@ public class CafeService {
 
             // 이미지를 가진 레코드만 필터링하여 DTO로 변환
             List<HomeResponseDto> filteredList = cafePage.getContent().stream()
-                    .filter(cafe -> !cafe.getCafeImages().isEmpty()) // 이미지를 가진 레코드만 필터링
+                    .filter(cafe -> !cafe.getImages().isEmpty()) // 이미지를 가진 레코드만 필터링
                     .map(cafe -> {
                         String[] arr = cafe.getAddr().substring(8).split(" ");
                         return new HomeResponseDto(
                                 cafe.getContentId(),
                                 cafe.getTitle(),
                                 arr[0] + " " + arr[1],
-                                cafe.getCafeImages().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
+                                cafe.getImages().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
                         );
                     })
                     .toList();
@@ -494,7 +494,7 @@ public class CafeService {
                 weather.temperature(),
                 cafe.getInfoCenter(),
                 cafe.getIntroduction(),
-                cafe.getCafeImages().get(0).getOriginimgurl(),
+                cafe.getImages().get(0).getOriginimgurl(),
                 cafe.getXMap(),
                 cafe.getYMap()
         );
