@@ -9,7 +9,7 @@
     import java.util.Optional;
 
     public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
-        @Query("SELECT r FROM Restaurant r")
+        @Query("SELECT r FROM Restaurant r JOIN r.images i GROUP BY r HAVING COUNT(i) > 0")
         Page<RestaurantSimpleInformation> findAllSimple(Pageable pageable);
 
         List<Restaurant> findByTitleContaining(String title);

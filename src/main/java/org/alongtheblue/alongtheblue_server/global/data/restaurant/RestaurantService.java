@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -225,6 +226,24 @@ public class RestaurantService {
         // 1. Restaurant 기준으로 페이징 처리된 데이터를 조회
         Page<RestaurantSimpleInformation> restaurantPage = restaurantRepository.findAllSimple(pageable);
 
+//        Pageable pageable = PageRequest.of(page, size);
+//
+//        // 1. Restaurant 기준으로 페이징 처리된 데이터를 조회
+//        Page<RestaurantSimpleInformation> restaurantPage = restaurantRepository.findAllSimple(pageable);
+//
+//        // 2. 이미지가 없는 Restaurant 항목들을 필터링하고 이미지가 있는 항목만 남김
+//        List<RestaurantSimpleInformation> filteredRestaurantList = restaurantPage.getContent().stream()
+//                .filter(restaurant -> restaurant.getImages() != null && !restaurant.getImages().isEmpty()) // 이미지가 있는 경우만 남김
+//                .collect(Collectors.toList());
+//
+//        // 3. 필터링된 결과에 맞춰 페이징을 다시 적용하여 반환
+//        Page<RestaurantSimpleInformation> pagedResult = new PageImpl<>(
+//                filteredRestaurantList, pageable, filteredRestaurantList.size());
+//
+//        // 4. 결과를 ApiResponse로 반환
+//        return ApiResponse.ok("이미지가 있는 음식점 목록을 성공적으로 조회했습니다.", pagedResult);
+
+
         // 2. RestaurantSimpleInformation으로 변환하여 이미지 그룹화
 //        List<RestaurantSimpleInformation> groupedRestaurantList = restaurantPage.getContent().stream()
 //                .map(restaurant -> new RestaurantSimpleInformationImpl(
@@ -241,6 +260,20 @@ public class RestaurantService {
 
         // 4. 결과를 ApiResponse로 반환
         return ApiResponse.ok("음식점 목록을 성공적으로 조회했습니다.", restaurantPage);
+        // 1. 전체 데이터에서 이미지를 가지고 있는 데이터만 조회
+//        Page<RestaurantSimpleInformation> restaurantPage = restaurantRepository.findAllSimple(pageable);
+//
+//        // 2. 이미지를 가지고 있는 Restaurant만 필터링 (만약 JPA에서 필터링이 안된 경우를 대비한 추가 필터링)
+//        List<RestaurantSimpleInformation> filteredRestaurantList = restaurantPage.getContent().stream()
+//                .filter(restaurant -> restaurant.getImages() != null && !restaurant.getImages().isEmpty())
+//                .collect(Collectors.toList());
+//
+//        // 3. 필터링된 데이터를 바탕으로 다시 페이지네이션 적용 (페이지와 사이즈에 맞는 데이터만 반환)
+//        Page<RestaurantSimpleInformation> pagedResult = new PageImpl<>(
+//                filteredRestaurantList, pageable, restaurantPage.getTotalElements());
+//
+//        // 4. 결과를 ApiResponse로 반환
+//        return ApiResponse.ok("이미지가 있는 음식점 목록을 성공적으로 조회했습니다.", pagedResult);
     }
 //    public List<RestaurantResponseDto> getAll() {
 //        List<Restaurant> restaurants = restaurantRepository.findAll();
