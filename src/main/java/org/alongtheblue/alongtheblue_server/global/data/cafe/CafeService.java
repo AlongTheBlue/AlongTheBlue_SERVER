@@ -3,10 +3,11 @@ package org.alongtheblue.alongtheblue_server.global.data.cafe;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
-import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantSimpleInformation;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantSimpleInformationImpl;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
@@ -14,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -203,24 +205,46 @@ public class CafeService {
         return new Cafe(contentId, title, addr, x, y);
     }
 
-    public List<CafeDTO> getAll() {
-        List<Cafe> cafes= cafeRepository.findAll();
-        CafeDTO dto= new CafeDTO();
-        List<CafeDTO> dtos= new ArrayList<>();
-        for(Cafe cafe: cafes){
-            List<CafeImage> imgs= cafeImageRepository.findBycafe(cafe);
-            List<String> urls= new ArrayList<>();
-            for(CafeImage img : imgs)  urls.add(img.getOriginimgurl());
-            dto.setAddress(cafe.getAddr().substring(8));
-            dto.setContentid(cafe.getContentId());
-            dto.setTitle(cafe.getTitle());
-            dto.setImgUrls(urls);
-            dtos.add(dto);
-            dto.setIntroduction(cafe.getIntroduction());
-            dto.setInfoCenter(cafe.getInfoCenter());
-            dto.setRestDate(cafe.getRestDate());
-        }
-        return dtos;
+    public ApiResponse<Page<CafeSimpleInformation>> retrieveAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 1. Cafe 기준으로 페이징 처리된 데이터를 조회
+        Page<CafeSimpleInformation> cafePage = cafeRepository.findAllSimple(pageable);
+
+        // 2. CafeSimpleInformation으로 변환하여 이미지 그룹화
+        List<CafeSimpleInformation> groupedCafeList = cafePage.getContent().stream()
+                .map(cafe -> new CafeSimpleInformationImpl(
+                        cafe.getContentId(),
+                        cafe.getTitle(),
+                        cafe.getAddress(),
+                        cafe.getImages()  // 이미지를 그룹화하지 않고 그대로 넣음
+                ))
+                .collect(Collectors.toList());
+
+        // 3. Restaurant 기준으로 페이징을 다시 적용하여 반환
+        Page<CafeSimpleInformation> pagedResult = new PageImpl<>(
+                groupedCafeList, pageable, cafePage.getTotalElements());
+
+        // 4. 결과를 ApiResponse로 반환
+        return ApiResponse.ok("카페 목록을 성공적으로 조회했습니다.", pagedResult);
+
+//        List<Cafe> cafes= cafeRepository.findAll();
+//        CafeDTO dto= new CafeDTO();
+//        List<CafeDTO> dtos= new ArrayList<>();
+//        for(Cafe cafe: cafes){
+//            List<CafeImage> imgs= cafeImageRepository.findBycafe(cafe);
+//            List<String> urls= new ArrayList<>();
+//            for(CafeImage img : imgs)  urls.add(img.getOriginimgurl());
+//            dto.setAddress(cafe.getAddr().substring(8));
+//            dto.setContentid(cafe.getContentId());
+//            dto.setTitle(cafe.getTitle());
+//            dto.setImgUrls(urls);
+//            dtos.add(dto);
+//            dto.setIntroduction(cafe.getIntroduction());
+//            dto.setInfoCenter(cafe.getInfoCenter());
+//            dto.setRestDate(cafe.getRestDate());
+//        }
+//        return dtos;
     }
 
     public List<CafeDTO> homeCafe() {
@@ -395,7 +419,7 @@ public class CafeService {
                     arr[0] + " " + arr[1],
                     cafe.getTitle(),
                     cafe.getContentId(),
-                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
+                    cafe.getImages().isEmpty() ? null : cafe.getImages().get(0).getOriginimgurl(),
                     cafe.getXMap(),
                     cafe.getYMap(),
                     "cafe"
@@ -415,7 +439,7 @@ public class CafeService {
                     arr[0] + " " + arr[1],
                     cafe.getTitle(),
                     cafe.getContentId(),
-                    cafe.getCafeImages().isEmpty() ? null : cafe.getCafeImages().get(0).getOriginimgurl(),
+                    cafe.getImages().isEmpty() ? null : cafe.getImages().get(0).getOriginimgurl(),
                     cafe.getXMap(),
                     cafe.getYMap(),
                     "cafe"
@@ -438,14 +462,14 @@ public class CafeService {
 
             // 이미지를 가진 레코드만 필터링하여 DTO로 변환
             List<HomeResponseDto> filteredList = cafePage.getContent().stream()
-                    .filter(cafe -> !cafe.getCafeImages().isEmpty()) // 이미지를 가진 레코드만 필터링
+                    .filter(cafe -> !cafe.getImages().isEmpty()) // 이미지를 가진 레코드만 필터링
                     .map(cafe -> {
                         String[] arr = cafe.getAddr().substring(8).split(" ");
                         return new HomeResponseDto(
                                 cafe.getContentId(),
                                 cafe.getTitle(),
                                 arr[0] + " " + arr[1],
-                                cafe.getCafeImages().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
+                                cafe.getImages().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
                         );
                     })
                     .toList();
@@ -470,7 +494,7 @@ public class CafeService {
                 weather.temperature(),
                 cafe.getInfoCenter(),
                 cafe.getIntroduction(),
-                cafe.getCafeImages().get(0).getOriginimgurl(),
+                cafe.getImages().get(0).getOriginimgurl(),
                 cafe.getXMap(),
                 cafe.getYMap()
         );

@@ -282,7 +282,7 @@ public class RestaurantService {
                 continue;
             }
             Restaurant restaurant = optionalRestaurant.get();
-            String[] arr = restaurant.getAddr().substring(8).split(" ");
+            String[] arr = restaurant.getAddress().substring(8).split(" ");
 //                    restaurant.setAddr(arr[0] + " " + arr[1]);
             PartRestaurantResponseDto responseDto = new PartRestaurantResponseDto(
                     arr[0] + " " + arr[1],
@@ -404,7 +404,7 @@ public class RestaurantService {
             return ApiResponse.withError(ErrorCode.INVALID_RESTAURANT_ID);
         }
         Restaurant restaurant= optionalRestaurant.get();
-        restaurant.setAddr(restaurant.getAddr().substring(8));
+        restaurant.setAddress(restaurant.getAddress().substring(8));
         return ApiResponse.ok("음식점 정보를 성공적으로 조회했습니다.", restaurant);
 //            RestaurantDTO dto= new RestaurantDTO();
 //            List<RestaurantImage> imgs= restaurantImageRepository.findByrestaurant(restaurant);
@@ -426,7 +426,7 @@ public class RestaurantService {
         List<Restaurant> optionalRestaurants = restaurantRepository.findByTitleContaining(keyword);
         List<PartRestaurantResponseDto> partRestaurantResponseDtoList = new ArrayList<>();
         for(Restaurant restaurant: optionalRestaurants) {
-            String[] arr = restaurant.getAddr().substring(8).split(" ");
+            String[] arr = restaurant.getAddress().substring(8).split(" ");
             PartRestaurantResponseDto restaurantResponseDto = new PartRestaurantResponseDto(
                     arr[0] + " " + arr[1],
                     restaurant.getTitle(),
@@ -456,7 +456,7 @@ public class RestaurantService {
             List<HomeResponseDto> filteredList = restaurantPage.getContent().stream()
                     .filter(restaurant -> !restaurant.getImages().isEmpty()) // 이미지를 가진 레코드만 필터링
                     .map(restaurant -> {
-                        String[] arr = restaurant.getAddr().substring(8).split(" ");
+                        String[] arr = restaurant.getAddress().substring(8).split(" ");
                         return new HomeResponseDto(
                                 restaurant.getContentId(),
                                 restaurant.getTitle(),
@@ -474,11 +474,11 @@ public class RestaurantService {
 
     public ApiResponse<DetailResponseDto> getRestaurantDetail(String id) {
         Restaurant restaurant = findByContentId(id);
-        WeatherResponseDto weather = weatherService.getWeatherByAddress(restaurant.getAddr());
+        WeatherResponseDto weather = weatherService.getWeatherByAddress(restaurant.getAddress());
         DetailResponseDto detailResponseDto = new DetailResponseDto(
                 restaurant.getContentId(),
                 restaurant.getTitle(),
-                restaurant.getAddr(),
+                restaurant.getAddress(),
                 restaurant.getRestDate(),
                 weather.weatherCondition(),
                 weather.temperature(),

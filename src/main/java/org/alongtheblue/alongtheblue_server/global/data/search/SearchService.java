@@ -5,14 +5,11 @@ import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationRepository;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueRepository;
-import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueService;
 import org.alongtheblue.alongtheblue_server.global.data.blue.Blue;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.Cafe;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeRepository;
-import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeService;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantRepository;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantService;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.TourData;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.TourDataRepository;
 import org.springframework.stereotype.Service;
@@ -81,7 +78,7 @@ public class SearchService {
         return new SearchResponseDto(
                 restaurant.getContentId(),
                 restaurant.getTitle(),
-                restaurant.getAddr(),
+                restaurant.getAddress(),
                 restaurant.getXMap(),
                 restaurant.getYMap(),
                 "restaurant"
