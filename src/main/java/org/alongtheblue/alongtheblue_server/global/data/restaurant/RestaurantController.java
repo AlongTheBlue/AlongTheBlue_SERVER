@@ -2,6 +2,7 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
@@ -44,8 +45,8 @@ public class RestaurantController {
 
     // TODO 페이지네이션 구현 필요
     @GetMapping("/detail/all")
-    public ApiResponse<Page<RestaurantSimpleInformation>> retrieveAll(@RequestParam(defaultValue = "0") int page,
-                                                                      @RequestParam(defaultValue = "10") int size) {
+    public ApiResponse<CustomPage<RestaurantSimpleInformation>> retrieveAll(@RequestParam(defaultValue = "0") int page,
+                                                                            @RequestParam(defaultValue = "10") int size) {
         return restaurantService.retrieveAll(page, size);
     }
 //    public ApiResponse<List<RestaurantResponseDto>> getAll(){
