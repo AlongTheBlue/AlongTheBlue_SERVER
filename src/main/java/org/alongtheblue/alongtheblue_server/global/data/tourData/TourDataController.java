@@ -1,5 +1,6 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourData;
 
+import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
@@ -12,10 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/tourData")
 public class TourDataController {
-    @Autowired
-    private TourDataService tourDataService;
+
+    private final TourDataService tourDataService;
 
     @GetMapping("/save")
     public ArrayList<TourData> getTourData() {
