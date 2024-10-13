@@ -4,25 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
-import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
-import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationDTO;
-import org.alongtheblue.alongtheblue_server.global.data.accommodation.AccommodationImage;
-import org.alongtheblue.alongtheblue_server.global.data.cafe.Cafe;
-import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeService;
-import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.Category;
 import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
 import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -386,7 +378,7 @@ public class TourDataService {
 
             // 이미지 리스트를 DTO에 추가
             List<String> imageUrls = tourData.getImages().stream()
-                    .map(TourDataImage::getUrl)
+                    .map(TourDataImage::getOriginimgurl)
                     .collect(Collectors.toList());
             tourDataDto.setOriginimgurl(imageUrls);
 
@@ -413,7 +405,7 @@ public class TourDataService {
 
             // 이미지 리스트를 DTO에 추가
             List<String> imageUrls = tourData.getImages().stream()
-                    .map(image -> image.getUrl()) // 여기를 수정
+                    .map(image -> image.getOriginimgurl()) // 여기를 수정
                     .collect(Collectors.toList());
             tourDataDto.setOriginimgurl(imageUrls);
 
@@ -505,7 +497,7 @@ public class TourDataService {
 
                     // TourDataImage 객체 생성 및 저장
                     TourDataImage tourDataImage = new TourDataImage();
-                    tourDataImage.setUrl(originimgurl);
+                    tourDataImage.setOriginimgurl(originimgurl);
                     tourDataImage.setTourData(tourData);  // 이미 전달된 TourData 객체 사용
                     tourDataImageRepository.save(tourDataImage);
                 }
@@ -525,7 +517,7 @@ public class TourDataService {
                     arr[0] + " " + arr[1],
                     tourData.getTitle(),
                     tourData.getContentId(),
-                    tourData.getImages().isEmpty() ? null : tourData.getImages().get(0).getUrl(),
+                    tourData.getImages().isEmpty() ? null : tourData.getImages().get(0).getOriginimgurl(),
                     tourData.getXMap(),
                     tourData.getYMap(),
                     "tourData"
@@ -558,7 +550,7 @@ public class TourDataService {
                     arr[0] + " " + arr[1],
                     tourData.getTitle(),
                     tourData.getContentId(),
-                    tourData.getImages().isEmpty() ? null : tourData.getImages().get(0).getUrl(),
+                    tourData.getImages().isEmpty() ? null : tourData.getImages().get(0).getOriginimgurl(),
                     tourData.getXMap(),
                     tourData.getYMap(),
                     "tourData"
@@ -589,7 +581,7 @@ public class TourDataService {
                                 tourData.getContentId(),
                                 tourData.getTitle(),
                                 arr[0] + " " + arr[1],
-                                tourData.getImages().get(0).getUrl() // 첫 번째 이미지 가져오기
+                                tourData.getImages().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
                         );
                     })
                     .toList();
@@ -613,7 +605,7 @@ public class TourDataService {
                 weather.temperature(),
                 tourData.getInfoCenter(),
                 tourData.getIntroduction(),
-                tourData.getImages().get(0).getUrl(),
+                tourData.getImages().get(0).getOriginimgurl(),
                 tourData.getXMap(),
                 tourData.getYMap()
         );

@@ -10,7 +10,7 @@ public class TourDataImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String url;
+    private String originimgurl;
 
     // TourImageEntity에 맞추어 변경
     @ManyToOne
