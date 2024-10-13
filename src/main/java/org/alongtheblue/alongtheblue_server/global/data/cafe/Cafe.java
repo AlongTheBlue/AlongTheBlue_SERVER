@@ -16,7 +16,7 @@ public class Cafe {
 
     private String contentId;
     private String title;
-    private String addr;
+    private String address;
 
     @Column(columnDefinition = "TEXT")
     private String introduction;
@@ -30,10 +30,10 @@ public class Cafe {
     @JsonManagedReference
     List<CafeImage> images;
 
-    public Cafe(String contentId, String title, String addr, String xMap, String yMap) {
+    public Cafe(String contentId, String title, String address, String xMap, String yMap) {
         this.contentId = contentId;
         this.title = title;
-        this.addr= addr;
+        this.address = address;
         this.xMap = xMap;
         this.yMap = yMap;
     }

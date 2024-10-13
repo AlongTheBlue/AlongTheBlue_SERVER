@@ -232,8 +232,8 @@ public class RestaurantService {
         CustomPage<SimpleInformation> customPage = new CustomPage<>(
                 restaurantPage.getContent(), pageable, restaurantPage.getTotalElements(), Category.RESTAURANT.getValue());
 
-        // 로깅 추가: CustomPage의 상태 확인
-        System.out.println("CustomPage category: " + customPage.getCategory());
+//        // 로깅 추가: CustomPage의 상태 확인
+//        System.out.println("CustomPage category: " + customPage.getCategory());
 
         // ApiResponse로 반환
         return ApiResponse.ok("음식점 목록을 성공적으로 조회했습니다.", customPage);

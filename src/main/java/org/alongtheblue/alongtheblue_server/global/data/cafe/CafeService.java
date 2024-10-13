@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.Category;
+import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
+import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantSimpleInformation;
-import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantSimpleInformationImpl;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
@@ -15,7 +16,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -205,28 +205,38 @@ public class CafeService {
         return new Cafe(contentId, title, addr, x, y);
     }
 
-    public ApiResponse<Page<CafeSimpleInformation>> retrieveAll(int page, int size) {
+    public ApiResponse<Page<SimpleInformation>> retrieveAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         // 1. Cafe 기준으로 페이징 처리된 데이터를 조회
-        Page<CafeSimpleInformation> cafePage = cafeRepository.findAllSimple(pageable);
+        Page<SimpleInformation> cafePage = cafeRepository.findAllSimple(pageable);
+
+        // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
+        CustomPage<SimpleInformation> customPage = new CustomPage<>(
+                cafePage.getContent(), pageable, cafePage.getTotalElements(), Category.CAFE.getValue());
+
+//        // 로깅 추가: CustomPage의 상태 확인
+//        System.out.println("CustomPage category: " + customPage.getCategory());
+
+        // ApiResponse로 반환
+        return ApiResponse.ok("카페 목록을 성공적으로 조회했습니다.", customPage);
 
         // 2. CafeSimpleInformation으로 변환하여 이미지 그룹화
-        List<CafeSimpleInformation> groupedCafeList = cafePage.getContent().stream()
-                .map(cafe -> new CafeSimpleInformationImpl(
-                        cafe.getContentId(),
-                        cafe.getTitle(),
-                        cafe.getAddress(),
-                        cafe.getImages()  // 이미지를 그룹화하지 않고 그대로 넣음
-                ))
-                .collect(Collectors.toList());
-
-        // 3. Restaurant 기준으로 페이징을 다시 적용하여 반환
-        Page<CafeSimpleInformation> pagedResult = new PageImpl<>(
-                groupedCafeList, pageable, cafePage.getTotalElements());
+//        List<CafeSimpleInformation> groupedCafeList = cafePage.getContent().stream()
+//                .map(cafe -> new CafeSimpleInformationImpl(
+//                        cafe.getContentId(),
+//                        cafe.getTitle(),
+//                        cafe.getAddress(),
+//                        cafe.getImages()  // 이미지를 그룹화하지 않고 그대로 넣음
+//                ))
+//                .collect(Collectors.toList());
+//
+//        // 3. Restaurant 기준으로 페이징을 다시 적용하여 반환
+//        Page<CafeSimpleInformation> pagedResult = new PageImpl<>(
+//                groupedCafeList, pageable, cafePage.getTotalElements());
 
         // 4. 결과를 ApiResponse로 반환
-        return ApiResponse.ok("카페 목록을 성공적으로 조회했습니다.", pagedResult);
+//        return ApiResponse.ok("카페 목록을 성공적으로 조회했습니다.", cafePage);
 
 //        List<Cafe> cafes= cafeRepository.findAll();
 //        CafeDTO dto= new CafeDTO();
@@ -261,8 +271,8 @@ public class CafeService {
                 cafe= cafes.get(randomNumber);
                 dto.setTitle(cafe.getTitle());
                 dto.setContentid(cafe.getContentId());
-                String addr= cafe.getAddr().substring(8).split(" ")[0]
-                        +" "+cafe.getAddr().substring(8).split(" ")[1];
+                String addr= cafe.getAddress().substring(8).split(" ")[0]
+                        +" "+cafe.getAddress().substring(8).split(" ")[1];
                 dto.setAddress(addr);
                 List<CafeImage> imgs= cafeImageRepository.findBycafe(cafe);
 
@@ -285,7 +295,7 @@ public class CafeService {
             List<String> urls= new ArrayList<>();
             for(CafeImage resimg : imgs)  urls.add(resimg.getOriginimgurl());
             dto.setImgUrls(urls);
-            dto.setAddress(cafe.getAddr());
+            dto.setAddress(cafe.getAddress());
             dto.setContentid(cafe.getContentId());
             dto.setTitle(cafe.getTitle());
             dto.setIntroduction(cafe.getIntroduction());
@@ -413,7 +423,7 @@ public class CafeService {
                 continue;
             }
             Cafe cafe = optionalCafe.get();
-            String[] arr = cafe.getAddr().substring(8).split(" ");
+            String[] arr = cafe.getAddress().substring(8).split(" ");
 //                    restaurant.setAddr(arr[0] + " " + arr[1]);
             PartCafeResponseDto responseDto = new PartCafeResponseDto(
                     arr[0] + " " + arr[1],
@@ -434,7 +444,7 @@ public class CafeService {
         List<Cafe> optionalCafes = cafeRepository.findByTitleContaining(keyword);
         List<PartCafeResponseDto> partCafeResponseDtoList = new ArrayList<>();
         for(Cafe cafe: optionalCafes) {
-            String[] arr = cafe.getAddr().substring(8).split(" ");
+            String[] arr = cafe.getAddress().substring(8).split(" ");
             PartCafeResponseDto partCafeResponseDto = new PartCafeResponseDto(
                     arr[0] + " " + arr[1],
                     cafe.getTitle(),
@@ -464,7 +474,7 @@ public class CafeService {
             List<HomeResponseDto> filteredList = cafePage.getContent().stream()
                     .filter(cafe -> !cafe.getImages().isEmpty()) // 이미지를 가진 레코드만 필터링
                     .map(cafe -> {
-                        String[] arr = cafe.getAddr().substring(8).split(" ");
+                        String[] arr = cafe.getAddress().substring(8).split(" ");
                         return new HomeResponseDto(
                                 cafe.getContentId(),
                                 cafe.getTitle(),
@@ -483,12 +493,12 @@ public class CafeService {
 
     public ApiResponse<DetailResponseDto> getCafeDetail(String id) {
         Cafe cafe = findByContentId(id);
-        WeatherResponseDto weather = weatherService.getWeatherByAddress(cafe.getAddr());
+        WeatherResponseDto weather = weatherService.getWeatherByAddress(cafe.getAddress());
 
         DetailResponseDto detailResponseDto = new DetailResponseDto(
                 cafe.getContentId(),
                 cafe.getTitle(),
-                cafe.getAddr(),
+                cafe.getAddress(),
                 cafe.getRestDate(),
                 weather.weatherCondition(),
                 weather.temperature(),
