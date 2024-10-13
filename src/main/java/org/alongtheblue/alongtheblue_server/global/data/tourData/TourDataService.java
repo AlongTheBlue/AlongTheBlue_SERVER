@@ -10,6 +10,9 @@ import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodat
 import org.alongtheblue.alongtheblue_server.global.data.cafe.Cafe;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeService;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.Category;
+import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
+import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.Restaurant;
@@ -649,5 +652,21 @@ public class TourDataService {
 //        }
 //        return ApiResponse.ok("음식점 정보를 성공적으로 조회했습니다.", partCafeResponseDtoList);
 //    }
+
+
+
+    public ApiResponse<Page<SimpleInformation>> retrieveAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 1. Cafe 기준으로 페이징 처리된 데이터를 조회
+        Page<SimpleInformation> cafePage = tourDataRepository.findAllSimple(pageable);
+
+        // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
+        CustomPage<SimpleInformation> customPage = new CustomPage<>(
+                cafePage.getContent(), pageable, cafePage.getTotalElements(), Category.CAFE.getValue());
+
+        // ApiResponse로 반환
+        return ApiResponse.ok("카페 목록을 성공적으로 조회했습니다.", customPage);
+    }
 }
 
