@@ -9,7 +9,7 @@
     import java.util.Optional;
 
     public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
-        @Query("SELECT r.contentId AS contentId, r.title AS title, r.addr AS address, r.images AS images FROM Restaurant r")
+        @Query("SELECT r FROM Restaurant r")
         Page<RestaurantSimpleInformation> findAllSimple(Pageable pageable);
 
         List<Restaurant> findByTitleContaining(String title);

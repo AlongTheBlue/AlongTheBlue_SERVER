@@ -15,7 +15,7 @@ public class RestaurantImage {
 
     private String originimgurl;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant")
     @JsonBackReference
     private Restaurant restaurant;
