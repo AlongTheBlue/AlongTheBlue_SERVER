@@ -8,6 +8,7 @@ import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueService;
 import org.alongtheblue.alongtheblue_server.global.data.blue.BlueResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.CafeService;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantService;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.TourDataService;
@@ -47,8 +48,10 @@ public class SearchController {
     }
 
     @GetMapping("/restaurant")
-    public ApiResponse<List<PartRestaurantResponseDto>> searchRestaurantsByKeyword(@RequestParam String keyword) {
-        return restaurantService.getRestaurantsByKeyword(keyword);
+    public ApiResponse<CustomPage<SearchInformation>> searchRestaurantsByKeyword(@RequestParam String keyword,
+                                                                                 @RequestParam(defaultValue = "0") int page,
+                                                                                 @RequestParam(defaultValue = "10") int size) {
+        return restaurantService.getRestaurantsByKeyword(keyword, page, size);
     }
 
 //    @GetMapping("/all")

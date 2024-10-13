@@ -9,6 +9,7 @@ import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.search.SearchInformation;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.alongtheblue.alongtheblue_server.global.error.ErrorCode;
@@ -463,23 +464,36 @@ public class RestaurantService {
 //        else return null;
     }
 
-    public ApiResponse<List<PartRestaurantResponseDto>> getRestaurantsByKeyword(String keyword) {
-        List<Restaurant> optionalRestaurants = restaurantRepository.findByTitleContaining(keyword);
-        List<PartRestaurantResponseDto> partRestaurantResponseDtoList = new ArrayList<>();
-        for(Restaurant restaurant: optionalRestaurants) {
-            String[] arr = restaurant.getAddress().substring(8).split(" ");
-            PartRestaurantResponseDto restaurantResponseDto = new PartRestaurantResponseDto(
-                    arr[0] + " " + arr[1],
-                    restaurant.getTitle(),
-                    restaurant.getContentId(),
-                    restaurant.getImages().isEmpty() ? null : restaurant.getImages().get(0).getOriginimgurl(),
-                    restaurant.getXMap(),
-                    restaurant.getYMap(),
-                    "restaurant"
-            );
-            partRestaurantResponseDtoList.add(restaurantResponseDto);
-        }
-        return ApiResponse.ok("음식점 정보를 성공적으로 검색했습니다.", partRestaurantResponseDtoList);
+    public ApiResponse<CustomPage<SearchInformation>> getRestaurantsByKeyword(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 1. Restaurant 기준으로 페이징 처리된 데이터를 조회
+        Page<SearchInformation> restaurantPage = restaurantRepository.findByTitleContaining(keyword, pageable);
+
+        // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
+        CustomPage<SearchInformation> customPage = new CustomPage<>(
+                restaurantPage.getContent(), pageable, restaurantPage.getTotalElements(), Category.RESTAURANT.getValue());
+
+        // ApiResponse로 반환
+        return ApiResponse.ok("음식점 목록을 성공적으로 조회했습니다.", customPage);
+
+
+//        List<SearchInformation> optionalRestaurants = restaurantRepository.findByTitleContaining(keyword);
+//        List<PartRestaurantResponseDto> partRestaurantResponseDtoList = new ArrayList<>();
+//        for(Restaurant restaurant: optionalRestaurants) {
+//            String[] arr = restaurant.getAddress().substring(8).split(" ");
+//            PartRestaurantResponseDto restaurantResponseDto = new PartRestaurantResponseDto(
+//                    arr[0] + " " + arr[1],
+//                    restaurant.getTitle(),
+//                    restaurant.getContentId(),
+//                    restaurant.getImages().isEmpty() ? null : restaurant.getImages().get(0).getOriginimgurl(),
+//                    restaurant.getXMap(),
+//                    restaurant.getYMap(),
+//                    "restaurant"
+//            );
+//            partRestaurantResponseDtoList.add(restaurantResponseDto);
+//        }
+//        return ApiResponse.ok("음식점 정보를 성공적으로 검색했습니다.", partRestaurantResponseDtoList);
     }
 
     public ApiResponse<List<HomeResponseDto>> getHomeRestaurant() {
