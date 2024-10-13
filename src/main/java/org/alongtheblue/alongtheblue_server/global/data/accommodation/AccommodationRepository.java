@@ -1,5 +1,8 @@
 package org.alongtheblue.alongtheblue_server.global.data.accommodation;
 
+import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -10,6 +13,9 @@ import java.util.Optional;
 
 @Repository
 public interface AccommodationRepository extends JpaRepository<Accommodation, Long> {
+    @Query("SELECT a FROM Accommodation a JOIN a.images i GROUP BY a HAVING COUNT(i) > 0")
+    Page<SimpleInformation> findAllSimple(Pageable pageable);
+
     List<Accommodation> findByIntroductionIsNull();
     @Query("SELECT a FROM Accommodation a WHERE a.introduction IS NULL")
     List<Accommodation> findAccommodationsWithNullIntroduction();

@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Transactional
 public class AccommodationService {
     private final WebClient webClient;
 
@@ -1017,6 +1019,20 @@ public class AccommodationService {
         Accommodation accommodation = findByContentId(id);
         List<String> hashtags = openAIService.getHashtags(accommodation.getIntroduction());
         return ApiResponse.ok(hashtags);
+    }
+
+    public ApiResponse<Page<SimpleInformation>> retrieveAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 1. Cafe 기준으로 페이징 처리된 데이터를 조회
+        Page<SimpleInformation> cafePage = accommodationRepository.findAllSimple(pageable);
+
+        // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
+        CustomPage<SimpleInformation> customPage = new CustomPage<>(
+                cafePage.getContent(), pageable, cafePage.getTotalElements(), Category.ACCOMMODATION.getValue());
+
+        // ApiResponse로 반환
+        return ApiResponse.ok("관광지 목록을 성공적으로 조회했습니다.", customPage);
     }
 
 }
