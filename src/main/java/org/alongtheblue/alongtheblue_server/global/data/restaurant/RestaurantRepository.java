@@ -14,8 +14,8 @@
         @Query("SELECT r FROM Restaurant r JOIN r.images i GROUP BY r HAVING COUNT(i) > 0")
         Page<SimpleInformation> findAllSimple(Pageable pageable);
 
-        @Query("SELECT r FROM Restaurant r JOIN r.images i WHERE r.title LIKE %:title% GROUP BY r HAVING COUNT(i) > 0")
-        Page<SearchInformation> findByTitleContaining(String title, Pageable pageable);
+        @Query("SELECT r FROM Restaurant r JOIN r.images i WHERE r.title LIKE %:keyword% GROUP BY r HAVING COUNT(i) > 0")
+        Page<SearchInformation> findByTitleContaining(String keyword, Pageable pageable);
 
         Page<Restaurant> findAll(Pageable pageable);
 
