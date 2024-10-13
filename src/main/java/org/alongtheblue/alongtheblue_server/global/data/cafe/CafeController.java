@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantSimpleInformation;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -47,8 +46,9 @@ public class CafeController {
 
 
     @GetMapping("/detail/all")
-    public List<CafeDTO> getAll() {
-        return cafeService.getAll();
+    public ApiResponse<Page<CafeSimpleInformation>> retrieveAll(@RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "10") int size) {
+        return cafeService.retrieveAll(page, size);
     }
 
 
