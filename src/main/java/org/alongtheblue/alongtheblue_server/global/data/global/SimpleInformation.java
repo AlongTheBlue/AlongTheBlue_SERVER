@@ -1,4 +1,6 @@
-package org.alongtheblue.alongtheblue_server.global.data.restaurant;
+package org.alongtheblue.alongtheblue_server.global.data.global;
+
+import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantImage;
 
 import java.util.List;
 
