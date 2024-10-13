@@ -27,17 +27,17 @@ public class SearchService {
     private final TourDataRepository tourDataRepository;
     private final AccommodationRepository accommodationRepository;
 
-    public ApiResponse<List<SearchResponseDto>> searchAllCategoryByKeyword(String keyword){
-        List<SearchResponseDto> searchResponseDtoList = new ArrayList<>();
-        List<Blue> blues = blueRepository.findByNameContaining(keyword);
-        List<Restaurant> restaurants = restaurantRepository.findByTitleContaining(keyword);
-        List<Cafe> cafes = cafeRepository.findByTitleContaining(keyword);
-        List<TourData> tourDataList = tourDataRepository.findByTitleContaining(keyword);
-        List<Accommodation> accommodations = accommodationRepository.findByTitleContaining(keyword);
-
-        addSearchResponseDto(searchResponseDtoList, blues, restaurants, cafes, tourDataList, accommodations);
-        return ApiResponse.ok("모든 카테고리에서 검색을 성공하였습니다.", searchResponseDtoList);
-    }
+//    public ApiResponse<List<SearchResponseDto>> searchAllCategoryByKeyword(String keyword){
+//        List<SearchResponseDto> searchResponseDtoList = new ArrayList<>();
+//        List<Blue> blues = blueRepository.findByNameContaining(keyword);
+//        List<Restaurant> restaurants = restaurantRepository.findByTitleContaining(keyword);
+//        List<Cafe> cafes = cafeRepository.findByTitleContaining(keyword);
+//        List<TourData> tourDataList = tourDataRepository.findByTitleContaining(keyword);
+//        List<Accommodation> accommodations = accommodationRepository.findByTitleContaining(keyword);
+//
+//        addSearchResponseDto(searchResponseDtoList, blues, restaurants, cafes, tourDataList, accommodations);
+//        return ApiResponse.ok("모든 카테고리에서 검색을 성공하였습니다.", searchResponseDtoList);
+//    }
 
     public ApiResponse<List<SearchResponseDto>> searchAllCategory() {
         List<SearchResponseDto> searchResponseDtoList = new ArrayList<>();
