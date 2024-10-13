@@ -83,8 +83,8 @@ public class SearchController {
 
     @GetMapping("/tourData")
     public ApiResponse<CustomPage<SearchInformation>> getTourDataListByKeyword(@RequestParam String keyword,
-                                                                           @RequestParam(defaultValue = "0") int page,
-                                                                           @RequestParam(defaultValue = "10") int size) {
+                                                                               @RequestParam(defaultValue = "0") int page,
+                                                                               @RequestParam(defaultValue = "10") int size) {
         return tourDataService.getTourDataListByKeyword(keyword, page, size);
     }
 
@@ -94,8 +94,10 @@ public class SearchController {
     }
 
     @GetMapping("/accommodation")
-    public ApiResponse<List<AccommodationResponseDto>> getAccommodationsByKeyword(@RequestParam String keyword) {
-        return accommodationService.getAccommodationsByKeyword(keyword);
+    public ApiResponse<CustomPage<SearchInformation>> getAccommodationsByKeyword(@RequestParam String keyword,
+                                                                                 @RequestParam(defaultValue = "0") int page,
+                                                                                 @RequestParam(defaultValue = "10") int size) {
+        return accommodationService.getAccommodationsByKeyword(keyword, page, size);
     }
 
 }

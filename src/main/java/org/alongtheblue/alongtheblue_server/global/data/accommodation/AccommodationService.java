@@ -9,6 +9,7 @@ import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
 import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.search.SearchInformation;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherRepository;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
@@ -466,23 +467,34 @@ public class AccommodationService {
                 .then();
     }
 
-    public ApiResponse<List<AccommodationResponseDto>> getAccommodationsByKeyword(String keyword) {
-        List<Accommodation> accommodations = accommodationRepository.findByTitleContaining(keyword);
-        List<AccommodationResponseDto> accommodationResponseDtoList = new ArrayList<>();
-        for(Accommodation accommodation : accommodations) {
-            String[] arr = accommodation.getAddress().substring(8).split(" ");
-            AccommodationResponseDto accommodationResponseDto = new AccommodationResponseDto(
-                    arr[0] + " " + arr[1],
-                    accommodation.getTitle(),
-                    accommodation.getContentId(),
-                    accommodation.getImages().isEmpty() ? null : accommodation.getImages().get(0).getOriginimgurl(),
-                    accommodation.getXMap(),
-                    accommodation.getYMap(),
-                    "tourData"
-            );
-            accommodationResponseDtoList.add(accommodationResponseDto);
-        }
-        return ApiResponse.ok("숙박 정보를 성공적으로 검색했습니다.", accommodationResponseDtoList);
+    public ApiResponse<CustomPage<SearchInformation>> getAccommodationsByKeyword(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 1. Restaurant 기준으로 페이징 처리된 데이터를 조회
+        Page<SearchInformation> accommodationPage = accommodationRepository.findByTitleContaining(keyword, pageable);
+
+        // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
+        CustomPage<SearchInformation> customPage = new CustomPage<>(
+                accommodationPage.getContent(), pageable, accommodationPage.getTotalElements(), Category.ACCOMMODATION.getValue());
+
+        // ApiResponse로 반환
+        return ApiResponse.ok("숙소 목록을 성공적으로 조회했습니다.", customPage);
+//        List<Accommodation> accommodations = accommodationRepository.findByTitleContaining(keyword);
+//        List<AccommodationResponseDto> accommodationResponseDtoList = new ArrayList<>();
+//        for(Accommodation accommodation : accommodations) {
+//            String[] arr = accommodation.getAddress().substring(8).split(" ");
+//            AccommodationResponseDto accommodationResponseDto = new AccommodationResponseDto(
+//                    arr[0] + " " + arr[1],
+//                    accommodation.getTitle(),
+//                    accommodation.getContentId(),
+//                    accommodation.getImages().isEmpty() ? null : accommodation.getImages().get(0).getOriginimgurl(),
+//                    accommodation.getXMap(),
+//                    accommodation.getYMap(),
+//                    "tourData"
+//            );
+//            accommodationResponseDtoList.add(accommodationResponseDto);
+//        }
+//        return ApiResponse.ok("숙박 정보를 성공적으로 검색했습니다.", accommodationResponseDtoList);
     }
 
     // API 응답을 매핑하기 위한 클래스
