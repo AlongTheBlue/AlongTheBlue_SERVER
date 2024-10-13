@@ -89,7 +89,7 @@ public class SearchService {
         return new SearchResponseDto(
                 cafe.getContentId(),
                 cafe.getTitle(),
-                cafe.getAddr(),
+                cafe.getAddress(),
                 cafe.getXMap(),
                 cafe.getYMap(),
                 "cafe"

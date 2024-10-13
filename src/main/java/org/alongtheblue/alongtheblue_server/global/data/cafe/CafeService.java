@@ -261,8 +261,8 @@ public class CafeService {
                 cafe= cafes.get(randomNumber);
                 dto.setTitle(cafe.getTitle());
                 dto.setContentid(cafe.getContentId());
-                String addr= cafe.getAddr().substring(8).split(" ")[0]
-                        +" "+cafe.getAddr().substring(8).split(" ")[1];
+                String addr= cafe.getAddress().substring(8).split(" ")[0]
+                        +" "+cafe.getAddress().substring(8).split(" ")[1];
                 dto.setAddress(addr);
                 List<CafeImage> imgs= cafeImageRepository.findBycafe(cafe);
 
@@ -285,7 +285,7 @@ public class CafeService {
             List<String> urls= new ArrayList<>();
             for(CafeImage resimg : imgs)  urls.add(resimg.getOriginimgurl());
             dto.setImgUrls(urls);
-            dto.setAddress(cafe.getAddr());
+            dto.setAddress(cafe.getAddress());
             dto.setContentid(cafe.getContentId());
             dto.setTitle(cafe.getTitle());
             dto.setIntroduction(cafe.getIntroduction());
@@ -413,7 +413,7 @@ public class CafeService {
                 continue;
             }
             Cafe cafe = optionalCafe.get();
-            String[] arr = cafe.getAddr().substring(8).split(" ");
+            String[] arr = cafe.getAddress().substring(8).split(" ");
 //                    restaurant.setAddr(arr[0] + " " + arr[1]);
             PartCafeResponseDto responseDto = new PartCafeResponseDto(
                     arr[0] + " " + arr[1],
@@ -434,7 +434,7 @@ public class CafeService {
         List<Cafe> optionalCafes = cafeRepository.findByTitleContaining(keyword);
         List<PartCafeResponseDto> partCafeResponseDtoList = new ArrayList<>();
         for(Cafe cafe: optionalCafes) {
-            String[] arr = cafe.getAddr().substring(8).split(" ");
+            String[] arr = cafe.getAddress().substring(8).split(" ");
             PartCafeResponseDto partCafeResponseDto = new PartCafeResponseDto(
                     arr[0] + " " + arr[1],
                     cafe.getTitle(),
@@ -464,7 +464,7 @@ public class CafeService {
             List<HomeResponseDto> filteredList = cafePage.getContent().stream()
                     .filter(cafe -> !cafe.getImages().isEmpty()) // 이미지를 가진 레코드만 필터링
                     .map(cafe -> {
-                        String[] arr = cafe.getAddr().substring(8).split(" ");
+                        String[] arr = cafe.getAddress().substring(8).split(" ");
                         return new HomeResponseDto(
                                 cafe.getContentId(),
                                 cafe.getTitle(),
@@ -483,12 +483,12 @@ public class CafeService {
 
     public ApiResponse<DetailResponseDto> getCafeDetail(String id) {
         Cafe cafe = findByContentId(id);
-        WeatherResponseDto weather = weatherService.getWeatherByAddress(cafe.getAddr());
+        WeatherResponseDto weather = weatherService.getWeatherByAddress(cafe.getAddress());
 
         DetailResponseDto detailResponseDto = new DetailResponseDto(
                 cafe.getContentId(),
                 cafe.getTitle(),
-                cafe.getAddr(),
+                cafe.getAddress(),
                 cafe.getRestDate(),
                 weather.weatherCondition(),
                 weather.temperature(),
