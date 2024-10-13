@@ -3,6 +3,8 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.global.Category;
+import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
@@ -220,11 +222,22 @@ public class RestaurantService {
     }
 
 //    //딱 음식 눌렀을 때 식당 목록
-    public ApiResponse<Page<RestaurantSimpleInformation>> retrieveAll(int page, int size) {
+    public ApiResponse<CustomPage<RestaurantSimpleInformation>> retrieveAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         // 1. Restaurant 기준으로 페이징 처리된 데이터를 조회
         Page<RestaurantSimpleInformation> restaurantPage = restaurantRepository.findAllSimple(pageable);
+
+        // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
+        CustomPage<RestaurantSimpleInformation> customPage = new CustomPage<>(
+                restaurantPage.getContent(), pageable, restaurantPage.getTotalElements(), Category.RESTAURANT.getValue());
+
+        // 로깅 추가: CustomPage의 상태 확인
+        System.out.println("CustomPage category: " + customPage.getCategory());
+
+        // ApiResponse로 반환
+        return ApiResponse.ok("음식점 목록을 성공적으로 조회했습니다.", customPage);
+    }
 
 //        Pageable pageable = PageRequest.of(page, size);
 //
@@ -259,7 +272,7 @@ public class RestaurantService {
 //                groupedRestaurantList, pageable, restaurantPage.getTotalElements());
 
         // 4. 결과를 ApiResponse로 반환
-        return ApiResponse.ok("음식점 목록을 성공적으로 조회했습니다.", restaurantPage);
+//        return ApiResponse.ok("음식점 목록을 성공적으로 조회했습니다.", restaurantPage);
         // 1. 전체 데이터에서 이미지를 가지고 있는 데이터만 조회
 //        Page<RestaurantSimpleInformation> restaurantPage = restaurantRepository.findAllSimple(pageable);
 //
@@ -274,7 +287,7 @@ public class RestaurantService {
 //
 //        // 4. 결과를 ApiResponse로 반환
 //        return ApiResponse.ok("이미지가 있는 음식점 목록을 성공적으로 조회했습니다.", pagedResult);
-    }
+//    }
 //    public List<RestaurantResponseDto> getAll() {
 //        List<Restaurant> restaurants = restaurantRepository.findAll();
 //        List<RestaurantResponseDto> dtos = new ArrayList<>();
