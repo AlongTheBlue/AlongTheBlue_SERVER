@@ -70,8 +70,10 @@ public class SearchController {
     }
 
     @GetMapping("/cafe")
-    public ApiResponse<List<PartCafeResponseDto>> searchCafesByKeyword(@RequestParam String keyword) {
-        return cafeService.getCafesByKeyword(keyword);
+    public ApiResponse<CustomPage<SearchInformation>> searchCafesByKeyword(@RequestParam String keyword,
+                                                                       @RequestParam(defaultValue = "0") int page,
+                                                                       @RequestParam(defaultValue = "10") int size) {
+        return cafeService.getCafesByKeyword(keyword, page, size);
     }
 
     @GetMapping("/tourData/list")

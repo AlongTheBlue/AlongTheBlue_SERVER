@@ -9,6 +9,7 @@ import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
 import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.search.SearchInformation;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
@@ -440,23 +441,35 @@ public class CafeService {
         return ApiResponse.ok("카페 정보를 성공적으로 조회했습니다.", dtos);
     }
 
-    public ApiResponse<List<PartCafeResponseDto>> getCafesByKeyword(String keyword) {
-        List<Cafe> optionalCafes = cafeRepository.findByTitleContaining(keyword);
-        List<PartCafeResponseDto> partCafeResponseDtoList = new ArrayList<>();
-        for(Cafe cafe: optionalCafes) {
-            String[] arr = cafe.getAddress().substring(8).split(" ");
-            PartCafeResponseDto partCafeResponseDto = new PartCafeResponseDto(
-                    arr[0] + " " + arr[1],
-                    cafe.getTitle(),
-                    cafe.getContentId(),
-                    cafe.getImages().isEmpty() ? null : cafe.getImages().get(0).getOriginimgurl(),
-                    cafe.getXMap(),
-                    cafe.getYMap(),
-                    "cafe"
-            );
-            partCafeResponseDtoList.add(partCafeResponseDto);
-        }
-        return ApiResponse.ok("카페 정보를 성공적으로 검색했습니다.", partCafeResponseDtoList);
+    public ApiResponse<CustomPage<SearchInformation>> getCafesByKeyword(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 1. Restaurant 기준으로 페이징 처리된 데이터를 조회
+        Page<SearchInformation> cafePage = cafeRepository.findByTitleContaining(keyword, pageable);
+
+        // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
+        CustomPage<SearchInformation> customPage = new CustomPage<>(
+                cafePage.getContent(), pageable, cafePage.getTotalElements(), Category.CAFE.getValue());
+
+        // ApiResponse로 반환
+        return ApiResponse.ok("카페 목록을 성공적으로 조회했습니다.", customPage);
+
+//        List<Cafe> optionalCafes = cafeRepository.findByTitleContaining(keyword);
+//        List<PartCafeResponseDto> partCafeResponseDtoList = new ArrayList<>();
+//        for(Cafe cafe: optionalCafes) {
+//            String[] arr = cafe.getAddress().substring(8).split(" ");
+//            PartCafeResponseDto partCafeResponseDto = new PartCafeResponseDto(
+//                    arr[0] + " " + arr[1],
+//                    cafe.getTitle(),
+//                    cafe.getContentId(),
+//                    cafe.getImages().isEmpty() ? null : cafe.getImages().get(0).getOriginimgurl(),
+//                    cafe.getXMap(),
+//                    cafe.getYMap(),
+//                    "cafe"
+//            );
+//            partCafeResponseDtoList.add(partCafeResponseDto);
+//        }
+//        return ApiResponse.ok("카페 정보를 성공적으로 검색했습니다.", partCafeResponseDtoList);
     }
 
     public ApiResponse<List<HomeResponseDto>> getHomeCafeList() {
