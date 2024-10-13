@@ -2,6 +2,7 @@ package org.alongtheblue.alongtheblue_server.global.data.tourData;
 
 import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
+import org.alongtheblue.alongtheblue_server.global.data.search.SearchInformation;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.UserTourCourse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,8 @@ public interface TourDataRepository extends JpaRepository<TourData, Long> {
             nativeQuery = true)
      List<TourData> findRandomTourDatasWithImages();
 
-    List<TourData> findByTitleContaining(String keyword);
+    @Query("SELECT t FROM TourData t JOIN t.images i WHERE t.title LIKE %:keyword% GROUP BY t HAVING COUNT(i) > 0")
+    Page<SearchInformation> findByTitleContaining(String keyword, Pageable pageable);
 
     Optional<TourData> findByContentId(String contentsid);
 }
