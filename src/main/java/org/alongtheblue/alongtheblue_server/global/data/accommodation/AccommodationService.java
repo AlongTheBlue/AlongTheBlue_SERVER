@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.global.Category;
+import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
+import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherRepository;
@@ -18,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -29,6 +33,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Transactional
 public class AccommodationService {
     private final WebClient webClient;
 
@@ -335,7 +340,7 @@ public class AccommodationService {
                     arr[0] + " " + arr[1],
                     accommodation.getTitle(),
                     accommodation.getContentId(),
-                    accommodation.getAccommodationImage().isEmpty() ? null : accommodation.getAccommodationImage().get(0).getOriginimgurl(),
+                    accommodation.getImages().isEmpty() ? null : accommodation.getImages().get(0).getOriginimgurl(),
                     accommodation.getXMap(),
                     accommodation.getYMap(),
                     "accommodation"
@@ -470,7 +475,7 @@ public class AccommodationService {
                     arr[0] + " " + arr[1],
                     accommodation.getTitle(),
                     accommodation.getContentId(),
-                    accommodation.getAccommodationImage().isEmpty() ? null : accommodation.getAccommodationImage().get(0).getOriginimgurl(),
+                    accommodation.getImages().isEmpty() ? null : accommodation.getImages().get(0).getOriginimgurl(),
                     accommodation.getXMap(),
                     accommodation.getYMap(),
                     "tourData"
@@ -479,7 +484,6 @@ public class AccommodationService {
         }
         return ApiResponse.ok("숙박 정보를 성공적으로 검색했습니다.", accommodationResponseDtoList);
     }
-
 
     // API 응답을 매핑하기 위한 클래스
     public static class ApiResponse2 {
@@ -828,7 +832,7 @@ public class AccommodationService {
             accommodationDTO.setInfocenter(accommodation.getInfoCenter());
 
             // 이미지 리스트를 DTO에 추가
-            List<String> imageUrls = accommodation.getAccommodationImage().stream()
+            List<String> imageUrls = accommodation.getImages().stream()
                     .map(AccommodationImage::getOriginimgurl)
                     .collect(Collectors.toList());
             accommodationDTO.setOriginimgurl(imageUrls);
@@ -854,7 +858,7 @@ public class AccommodationService {
             accommodationDTO.setCheckintime(accommodation.getCheckintime());
 
             // 이미지 리스트를 DTO에 추가
-            List<String> imageUrls = accommodation.getAccommodationImage().stream()
+            List<String> imageUrls = accommodation.getImages().stream()
                     .map(AccommodationImage::getOriginimgurl)
                     .collect(Collectors.toList());
             accommodationDTO.setOriginimgurl(imageUrls);
@@ -878,7 +882,7 @@ public class AccommodationService {
             accommodationDTO.setIntroduction(accommodation.getIntroduction());
 
             // 이미지 리스트에서 랜덤으로 두 개의 이미지 URL 가져오기
-            List<String> imageUrls = accommodation.getAccommodationImage().stream()
+            List<String> imageUrls = accommodation.getImages().stream()
                     .map(AccommodationImage::getOriginimgurl)
                     .distinct() // 중복된 이미지 URL 제거
                     .limit(2)   // 최대 2개만 선택
@@ -973,14 +977,14 @@ public class AccommodationService {
 
             // 이미지를 가진 레코드만 필터링하여 DTO로 변환
             List<HomeResponseDto> filteredList = accommodationPage.getContent().stream()
-                    .filter(accommodation -> !accommodation.getAccommodationImage().isEmpty()) // 이미지를 가진 레코드만 필터링
+                    .filter(accommodation -> !accommodation.getImages().isEmpty()) // 이미지를 가진 레코드만 필터링
                     .map(accommodation -> {
                         String[] arr = accommodation.getAddress().substring(8).split(" ");
                         return new HomeResponseDto(
                                 accommodation.getContentId(),
                                 accommodation.getTitle(),
                                 arr[0] + " " + arr[1],
-                                accommodation.getAccommodationImage().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
+                                accommodation.getImages().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
                         );
                     })
                     .toList();
@@ -1004,7 +1008,7 @@ public class AccommodationService {
                 weather.temperature(),
                 accommodation.getInfoCenter(),
                 accommodation.getIntroduction(),
-                accommodation.getAccommodationImage().get(0).getOriginimgurl(),
+                accommodation.getImages().get(0).getOriginimgurl(),
                 accommodation.getXMap(),
                 accommodation.getYMap()
         );
@@ -1015,6 +1019,20 @@ public class AccommodationService {
         Accommodation accommodation = findByContentId(id);
         List<String> hashtags = openAIService.getHashtags(accommodation.getIntroduction());
         return ApiResponse.ok(hashtags);
+    }
+
+    public ApiResponse<Page<SimpleInformation>> retrieveAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 1. Cafe 기준으로 페이징 처리된 데이터를 조회
+        Page<SimpleInformation> cafePage = accommodationRepository.findAllSimple(pageable);
+
+        // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
+        CustomPage<SimpleInformation> customPage = new CustomPage<>(
+                cafePage.getContent(), pageable, cafePage.getTotalElements(), Category.ACCOMMODATION.getValue());
+
+        // ApiResponse로 반환
+        return ApiResponse.ok("관광지 목록을 성공적으로 조회했습니다.", customPage);
     }
 
 }

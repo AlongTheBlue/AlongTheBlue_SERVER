@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.TourImage;
 
 import java.util.List;
 
@@ -29,7 +27,7 @@ public class Accommodation {
 
     @OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<AccommodationImage> accommodationImage;
+    private List<AccommodationImage> images;
 
     public Accommodation(String contentId, String title, String address, String xMap, String yMap) {
         this.contentId = contentId;
