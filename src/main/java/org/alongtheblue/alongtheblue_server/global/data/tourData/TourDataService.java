@@ -513,11 +513,11 @@ public class TourDataService {
         Pageable pageable = PageRequest.of(page, size);
 
         // 1. Restaurant 기준으로 페이징 처리된 데이터를 조회
-        Page<SearchInformation> cafePage = tourDataRepository.findByTitleContaining(keyword, pageable);
+        Page<SearchInformation> tourDataPage = tourDataRepository.findByTitleContaining(keyword, pageable);
 
         // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
         CustomPage<SearchInformation> customPage = new CustomPage<>(
-                cafePage.getContent(), pageable, cafePage.getTotalElements(), Category.TOURDATA.getValue());
+                tourDataPage.getContent(), pageable, tourDataPage.getTotalElements(), Category.TOURDATA.getValue());
 
         // ApiResponse로 반환
         return ApiResponse.ok("관광지 목록을 성공적으로 조회했습니다.", customPage);
@@ -663,11 +663,11 @@ public class TourDataService {
         Pageable pageable = PageRequest.of(page, size);
 
         // 1. Cafe 기준으로 페이징 처리된 데이터를 조회
-        Page<SimpleInformation> cafePage = tourDataRepository.findAllSimple(pageable);
+        Page<SimpleInformation> tourDataPage = tourDataRepository.findAllSimple(pageable);
 
         // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
         CustomPage<SimpleInformation> customPage = new CustomPage<>(
-                cafePage.getContent(), pageable, cafePage.getTotalElements(), Category.TOURDATA.getValue());
+                tourDataPage.getContent(), pageable, tourDataPage.getTotalElements(), Category.TOURDATA.getValue());
 
         // ApiResponse로 반환
         return ApiResponse.ok("관광지 목록을 성공적으로 조회했습니다.", customPage);
