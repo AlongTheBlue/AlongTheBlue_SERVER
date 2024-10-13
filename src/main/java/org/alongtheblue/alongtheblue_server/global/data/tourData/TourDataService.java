@@ -9,6 +9,7 @@ import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
 import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.search.SearchInformation;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
@@ -508,23 +509,34 @@ public class TourDataService {
         }
     }
 
-    public ApiResponse<List<TourDataResponseDto>> getTourDataListByKeyword(String keyword) {
-        List<TourData> tourDataList = tourDataRepository.findByTitleContaining(keyword);
-        List<TourDataResponseDto> tourDataDtoList = new ArrayList<>();
-        for(TourData tourData: tourDataList) {
-            String[] arr = tourData.getAddress().substring(8).split(" ");
-            TourDataResponseDto tourDataResponseDto = new TourDataResponseDto(
-                    arr[0] + " " + arr[1],
-                    tourData.getTitle(),
-                    tourData.getContentId(),
-                    tourData.getImages().isEmpty() ? null : tourData.getImages().get(0).getOriginimgurl(),
-                    tourData.getXMap(),
-                    tourData.getYMap(),
-                    "tourData"
-            );
-            tourDataDtoList.add(tourDataResponseDto);
-        }
-        return ApiResponse.ok("관광지 정보를 성공적으로 검색했습니다.", tourDataDtoList);
+    public ApiResponse<CustomPage<SearchInformation>> getTourDataListByKeyword(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 1. Restaurant 기준으로 페이징 처리된 데이터를 조회
+        Page<SearchInformation> cafePage = tourDataRepository.findByTitleContaining(keyword, pageable);
+
+        // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
+        CustomPage<SearchInformation> customPage = new CustomPage<>(
+                cafePage.getContent(), pageable, cafePage.getTotalElements(), Category.TOURDATA.getValue());
+
+        // ApiResponse로 반환
+        return ApiResponse.ok("관광지 목록을 성공적으로 조회했습니다.", customPage);
+//        List<TourData> tourDataList = tourDataRepository.findByTitleContaining(keyword);
+//        List<TourDataResponseDto> tourDataDtoList = new ArrayList<>();
+//        for(TourData tourData: tourDataList) {
+//            String[] arr = tourData.getAddress().substring(8).split(" ");
+//            TourDataResponseDto tourDataResponseDto = new TourDataResponseDto(
+//                    arr[0] + " " + arr[1],
+//                    tourData.getTitle(),
+//                    tourData.getContentId(),
+//                    tourData.getImages().isEmpty() ? null : tourData.getImages().get(0).getOriginimgurl(),
+//                    tourData.getXMap(),
+//                    tourData.getYMap(),
+//                    "tourData"
+//            );
+//            tourDataDtoList.add(tourDataResponseDto);
+//        }
+//        return ApiResponse.ok("관광지 정보를 성공적으로 검색했습니다.", tourDataDtoList);
     }
 
     public ApiResponse<List<TourDataResponseDto>> getTourDataListHome() {
