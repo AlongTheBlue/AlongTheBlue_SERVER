@@ -44,8 +44,8 @@ public class RestaurantController {
 
     // TODO 페이지네이션 구현 필요
     @GetMapping("/detail/all")
-    public ApiResponse<Page<RestaurantSimpleInformation>> getAll(@RequestParam(defaultValue = "0") int page,
-                                                @RequestParam(defaultValue = "10") int size) {
+    public ApiResponse<Page<RestaurantSimpleInformation>> retrieveAll(@RequestParam(defaultValue = "0") int page,
+                                                                      @RequestParam(defaultValue = "10") int size) {
         return restaurantService.retrieveAll(page, size);
     }
 //    public ApiResponse<List<RestaurantResponseDto>> getAll(){
