@@ -1,15 +1,17 @@
 package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 
+import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
+
 import java.util.List;
 
-public class RestaurantSimpleInformationImpl implements RestaurantSimpleInformation {
+public class SimpleInformationImpl implements SimpleInformation {
 
     private String contentId;
     private String title;
     private String address;
     private List<RestaurantImage> images;
 
-    public RestaurantSimpleInformationImpl(String contentId, String title, String address, List<RestaurantImage> images) {
+    public SimpleInformationImpl(String contentId, String title, String address, List<RestaurantImage> images) {
         this.contentId = contentId;
         this.title = title;
         this.address = address;
