@@ -71,8 +71,8 @@ public class SearchController {
 
     @GetMapping("/cafe")
     public ApiResponse<CustomPage<SearchInformation>> searchCafesByKeyword(@RequestParam String keyword,
-                                                                       @RequestParam(defaultValue = "0") int page,
-                                                                       @RequestParam(defaultValue = "10") int size) {
+                                                                           @RequestParam(defaultValue = "0") int page,
+                                                                           @RequestParam(defaultValue = "10") int size) {
         return cafeService.getCafesByKeyword(keyword, page, size);
     }
 
