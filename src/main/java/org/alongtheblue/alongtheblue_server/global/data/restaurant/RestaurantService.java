@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.global.Category;
 import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
+import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
@@ -16,7 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -222,14 +222,14 @@ public class RestaurantService {
     }
 
 //    //딱 음식 눌렀을 때 식당 목록
-    public ApiResponse<CustomPage<RestaurantSimpleInformation>> retrieveAll(int page, int size) {
+    public ApiResponse<CustomPage<SimpleInformation>> retrieveAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         // 1. Restaurant 기준으로 페이징 처리된 데이터를 조회
-        Page<RestaurantSimpleInformation> restaurantPage = restaurantRepository.findAllSimple(pageable);
+        Page<SimpleInformation> restaurantPage = restaurantRepository.findAllSimple(pageable);
 
         // CustomPage 객체로 변환 (기존 페이지네이션 정보와 category를 함께 담음)
-        CustomPage<RestaurantSimpleInformation> customPage = new CustomPage<>(
+        CustomPage<SimpleInformation> customPage = new CustomPage<>(
                 restaurantPage.getContent(), pageable, restaurantPage.getTotalElements(), Category.RESTAURANT.getValue());
 
         // 로깅 추가: CustomPage의 상태 확인
