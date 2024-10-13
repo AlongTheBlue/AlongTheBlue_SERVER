@@ -4,9 +4,9 @@ import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantIma
 
 import java.util.List;
 
-public interface RestaurantSimpleInformation {
+public interface SimpleInformation<T> {
     String getContentId();
     String getTitle();
     String getAddress();
-    List<RestaurantImage> getImages();
+    List<T> getImages();
 }
