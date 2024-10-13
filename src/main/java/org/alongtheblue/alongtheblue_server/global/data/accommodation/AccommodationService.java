@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.global.Category;
+import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
+import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherRepository;
@@ -335,7 +338,7 @@ public class AccommodationService {
                     arr[0] + " " + arr[1],
                     accommodation.getTitle(),
                     accommodation.getContentId(),
-                    accommodation.getAccommodationImage().isEmpty() ? null : accommodation.getAccommodationImage().get(0).getOriginimgurl(),
+                    accommodation.getImages().isEmpty() ? null : accommodation.getImages().get(0).getOriginimgurl(),
                     accommodation.getXMap(),
                     accommodation.getYMap(),
                     "accommodation"
@@ -470,7 +473,7 @@ public class AccommodationService {
                     arr[0] + " " + arr[1],
                     accommodation.getTitle(),
                     accommodation.getContentId(),
-                    accommodation.getAccommodationImage().isEmpty() ? null : accommodation.getAccommodationImage().get(0).getOriginimgurl(),
+                    accommodation.getImages().isEmpty() ? null : accommodation.getImages().get(0).getOriginimgurl(),
                     accommodation.getXMap(),
                     accommodation.getYMap(),
                     "tourData"
@@ -479,7 +482,6 @@ public class AccommodationService {
         }
         return ApiResponse.ok("숙박 정보를 성공적으로 검색했습니다.", accommodationResponseDtoList);
     }
-
 
     // API 응답을 매핑하기 위한 클래스
     public static class ApiResponse2 {
@@ -828,7 +830,7 @@ public class AccommodationService {
             accommodationDTO.setInfocenter(accommodation.getInfoCenter());
 
             // 이미지 리스트를 DTO에 추가
-            List<String> imageUrls = accommodation.getAccommodationImage().stream()
+            List<String> imageUrls = accommodation.getImages().stream()
                     .map(AccommodationImage::getOriginimgurl)
                     .collect(Collectors.toList());
             accommodationDTO.setOriginimgurl(imageUrls);
@@ -854,7 +856,7 @@ public class AccommodationService {
             accommodationDTO.setCheckintime(accommodation.getCheckintime());
 
             // 이미지 리스트를 DTO에 추가
-            List<String> imageUrls = accommodation.getAccommodationImage().stream()
+            List<String> imageUrls = accommodation.getImages().stream()
                     .map(AccommodationImage::getOriginimgurl)
                     .collect(Collectors.toList());
             accommodationDTO.setOriginimgurl(imageUrls);
@@ -878,7 +880,7 @@ public class AccommodationService {
             accommodationDTO.setIntroduction(accommodation.getIntroduction());
 
             // 이미지 리스트에서 랜덤으로 두 개의 이미지 URL 가져오기
-            List<String> imageUrls = accommodation.getAccommodationImage().stream()
+            List<String> imageUrls = accommodation.getImages().stream()
                     .map(AccommodationImage::getOriginimgurl)
                     .distinct() // 중복된 이미지 URL 제거
                     .limit(2)   // 최대 2개만 선택
@@ -973,14 +975,14 @@ public class AccommodationService {
 
             // 이미지를 가진 레코드만 필터링하여 DTO로 변환
             List<HomeResponseDto> filteredList = accommodationPage.getContent().stream()
-                    .filter(accommodation -> !accommodation.getAccommodationImage().isEmpty()) // 이미지를 가진 레코드만 필터링
+                    .filter(accommodation -> !accommodation.getImages().isEmpty()) // 이미지를 가진 레코드만 필터링
                     .map(accommodation -> {
                         String[] arr = accommodation.getAddress().substring(8).split(" ");
                         return new HomeResponseDto(
                                 accommodation.getContentId(),
                                 accommodation.getTitle(),
                                 arr[0] + " " + arr[1],
-                                accommodation.getAccommodationImage().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
+                                accommodation.getImages().get(0).getOriginimgurl() // 첫 번째 이미지 가져오기
                         );
                     })
                     .toList();
@@ -1004,7 +1006,7 @@ public class AccommodationService {
                 weather.temperature(),
                 accommodation.getInfoCenter(),
                 accommodation.getIntroduction(),
-                accommodation.getAccommodationImage().get(0).getOriginimgurl(),
+                accommodation.getImages().get(0).getOriginimgurl(),
                 accommodation.getXMap(),
                 accommodation.getYMap()
         );
