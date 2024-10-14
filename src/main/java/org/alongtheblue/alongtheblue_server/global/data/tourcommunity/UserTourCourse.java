@@ -3,7 +3,10 @@ package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 
 import java.util.Date;
@@ -34,5 +37,16 @@ public class UserTourCourse {
 //    @JsonManagedReference
 //    private List<TourPostHashTag> tourPostHashTags;
 
-    private String contentId; // 필요 없음
+    @Builder
+    public UserTourCourse(Date createdate, String title, String writing, List<TourPostItem> tourPostItems, UserInfo userInfo) {
+        this.createdate = createdate;
+        this.title = title;
+        this.writing = writing;
+        this.tourPostItems = tourPostItems;
+        this.userInfo = userInfo;
+    }
+
+    public UserTourCourse() {
+
+    }
 }
