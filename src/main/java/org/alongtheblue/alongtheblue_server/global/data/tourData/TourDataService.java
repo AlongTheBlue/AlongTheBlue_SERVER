@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.global.Category;
 import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
 import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.search.SearchInformation;
+import org.alongtheblue.alongtheblue_server.global.data.search.SearchResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
@@ -109,13 +111,13 @@ public class TourDataService {
     public ArrayList<TourData> getTourData() {
         String baseUrl = "https://apis.data.go.kr/B551011/KorService1/areaBasedList1";
         ArrayList<TourData> tourDataList = new ArrayList<>();
-        int numOfRows = 10;  // 한 페이지에 가져올 데이터 수
+        int numOfRows = 50;  // 한 페이지에 가져올 데이터 수
 
         // WebClient 생성
         WebClient webClient = WebClient.builder().build();
 
         // 페이지별로 데이터를 가져오는 반복문
-        for (int pageNo = 1; pageNo <= 10; pageNo++) {
+        for (int pageNo = 1; pageNo <= 12; pageNo++) {
             // URI 객체를 UriComponentsBuilder로 구성
             URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
                     .queryParam("serviceKey", apiKey)
@@ -138,9 +140,10 @@ public class TourDataService {
                     .bodyToMono(String.class);
 
             String jsonResponse = response.block();
-
+            System.out.println(jsonResponse);
             // JSON 데이터 파싱
             JSONObject jsonObject = new JSONObject(jsonResponse);
+            System.out.println(jsonObject);
             JSONObject responseBody = jsonObject.getJSONObject("response").getJSONObject("body");
             JSONObject items = responseBody.getJSONObject("items");
             JSONArray itemArray = items.getJSONArray("item");
@@ -671,6 +674,19 @@ public class TourDataService {
 
         // ApiResponse로 반환
         return ApiResponse.ok("관광지 목록을 성공적으로 조회했습니다.", customPage);
+    }
+
+    public ApiResponse<SearchResponseDto> getTourDataInfo(String id) {
+        TourData tourData = findByContentId(id);
+        SearchResponseDto searchResponseDto = new SearchResponseDto(
+                tourData.getContentId(),
+                tourData.getTitle(),
+                tourData.getAddress(),
+                tourData.getXMap(),
+                tourData.getYMap(),
+                "tourData"
+        );
+        return ApiResponse.ok(searchResponseDto);
     }
 }
 

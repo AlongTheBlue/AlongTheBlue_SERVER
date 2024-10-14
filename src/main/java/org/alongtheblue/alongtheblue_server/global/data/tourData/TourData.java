@@ -17,6 +17,7 @@ public class TourData {
     private String address;
     @Column(columnDefinition = "TEXT")
     private String introduction;
+    @Column(columnDefinition = "TEXT")
     private String infoCenter;
     private String restDate;
     private String xMap;
