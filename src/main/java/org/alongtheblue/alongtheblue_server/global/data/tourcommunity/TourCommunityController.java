@@ -46,7 +46,7 @@ public class TourCommunityController {
 
     @Operation(summary = "여행따라 전체 게시물 조회 API")
     @GetMapping("/list")
-    public List<UserTourCourseDTO> getAllUserTourCourses(){
+    public ApiResponse<List<UserTourCourseDTO>> getAllUserTourCourses(){
         return tourCommunityService.getAllUserTourCourses();
     }
 
