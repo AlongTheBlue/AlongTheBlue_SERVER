@@ -18,8 +18,9 @@ public class BlueCourseController {
 
     @PostMapping("/create")
     @Operation(summary = "바당따라 코스 추가")
-    public ApiResponse<BlueCourse> createCourse(@RequestBody CreateBlueCourseRequestDto dto){
-        return blueCourseService.createCourse(dto.toServiceRequest());
+    public ApiResponse<BlueCourse> createCourse(@RequestHeader("Authorization") String uid,
+                                                @RequestBody CreateBlueCourseRequestDto dto){
+        return blueCourseService.createCourse(uid, dto.toServiceRequest());
     }
 
     @GetMapping("/list")

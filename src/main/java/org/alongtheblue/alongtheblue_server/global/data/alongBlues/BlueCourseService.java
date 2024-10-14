@@ -1,6 +1,8 @@
 package org.alongtheblue.alongtheblue_server.global.data.alongBlues;
 
 import lombok.RequiredArgsConstructor;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.application.UserInfoService;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.request.CreateBlueCourseServiceRequestDto;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.request.CreateBlueItemRequestDto;
@@ -17,11 +19,14 @@ import java.util.*;
 public class BlueCourseService {
 
     private final BlueCourseRepository blueCourseRepository;
+    private final UserInfoService userInfoService;
 
 //    private final BlueItemRepository blueItemRepository;
 
 //    public void createCourse(BlueCourse blueCourse) {
-    public ApiResponse<BlueCourse> createCourse(CreateBlueCourseServiceRequestDto dto) {
+    public ApiResponse<BlueCourse> createCourse(String uid, CreateBlueCourseServiceRequestDto dto) {
+        UserInfo userInfo = userInfoService.retrieveUserInfo(uid).getData();
+
         List<CreateBlueItemRequestDto> itemDtoList = dto.blueItems();
 
         List<BlueItem> itemList = new ArrayList<>();
@@ -30,7 +35,7 @@ public class BlueCourseService {
         }
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
         Date now = new Date();
-        BlueCourse blueCourse = dto.toEntity(now, itemList);
+        BlueCourse blueCourse = dto.toEntity(now, itemList, userInfo);
         BlueCourse savedBlueCourse = blueCourseRepository.save(blueCourse);
         return ApiResponse.ok("코스를 성공적으로 등록했습니다.", savedBlueCourse);
 //        blueItemRepository.saveAll(blueCourse.getBlueItems());
