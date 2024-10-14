@@ -3,7 +3,10 @@ package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
@@ -32,4 +35,21 @@ public class TourPostItem {
     @JsonManagedReference
     private List<TourImage> tourImage;
 
+    @Builder
+    public TourPostItem(String name, String category, String address, String comment, String xMap, String yMap,
+                        String contentId, UserTourCourse userTourCourse, List<TourImage> tourImage) {
+        this.name = name;
+        this.category = category;
+        this.address = address;
+        this.comment = comment;
+        this.xMap = xMap;
+        this.yMap = yMap;
+        this.contentId = contentId;
+        this.userTourCourse = userTourCourse;
+        this.tourImage = tourImage;
+    }
+
+    public TourPostItem() {
+
+    }
 }

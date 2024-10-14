@@ -2,11 +2,14 @@ package org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.reque
 
 import java.util.List;
 
-public record UserTourCourseRequestDto(
+public record CreateUserTourCourseRequestDto(
         String title,
         String content,
         List<TourPostItemRequestDto> tourPostItems,
 //        List<TourPostHashTag> hashTags,
         List<List<Integer>> imgIndexArr
 ) {
+    public CreateUserTourCourseServiceRequestDto toServiceRequest() {
+        return new CreateUserTourCourseServiceRequestDto(title, content, tourPostItems, imgIndexArr);
+    }
 }
