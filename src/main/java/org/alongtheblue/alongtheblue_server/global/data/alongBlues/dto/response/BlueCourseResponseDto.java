@@ -1,10 +1,13 @@
 package org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response;
 
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.dto.UserInfoDto;
 
 public record BlueCourseResponseDto(
-        String title,
-        List<BlueItemResponseDto> blueItems
+        UserInfoDto user,
+        Long id,
+        String title
 ) {
 
 }

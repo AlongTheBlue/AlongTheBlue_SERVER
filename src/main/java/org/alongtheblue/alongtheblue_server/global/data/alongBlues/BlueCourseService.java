@@ -3,12 +3,18 @@ package org.alongtheblue.alongtheblue_server.global.data.alongBlues;
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.application.UserInfoService;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.dto.UserInfoDto;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.request.CreateBlueCourseServiceRequestDto;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.request.CreateBlueItemRequestDto;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueCourseDetailResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueCourseDto;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueCourseResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueItemResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.TourImage;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.TourPostItem;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.UserTourCourse;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.UserTourCourseDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,12 +52,18 @@ public class BlueCourseService {
         return blueCourseRepository.findAll();
     }
 
-    public ApiResponse<BlueCourseResponseDto> getBlueCourse(Long id) {
+    public ApiResponse<BlueCourseDto> getBlueCourse(Long id) {
         Optional<BlueCourse> course = blueCourseRepository.findById(id);
         if(course.isEmpty())
             return ApiResponse.ok("해당 ID의 코스를 찾지 못했습니다.");
-
         BlueCourse blueCourse = course.get();
+        UserInfo userInfo = blueCourse.getUserInfo();
+        UserInfoDto userInfoDto = new UserInfoDto(
+                userInfo.getUid(),
+                userInfo.getUserName(),
+                userInfo.getProfileImageUrl()
+        );
+
         List<BlueItemResponseDto> blueItemResponseDtoList = new ArrayList<>();
         for(BlueItem blueItem :  blueCourse.getBlueItems()) {
             BlueItemResponseDto blueItemResponseDto = new BlueItemResponseDto(
@@ -63,15 +75,34 @@ public class BlueCourseService {
             );
             blueItemResponseDtoList.add(blueItemResponseDto);
         }
-        BlueCourseResponseDto blueCourseResponseDto = new BlueCourseResponseDto(
+        BlueCourseDto blueCourseDto = new BlueCourseDto(
+                userInfoDto,
                 blueCourse.getTitle(),
                 blueItemResponseDtoList
         );
-        return ApiResponse.ok(blueCourseResponseDto);
+
+        return ApiResponse.ok(blueCourseDto);
     }
 
-    public ApiResponse<List<BlueCourse>> retrieveMyBlueCourses(String uid) {
+    public ApiResponse<List<BlueCourseResponseDto>> retrieveMyBlueCourses(String uid) {
         List<BlueCourse> blueCourses = blueCourseRepository.findByUserInfo_Uid(uid);
-        return ApiResponse.ok("나의 바당따라 데이터를 성공적으로 조회했습니다.", blueCourses);
+
+        List<BlueCourseResponseDto> blueCourseResponseDtoList = new ArrayList<>();
+        for (BlueCourse blueCourse : blueCourses) {
+            UserInfo userInfo = blueCourse.getUserInfo();
+            UserInfoDto userInfoDto = new UserInfoDto(
+                    userInfo.getUid(),
+                    userInfo.getUserName(),
+                    userInfo.getProfileImageUrl()
+            );
+            BlueCourseResponseDto blueCourseResponseDto = new BlueCourseResponseDto(
+                userInfoDto,
+                blueCourse.getId(),
+                blueCourse.getTitle()
+            );
+            blueCourseResponseDtoList.add(blueCourseResponseDto);
+        }
+
+        return ApiResponse.ok("나의 바당따라 데이터를 성공적으로 조회했습니다.", blueCourseResponseDtoList);
     }
 }

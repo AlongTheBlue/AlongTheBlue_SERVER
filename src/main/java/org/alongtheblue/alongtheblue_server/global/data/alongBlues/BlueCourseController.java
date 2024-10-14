@@ -4,8 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.request.CreateBlueCourseRequestDto;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueCourseDetailResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueCourseDto;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueCourseResponseDto;
-import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.UserTourCourse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,13 +33,13 @@ public class BlueCourseController {
 
     @GetMapping("/{id}")
     @Operation(summary = "특정 바당따라 코스 조회")
-    public ApiResponse<BlueCourseResponseDto> getBlueCourse(@PathVariable Long id){
+    public ApiResponse<BlueCourseDto> getBlueCourse(@PathVariable Long id){
         return blueCourseService.getBlueCourse(id);
     }
 
     @Operation(summary = "내 바당따라 전체 코스 조회 API")
     @GetMapping("/my")
-    public ApiResponse<List<BlueCourse>> retrieveMyBlueCourses(@RequestHeader("Authorization") String uid) {
+    public ApiResponse<List<BlueCourseResponseDto>> retrieveMyBlueCourses(@RequestHeader("Authorization") String uid) {
         return blueCourseService.retrieveMyBlueCourses(uid);
     }
 }
