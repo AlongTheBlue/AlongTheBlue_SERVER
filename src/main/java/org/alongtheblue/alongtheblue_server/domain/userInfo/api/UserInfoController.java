@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.application.UserInfoService;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.dto.CreateUserInfoDto;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.dto.UserInfoDto;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,8 +34,9 @@ public class UserInfoController {
 
     @Operation(summary = "ID로 UserInfo 조회 API")
     @GetMapping("/user")
-    public ApiResponse<UserInfo> retrieveUserInfo(@RequestHeader("Authorization") String uid) {
-        return userInfoService.retrieveUserInfo(uid);
+    public ApiResponse<UserInfoDto> retrieveUserInfo(@RequestHeader("Authorization") String uid) {
+        return userInfoService.retrieveUserInfoDto(uid);
+//        return userInfoService.retrieveUserInfo(uid);
     }
 
 }

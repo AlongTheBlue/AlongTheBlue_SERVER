@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.dao.UserInfoRepository;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.dto.CreateUserInfoServiceDto;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.dto.UserInfoDto;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.error.ErrorCode;
 import org.springframework.stereotype.Service;
@@ -74,4 +75,13 @@ public class UserInfoService {
         return ApiResponse.ok("사용자 정보를 성공적으로 조회했습니다.", userInfo);
     }
 
+    public ApiResponse<UserInfoDto> retrieveUserInfoDto(String uid) {
+        UserInfo userInfo = retrieveUserInfo(uid).getData();
+        UserInfoDto userInfoDto = new UserInfoDto(
+                userInfo.getUid(),
+                userInfo.getUserName(),
+                userInfo.getProfileImageUrl()
+        );
+        return  ApiResponse.ok("사용자 정보를 성공적으로 조회했습니다.", userInfoDto);
+    }
 }

@@ -3,6 +3,7 @@ package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.application.UserInfoService;
 import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.dto.UserInfoDto;
 import org.alongtheblue.alongtheblue_server.global.adapter.S3Adapter;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.CreateUserTourCourseServiceRequestDto;
@@ -120,22 +121,31 @@ public class TourCommunityService {
     }
 
     // 여행따라 전체 조회 - 페이지네이션 필요
-    public List<UserTourCourseDTO> getAllUserTourCourses() {
+    public ApiResponse<List<UserTourCourseDTO>> getAllUserTourCourses() {
         List<UserTourCourse> userCourses = userTourCourseRepository.findAll();
         List<UserTourCourseDTO> userCourseDtoList = new ArrayList<>();
         for (UserTourCourse userCourse : userCourses) {
+            UserInfo userInfo = userCourse.getUserInfo();
+            UserInfoDto userInfoDto = new UserInfoDto(
+                    userInfo.getUid(),
+                    userInfo.getUserName(),
+                    userInfo.getProfileImageUrl()
+            );
             UserTourCourseDTO userCourseDto = new UserTourCourseDTO();
+            userCourseDto.setUser(userInfoDto);
             userCourseDto.setTitle(userCourse.getTitle());
-            userCourseDto.setWriting(userCourse.getWriting());
+            userCourseDto.setContent(userCourse.getWriting());
+            userCourseDto.setId(userCourse.getId());
 //            dto.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(tour));
 
-            List<TourPostItem> items = tourPostItemRepository.findByuserTourCourse(userCourse);
+            List<TourPostItem> items = tourPostItemRepository.findByUserTourCourse(userCourse);
             List<TourImage> images = tourImageRepository.findBytourPostItem(items.get(0));
-            if (!images.isEmpty()) userCourseDto.setImgUrl(images.get(0).getUrl());
+            if (!images.isEmpty())
+                userCourseDto.setImgUrl(images.get(0).getUrl());
 //            userCourseDto.setImgUrl(tourImageRepository.findBytourPostItem(items.get(0)).get(0).getUrl());
             userCourseDtoList.add(userCourseDto);
         }
-        return userCourseDtoList;
+        return ApiResponse.ok(userCourseDtoList);
     }
 
     public UserTourCourse findById(Long id) {
