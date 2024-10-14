@@ -57,7 +57,7 @@ public class TourCommunityController {
     }
     @Operation(summary = "내 여행따라 전체 게시물 조회 API")
     @GetMapping("/my")
-    public ApiResponse<List<UserTourCourse>> retrieveMyUserTourCourses(@RequestHeader("Authorization") String uid) {
+    public ApiResponse<List<UserTourCourseDTO>> retrieveMyUserTourCourses(@RequestHeader("Authorization") String uid) {
         return tourCommunityService.retrieveMyUserTourCourses(uid);
     }
 

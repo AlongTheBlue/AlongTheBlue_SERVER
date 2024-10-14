@@ -156,6 +156,12 @@ public class TourCommunityService {
     // 특정 여행따라 조회
     public ApiResponse<UserTourCourseDetailDto> getUserCourseByID(Long id) {
         UserTourCourse userCourse = findById(id);
+        UserInfo userInfo = userCourse.getUserInfo();
+        UserInfoDto userInfoDto = new UserInfoDto(
+                userInfo.getUid(),
+                userInfo.getUserName(),
+                userInfo.getProfileImageUrl()
+        );
 
         List<TourPostItem> tourPostItems = userCourse.getTourPostItems();
         List<TourPostItemResponseDto> tourPostItemResponseDtoList = new ArrayList<>();
@@ -172,17 +178,17 @@ public class TourCommunityService {
             TourPostItemResponseDto tourPostItemResponseDto = new TourPostItemResponseDto(
                     tourPostItem.getName(),
                     tourPostItem.getAddress(),
-                    tourPostItem.getXMap(),
-                    tourPostItem.getYMap(),
                     tourPostItem.getComment(),
                     tourPostItem.getCategory(),
-                    tourPostItem.getContentId(),
+                    tourPostItem.getXMap(),
+                    tourPostItem.getYMap(),
                     tourImageResponseDtoList
             );
             tourPostItemResponseDtoList.add(tourPostItemResponseDto);
         }
 
         UserTourCourseDetailDto userTourCourseDetailDto = new UserTourCourseDetailDto(
+                userInfoDto,
                 userCourse.getTitle(),
                 userCourse.getWriting(),
                 tourPostItemResponseDtoList
@@ -215,8 +221,31 @@ public class TourCommunityService {
 //        return userCourseDto;
     }
 
-    public ApiResponse<List<UserTourCourse>> retrieveMyUserTourCourses(String uid) {
+    public ApiResponse<List<UserTourCourseDTO>> retrieveMyUserTourCourses(String uid) {
         List<UserTourCourse> userTourCourses = userTourCourseRepository.findByUserInfo_Uid(uid);
-        return ApiResponse.ok("나의 여행따라 데이터를 성공적으로 조회했습니다.", userTourCourses);
+        List<UserTourCourseDTO> userCourseDtoList = new ArrayList<>();
+        for (UserTourCourse userCourse : userTourCourses) {
+            UserInfo userInfo = userCourse.getUserInfo();
+            UserInfoDto userInfoDto = new UserInfoDto(
+                    userInfo.getUid(),
+                    userInfo.getUserName(),
+                    userInfo.getProfileImageUrl()
+            );
+            UserTourCourseDTO userCourseDto = new UserTourCourseDTO();
+            userCourseDto.setUser(userInfoDto);
+            userCourseDto.setTitle(userCourse.getTitle());
+            userCourseDto.setContent(userCourse.getWriting());
+            userCourseDto.setId(userCourse.getId());
+//            dto.setTags(tourPostHashTagRepository.findBytourCourseForHashTag(tour));
+
+            List<TourPostItem> items = tourPostItemRepository.findByUserTourCourse(userCourse);
+            List<TourImage> images = tourImageRepository.findBytourPostItem(items.get(0));
+            if (!images.isEmpty())
+                userCourseDto.setImgUrl(images.get(0).getUrl());
+//            userCourseDto.setImgUrl(tourImageRepository.findBytourPostItem(items.get(0)).get(0).getUrl());
+            userCourseDtoList.add(userCourseDto);
+        }
+
+        return ApiResponse.ok("나의 여행따라 데이터를 성공적으로 조회했습니다.", userCourseDtoList);
     }
 }
