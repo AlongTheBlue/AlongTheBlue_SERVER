@@ -9,6 +9,7 @@ import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.respon
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Tag(name = "여행따라 API", description = "여행따라  코스 등록 / 게시물 목록 조회 / 게시물 상세 조회")
@@ -32,8 +33,8 @@ public class TourCommunityController {
 //            @RequestPart List<TourPostHashTag> hashTags,
 //            ,
 //            @RequestPart List<List<Integer>> imgIndexArr
-    ) {
-        return tourCommunityService.createPost(dto, images);
+    ) throws IOException {
+        return tourCommunityService.createPost(uid, dto.toServiceRequest(), images);
 //        UserTourCourse userTourCourse= new UserTourCourse();
 //        userTourCourse.setTitle(title);
 //        userTourCourse.setTourPostItems(tourItems);

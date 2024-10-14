@@ -1,18 +1,23 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 
 import lombok.RequiredArgsConstructor;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.application.UserInfoService;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 import org.alongtheblue.alongtheblue_server.global.adapter.S3Adapter;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
-import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.UserTourCourseRequestDto;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.request.CreateBlueItemRequestDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.CreateUserTourCourseServiceRequestDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.TourPostItemRequestDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.TourImageResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.TourPostItemResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.UserTourCourseDetailDto;
+import org.alongtheblue.alongtheblue_server.global.error.ErrorCode;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -25,38 +30,107 @@ public class TourCommunityService {
     private final TourImageRepository tourImageRepository;
     private final S3Adapter s3Adapter;
     private final ConversionService conversionService;
+    private final UserInfoService userInfoService;
 
 //    private final TourPostHashTagRepository tourPostHashTagRepository;
 
     // 여행따라 저장
-    public UserTourCourse createPost(UserTourCourseRequestDto dto, List<MultipartFile> images) {
-//        먼저 userTourCourse 저장
-        UserTourCourse userCourse = new UserTourCourse();
-        userCourse.setTitle(dto.title());
-        userCourse.setWriting(dto.content());
+    public ApiResponse<UserTourCourse> createPost(String uid, CreateUserTourCourseServiceRequestDto dto, List<MultipartFile> images) throws IOException {
+        // 1. userInfo 가져오기
+        UserInfo userInfo = userInfoService.retrieveUserInfo(uid).getData();
+
+        // 2. 날짜 받아오기
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
-        userCourse.setCreatedate(new Date());
-        userCourse.setWriting(dto.content());
-        userCourse = userTourCourseRepository.save(userCourse);
 
-        System.out.println(dto);
-
+        // 3. tourPostItem 사진 리스트로 묶기
+        List<TourPostItemRequestDto> tourPostItems = dto.tourPostItems();
         List<TourPostItem> tourItems = new ArrayList<>();
-        List<TourPostItemRequestDto> tourItemDtoList = dto.tourPostItems();
-        for (TourPostItemRequestDto tourItemDto : tourItemDtoList) {
-            TourPostItem tourItem = new TourPostItem();
-            tourItem.setName(tourItemDto.title());
-            tourItem.setComment(tourItemDto.comment());
-            tourItem.setAddress(tourItemDto.address());
-            tourItem.setXMap(tourItemDto.xMap());
-            tourItem.setYMap(tourItemDto.yMap());
-            tourItem.setCategory(tourItemDto.category());
-            tourItem.setUserTourCourse(userCourse);
-//            tourItem.setContentId
-            tourPostItemRepository.save(tourItem);
-            tourItems.add(tourItem);
+
+        for(TourPostItemRequestDto itemDto : tourPostItems) {
+
+//        List<TourImage> tourImages = new ArrayList<>();
+            if (dto.imgIndexArr() != null) {
+                for (List<Integer> list : dto.imgIndexArr()) {
+                    List<TourImage> tourImages = new ArrayList<>();
+                    for (int i = 0; i < list.size(); i++) {
+                        MultipartFile image = images.get(i);
+                        ApiResponse<String> updateFileResponse = s3Adapter.uploadFile(image);
+                        if (updateFileResponse.getStatus().is5xxServerError()) {
+                            return ApiResponse.withError(ErrorCode.ERROR_S3_UPDATE_OBJECT);
+                        }
+                        String fileName = image.getOriginalFilename();
+                        TourImage tourImage = TourImage.builder()
+                                .fileName(fileName)
+                                .url(updateFileResponse.getData())
+                                .build();
+                        tourImages.add(tourImage);
+                    }
+                    tourItems.add(itemDto.toEntity(tourImages));
+                }
+            }
         }
-        userCourse.setTourPostItems(tourItems);
+//        if (dto.imgIndexArr() != null) {
+//            for (int i = 0; i < dto.imgIndexArr().size(); i++) {
+//                for (int j = 0; j < dto.imgIndexArr().get(i).size(); j++) {
+////                    TourPostItem tourItem = tourItems.get(i);
+////                    System.out.println("i: " + i + " j: " + j);
+////                    System.out.println(images.size());
+//                    MultipartFile image = images.get(dto.imgIndexArr().get(i).get(j));  // 인덱스로 매칭
+////                    String imageUrl = saveImageToS3(image);  // 이미지 저장 로직 호출
+//                    ApiResponse<String> imageUrl = s3Adapter.uploadImage(image);
+//                    TourImage tourImage = new TourImage();
+//                    tourImage.setUrl(imageUrl.getData());
+//                    tourImage.setTourPostItem(tourItem);
+//                    tourImageRepository.save(tourImage);
+//
+//                }
+//            }
+//        }
+        // 4. tourPostItem 만들기
+
+        // 5. userTourCourse 만들기
+        UserTourCourse userTourCourse = dto.toEntity(userInfo, new Date(), tourItems);
+
+        // 6. userTourCourse 저장
+        UserTourCourse savedUserTourCourse = userTourCourseRepository.save(userTourCourse);
+
+
+//        List<TourPostItemRequestDto> tourPostItems = dto.tourPostItems();
+//        List<TourPostItem> tourItems = new ArrayList<>();
+//
+//        for(TourPostItemRequestDto itemDto : tourPostItems) {
+//            tourItems.add(itemDto.toEntity());
+//        }
+
+
+
+//        먼저 userTourCourse 저장
+//        UserTourCourse userCourse = new UserTourCourse();
+//        userCourse.setTitle(dto.title());
+//        userCourse.setWriting(dto.content());
+//        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
+//        userCourse.setCreatedate(new Date());
+//        userCourse.setWriting(dto.content());
+//        userCourse = userTourCourseRepository.save(userCourse);
+//
+//        System.out.println(dto);
+
+//        List<TourPostItem> tourItems = new ArrayList<>();
+//        List<TourPostItemRequestDto> tourItemDtoList = dto.tourPostItems();
+//        for (TourPostItemRequestDto tourItemDto : tourItemDtoList) {
+//            TourPostItem tourItem = new TourPostItem();
+//            tourItem.setName(tourItemDto.title());
+//            tourItem.setComment(tourItemDto.comment());
+//            tourItem.setAddress(tourItemDto.address());
+//            tourItem.setXMap(tourItemDto.xMap());
+//            tourItem.setYMap(tourItemDto.yMap());
+//            tourItem.setCategory(tourItemDto.category());
+//            tourItem.setUserTourCourse(userCourse);
+////            tourItem.setContentId
+//            tourPostItemRepository.save(tourItem);
+//            tourItems.add(tourItem);
+//        }
+//        userCourse.setTourPostItems(tourItems);
 //        userTourCourse.setTourPostHashTags(dto.hashTags());
 
         // tags와 items가 null인 경우 빈 리스트로 초기화
@@ -64,24 +138,27 @@ public class TourCommunityService {
 //        List<TourPostItem> items = userCourse.getTourPostItems() != null ? userCourse.getTourPostItems() : new ArrayList<>();
 
         // 이미지 저장 - 예외처리
-        if (dto.imgIndexArr() != null) {
-            // 해당 TourPostItem에 이미지 저장 (순서대로 처리)
-            for (int i = 0; i < dto.imgIndexArr().size(); i++) {
-                for (int j = 0; j < dto.imgIndexArr().get(i).size(); j++) {
-                    TourPostItem tourItem = tourItems.get(i);
-                    System.out.println("i: " + i + " j: " + j);
-                    System.out.println(images.size());
-                    MultipartFile image = images.get(dto.imgIndexArr().get(i).get(j));  // 인덱스로 매칭
-//                    String imageUrl = saveImageToS3(image);  // 이미지 저장 로직 호출
-                    ApiResponse<String> imageUrl = s3Adapter.uploadImage(image);
-                    TourImage tourImage = new TourImage();
-                    tourImage.setUrl(imageUrl.getData());
-                    tourImage.setTourPostItem(tourItem);
-                    tourImageRepository.save(tourImage);
+//        if (dto.imgIndexArr() != null) {
+//            // 해당 TourPostItem에 이미지 저장 (순서대로 처리)
+//            for (int i = 0; i < dto.imgIndexArr().size(); i++) {
+//                for (int j = 0; j < dto.imgIndexArr().get(i).size(); j++) {
+//                    TourPostItem tourItem = tourItems.get(i);
+//                    System.out.println("i: " + i + " j: " + j);
+//                    System.out.println(images.size());
+//                    MultipartFile image = images.get(dto.imgIndexArr().get(i).get(j));  // 인덱스로 매칭
+////                    String imageUrl = saveImageToS3(image);  // 이미지 저장 로직 호출
+//                    ApiResponse<String> imageUrl = s3Adapter.uploadImage(image);
+//                    TourImage tourImage = new TourImage();
+//                    tourImage.setUrl(imageUrl.getData());
+//                    tourImage.setTourPostItem(tourItem);
+//                    tourImageRepository.save(tourImage);
+//
+//                }
+//            }
+//        }
+//
+//        dto.toEntity(userInfo, new Date(), tourItems);
 
-                }
-            }
-        }
         // items 리스트가 비어있지 않은 경우 처리
 //        if (!items.isEmpty()) {
 //            for (TourPostItem item : items) {
@@ -101,7 +178,8 @@ public class TourCommunityService {
 //        }
 
         // userTourCourse 반환 (이미 저장되었으므로)
-        return userCourse;
+
+        return ApiResponse.ok("여행코스를 성공적으로 등록했습니다.", savedUserTourCourse);
     }
 
     // 이미지 파일 저장 로직
