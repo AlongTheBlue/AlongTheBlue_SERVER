@@ -13,10 +13,7 @@ import org.alongtheblue.alongtheblue_server.global.data.restaurant.RestaurantSer
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.TourDataService;
 import org.alongtheblue.alongtheblue_server.global.data.tourData.dto.TourDataResponseDto;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -53,6 +50,10 @@ public class SearchController {
                                                                                  @RequestParam(defaultValue = "10") int size) {
         return restaurantService.getRestaurantsByKeyword(keyword, page, size);
     }
+    @GetMapping("/restaurant/{id}")
+    public ApiResponse<SearchResponseDto> getRestaurantInfo(@PathVariable String id) {
+        return restaurantService.getRestaurantInfo(id);
+    }
 
 //    @GetMapping("/all")
 //    public ApiResponse<List<SearchResponseDto>> searchAllCategoryByKeyword(@RequestParam String keyword){
@@ -76,6 +77,11 @@ public class SearchController {
         return cafeService.getCafesByKeyword(keyword, page, size);
     }
 
+    @GetMapping("/cafe/{id}")
+    public ApiResponse<SearchResponseDto> getCafeInfo(@PathVariable String id) {
+        return cafeService.getCafeInfo(id);
+    }
+
     @GetMapping("/tourData/list")
     public ApiResponse<List<TourDataResponseDto>> getTourDataList() {
         return tourDataService.getTourDataListHome();
@@ -88,6 +94,11 @@ public class SearchController {
         return tourDataService.getTourDataListByKeyword(keyword, page, size);
     }
 
+    @GetMapping("/tourData/{id}")
+    public ApiResponse<SearchResponseDto> getTourDataInfo(@PathVariable String id) {
+        return tourDataService.getTourDataInfo(id);
+    }
+
     @GetMapping("/accommodation/list")
     public ApiResponse<List<AccommodationResponseDto>> getAccommodationHome() {
         return accommodationService.getAccommodationHomeInfo();
@@ -98,6 +109,11 @@ public class SearchController {
                                                                                  @RequestParam(defaultValue = "0") int page,
                                                                                  @RequestParam(defaultValue = "10") int size) {
         return accommodationService.getAccommodationsByKeyword(keyword, page, size);
+    }
+
+    @GetMapping("/accommodation/{id}")
+    public ApiResponse<SearchResponseDto> getAccommodationInfo(@PathVariable String id) {
+        return accommodationService.getAccommodationInfo(id);
     }
 
 }
