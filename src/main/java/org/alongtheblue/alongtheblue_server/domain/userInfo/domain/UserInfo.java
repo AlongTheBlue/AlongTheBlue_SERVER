@@ -11,6 +11,7 @@ import org.alongtheblue.alongtheblue_server.domain.courseLike.domain.CourseLike;
 import org.alongtheblue.alongtheblue_server.domain.itemLike.domain.ItemLike;
 import org.alongtheblue.alongtheblue_server.domain.search.domain.Search;
 import org.alongtheblue.alongtheblue_server.domain.tourCourse.domain.TourCourse;
+import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueCourse;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.UserTourCourse;
 
 import java.util.ArrayList;
@@ -53,6 +54,10 @@ public class UserInfo {
     @OneToMany(mappedBy = "userInfo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<UserTourCourse> userTourCourses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "userInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<BlueCourse> blueCourses = new ArrayList<>();
 
     @Builder
     public UserInfo(String userName, String uid, String profileImageUrl) {
