@@ -8,6 +8,7 @@ import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.request.C
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.request.CreateBlueItemRequestDto;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueCourseResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.alongBlues.dto.response.BlueItemResponseDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.UserTourCourse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,5 +68,10 @@ public class BlueCourseService {
                 blueItemResponseDtoList
         );
         return ApiResponse.ok(blueCourseResponseDto);
+    }
+
+    public ApiResponse<List<BlueCourse>> retrieveMyBlueCourses(String uid) {
+        List<BlueCourse> blueCourses = blueCourseRepository.findByUserInfo_Uid(uid);
+        return ApiResponse.ok("나의 바당따라 데이터를 성공적으로 조회했습니다.", blueCourses);
     }
 }
