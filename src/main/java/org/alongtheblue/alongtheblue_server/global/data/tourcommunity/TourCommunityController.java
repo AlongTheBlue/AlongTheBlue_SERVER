@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
-import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.UserTourCourseRequestDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.CreateUserTourCourseRequestDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.UserTourCourseDetailDto;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,8 +21,9 @@ public class TourCommunityController {
 
     @Operation(summary = "여행따라 게시물 등록 API")
     @PostMapping
-    public UserTourCourse createTourCourse(
-            @RequestPart(value = "request", required = false) UserTourCourseRequestDto dto,
+    public ApiResponse<UserTourCourse> createTourCourse(
+            @RequestHeader("Authorization") String uid,
+            @RequestPart(value = "request", required = false) CreateUserTourCourseRequestDto dto,
             @RequestPart(value = "file", required = false) List<MultipartFile> images
 //            @RequestPart("title") String title,
 //            @RequestPart("writing") String writing,
