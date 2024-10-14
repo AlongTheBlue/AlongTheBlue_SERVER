@@ -21,7 +21,7 @@ public class TourCommunityController {
 
     @Operation(summary = "여행따라 게시물 등록 API")
     @PostMapping
-    public ApiResponse<UserTourCourse> createTourCourse(
+    public UserTourCourse createTourCourse(
             @RequestHeader("Authorization") String uid,
             @RequestPart(value = "request", required = false) CreateUserTourCourseRequestDto dto,
             @RequestPart(value = "file", required = false) List<MultipartFile> images
@@ -33,7 +33,7 @@ public class TourCommunityController {
 //            ,
 //            @RequestPart List<List<Integer>> imgIndexArr
     ) {
-        return tourCommunityService.createPost(dto, images);
+        return tourCommunityService.createPost(uid, dto.toServiceRequest(), images);
 //        UserTourCourse userTourCourse= new UserTourCourse();
 //        userTourCourse.setTitle(title);
 //        userTourCourse.setTourPostItems(tourItems);

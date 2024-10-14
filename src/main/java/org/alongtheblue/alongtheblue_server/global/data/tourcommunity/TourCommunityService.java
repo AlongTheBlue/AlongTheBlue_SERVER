@@ -1,9 +1,11 @@
 package org.alongtheblue.alongtheblue_server.global.data.tourcommunity;
 
 import lombok.RequiredArgsConstructor;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.application.UserInfoService;
+import org.alongtheblue.alongtheblue_server.domain.userInfo.domain.UserInfo;
 import org.alongtheblue.alongtheblue_server.global.adapter.S3Adapter;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
-import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.UserTourCourseRequestDto;
+import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.CreateUserTourCourseServiceRequestDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.request.TourPostItemRequestDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.TourImageResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.dto.response.TourPostItemResponseDto;
@@ -25,11 +27,15 @@ public class TourCommunityService {
     private final TourImageRepository tourImageRepository;
     private final S3Adapter s3Adapter;
     private final ConversionService conversionService;
+    private final UserInfoService userInfoService;
 
 //    private final TourPostHashTagRepository tourPostHashTagRepository;
 
     // 여행따라 저장
-    public UserTourCourse createPost(UserTourCourseRequestDto dto, List<MultipartFile> images) {
+    public UserTourCourse createPost(String uid, CreateUserTourCourseServiceRequestDto dto, List<MultipartFile> images) {
+
+        UserInfo userInfo = userInfoService.retrieveUserInfo(uid).getData();
+
 //        먼저 userTourCourse 저장
         UserTourCourse userCourse = new UserTourCourse();
         userCourse.setTitle(dto.title());
@@ -37,6 +43,7 @@ public class TourCommunityService {
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
         userCourse.setCreatedate(new Date());
         userCourse.setWriting(dto.content());
+        userCourse.setUserInfo(userInfo);
         userCourse = userTourCourseRepository.save(userCourse);
 
         System.out.println(dto);
