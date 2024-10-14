@@ -3,6 +3,7 @@ package org.alongtheblue.alongtheblue_server.global.data.restaurant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.global.Category;
 import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
 import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation;
@@ -10,6 +11,7 @@ import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.Deta
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.restaurant.dto.response.PartRestaurantResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.search.SearchInformation;
+import org.alongtheblue.alongtheblue_server.global.data.search.SearchResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.alongtheblue.alongtheblue_server.global.error.ErrorCode;
@@ -342,7 +344,7 @@ public class RestaurantService {
     }
 
     public void saveRestaurants() {
-        for (int i = 1; i < 2; i++) { // 1 and 11
+        for (int i = 1; i < 11; i++) { // 1 and 11
             URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
                     .path("/areaBasedList1")
                     .queryParam("serviceKey", apiKey)
@@ -558,5 +560,18 @@ public class RestaurantService {
         Restaurant restaurant = findByContentId(id);
         List<String> hashtags = openAIService.getHashtags(restaurant.getIntroduction());
         return ApiResponse.ok(hashtags);
+    }
+
+    public ApiResponse<SearchResponseDto> getRestaurantInfo(String id) {
+        Restaurant restaurant = findByContentId(id);
+        SearchResponseDto searchResponseDto = new SearchResponseDto(
+                restaurant.getContentId(),
+                restaurant.getTitle(),
+                restaurant.getAddress(),
+                restaurant.getXMap(),
+                restaurant.getYMap(),
+                "restaurant"
+        );
+        return ApiResponse.ok(searchResponseDto);
     }
 }

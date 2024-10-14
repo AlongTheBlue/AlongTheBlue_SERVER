@@ -10,6 +10,7 @@ import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.search.SearchInformation;
+import org.alongtheblue.alongtheblue_server.global.data.search.SearchResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherRepository;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
@@ -101,7 +102,7 @@ public class AccommodationService {
     }
 
     public void saveAccommodations() {
-        for (int i = 1; i < 2; i++) { // 1 and 11
+        for (int i = 1; i <4; i++) { // 1 and 11
             URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
                     .path("/areaBasedList1")
                     .queryParam("serviceKey", apiKey)
@@ -495,6 +496,19 @@ public class AccommodationService {
 //            accommodationResponseDtoList.add(accommodationResponseDto);
 //        }
 //        return ApiResponse.ok("숙박 정보를 성공적으로 검색했습니다.", accommodationResponseDtoList);
+    }
+
+    public ApiResponse<SearchResponseDto> getAccommodationInfo(String id) {
+        Accommodation accommodation = findByContentId(id);
+        SearchResponseDto searchResponseDto = new SearchResponseDto(
+                accommodation.getContentId(),
+                accommodation.getTitle(),
+                accommodation.getAddress(),
+                accommodation.getXMap(),
+                accommodation.getYMap(),
+                "accommodation"
+        );
+        return ApiResponse.ok(searchResponseDto);
     }
 
     // API 응답을 매핑하기 위한 클래스

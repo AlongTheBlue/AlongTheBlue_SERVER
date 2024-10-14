@@ -3,6 +3,7 @@ package org.alongtheblue.alongtheblue_server.global.data.cafe;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alongtheblue.alongtheblue_server.global.common.response.ApiResponse;
+import org.alongtheblue.alongtheblue_server.global.data.accommodation.Accommodation;
 import org.alongtheblue.alongtheblue_server.global.data.cafe.dto.PartCafeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.Category;
 import org.alongtheblue.alongtheblue_server.global.data.global.CustomPage;
@@ -10,6 +11,7 @@ import org.alongtheblue.alongtheblue_server.global.data.global.SimpleInformation
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.DetailResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.global.dto.response.HomeResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.search.SearchInformation;
+import org.alongtheblue.alongtheblue_server.global.data.search.SearchResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherResponseDto;
 import org.alongtheblue.alongtheblue_server.global.data.weather.WeatherService;
 import org.alongtheblue.alongtheblue_server.global.gpt.OpenAIService;
@@ -82,6 +84,7 @@ public class CafeService {
     }
 
     private JsonNode parseJson(String response) {
+        System.out.println(response);
         try {
             return objectMapper.readTree(response);
         } catch (IOException e) {
@@ -308,7 +311,7 @@ public class CafeService {
     }
   
     public void saveCafes() {
-        for (int i = 1; i < 2; i++) { // 1 and 11
+        for (int i = 1; i < 5; i++) { // 1 and 11
             URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
                     .path("/areaBasedList1")
                     .queryParam("serviceKey", apiKey)
@@ -339,6 +342,7 @@ public class CafeService {
     }
 
     private void processCafe(JsonNode rootNode) {
+        System.out.println(rootNode.path("response").asText());
         JsonNode itemsNode = rootNode.path("response").path("body").path("items").path("item");
         if (itemsNode.isArray()) {
             for (JsonNode itemNode : itemsNode) {
@@ -536,5 +540,18 @@ public class CafeService {
         Cafe cafe = findByContentId(id);
         List<String> hashtags = openAIService.getHashtags(cafe.getIntroduction());
         return ApiResponse.ok(hashtags);
+    }
+
+    public ApiResponse<SearchResponseDto> getCafeInfo(String id) {
+        Cafe cafe = findByContentId(id);
+        SearchResponseDto searchResponseDto = new SearchResponseDto(
+                cafe.getContentId(),
+                cafe.getTitle(),
+                cafe.getAddress(),
+                cafe.getXMap(),
+                cafe.getYMap(),
+                "cafe"
+        );
+        return ApiResponse.ok(searchResponseDto);
     }
 }
