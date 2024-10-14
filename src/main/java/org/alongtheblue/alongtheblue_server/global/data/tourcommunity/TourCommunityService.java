@@ -204,4 +204,9 @@ public class TourCommunityService {
 //        userCourseDto.setPostItems(postItems);
 //        return userCourseDto;
     }
+
+    public ApiResponse<List<UserTourCourse>> retrieveMyUserTourCourses(String uid) {
+        List<UserTourCourse> userTourCourses = userTourCourseRepository.findByUserInfo_Uid(uid);
+        return ApiResponse.ok("나의 여행따라 데이터를 성공적으로 조회했습니다.", userTourCourses);
+    }
 }
