@@ -9,10 +9,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.alongtheblue.alongtheblue_server.domain.courseLike.domain.CourseLike;
 import org.alongtheblue.alongtheblue_server.domain.itemLike.domain.ItemLike;
-import org.alongtheblue.alongtheblue_server.domain.search.domain.Search;
+import org.alongtheblue.alongtheblue_server.domain.searchHistory.domain.Search;
 import org.alongtheblue.alongtheblue_server.domain.tourCourse.domain.TourCourse;
-import org.alongtheblue.alongtheblue_server.global.data.alongBlues.BlueCourse;
-import org.alongtheblue.alongtheblue_server.global.data.tourcommunity.UserTourCourse;
+import org.alongtheblue.alongtheblue_server.domain.alongBlues.domain.BlueCourse;
+import org.alongtheblue.alongtheblue_server.domain.tourCommunity.domain.UserTourCourse;
 
 import java.util.ArrayList;
 import java.util.List;
