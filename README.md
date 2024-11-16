@@ -1,7 +1,23 @@
 # 제주도 바닷가를 따라, 바당따라
 🏆**한국관광공사 X 카카오 2024 관광데이터 활용 공모전 장려상 수상작**🏆
 
-[![2024 관광데이터 활용 공모전 배너](https://github.com/user-attachments/assets/37534e0c-3ffe-4e4e-8e93-44420a90fca5)](https://www.2024tourapi.com/)
+<a href="https://www.2024tourapi.com/">
+  <img src="https://github.com/user-attachments/assets/37534e0c-3ffe-4e4e-8e93-44420a90fca5" width="100%" />
+</a>
+
+<br/>
+
+<p align="center">
+    <a href="https://www.alongtheblue.site">
+      <img src="https://github.com/AlongTheBlue/.github/blob/1e485f03b9b2a13fcedb858fcb1680b88542ee9c/assets/web.png" width="15%" />
+    </a>
+    <a href="https://github.com/AlongTheBlue">
+      <img src="https://github.com/AlongTheBlue/.github/blob/1e485f03b9b2a13fcedb858fcb1680b88542ee9c/assets/github.png" width="15%" />
+    </a>
+    <a href="https://api.visitkorea.or.kr/#/cntBoardDetail?no=7">
+      <img src="https://github.com/AlongTheBlue/.github/blob/1e485f03b9b2a13fcedb858fcb1680b88542ee9c/assets/%E1%84%80%E1%85%A7%E1%86%AF%E1%84%80%E1%85%AA%E1%84%87%E1%85%A1%E1%86%AF%E1%84%91%E1%85%AD.png" width="15%" />
+    </a>
+</p>
 
 </br>
 
