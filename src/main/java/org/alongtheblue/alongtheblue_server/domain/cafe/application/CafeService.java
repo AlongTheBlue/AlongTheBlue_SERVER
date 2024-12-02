@@ -48,12 +48,12 @@ public class CafeService {
     @Value("${api.key}")
     private String apiKey;
 
-    private final String baseUrl = "http://apis.data.go.kr/B551011/KorService1";
+    private final String baseUrl = "http://apis.data.go.kr/B551011/KorService2";
 
     public CafeService(CafeRepository cafeRepository, CafeImageRepository cafeImageRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, WeatherService weatherService, OpenAIService openAIService) {
         this.cafeRepository = cafeRepository;
         this.cafeImageRepository = cafeImageRepository;
-        this.webClient = webClientBuilder.baseUrl("http://apis.data.go.kr/B551011/KorService1").build();
+        this.webClient = webClientBuilder.baseUrl(baseUrl).build();
         this.objectMapper = objectMapper;
         this.weatherService = weatherService;
         this.openAIService = openAIService;
@@ -65,7 +65,7 @@ public class CafeService {
     public Mono<Void> fetchAndSaveData() {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/areaBasedList1")
+                        .path("/areaBasedList2")
                         .queryParam("serviceKey", apiKey)
                         .queryParam("numOfRows", 10) //296
                         .queryParam("pageNo", 1)
@@ -99,15 +99,12 @@ public class CafeService {
 
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/detailCommon1")
+                        .path("/detailCommon2")
                         .queryParam("serviceKey", apiKey)
                         .queryParam("MobileOS", "ETC")
                         .queryParam("MobileApp", "AppTest")
                         .queryParam("_type", "json")
-                        .queryParam("contentTypeId", 39)
                         .queryParam("contentId", cafe.getContentId())
-                        .queryParam("defaultYN", "Y")
-                        .queryParam("overviewYN", "Y")
                         .build())
                 .retrieve()
                 .bodyToMono(String.class)
@@ -119,7 +116,7 @@ public class CafeService {
 
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/detailIntro1")
+                        .path("/detailIntro2")
                         .queryParam("serviceKey", apiKey)
                         .queryParam("MobileOS", "ETC")
                         .queryParam("MobileApp", "AppTest")
@@ -149,14 +146,13 @@ public class CafeService {
 
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/detailImage1")
+                        .path("/detailImage2")
                         .queryParam("serviceKey", apiKey)
                         .queryParam("contentId", cafe.getContentId())
                         .queryParam("MobileOS", "ETC")
                         .queryParam("MobileApp", "AppTest")
                         .queryParam("_type", "json")
                         .queryParam("imageYN", "Y")
-                        .queryParam("subImageYN", "Y")
                         .build())
                 .retrieve()
                 .bodyToMono(String.class)
@@ -273,7 +269,7 @@ public class CafeService {
         Cafe cafe;
         while (dtos.size() < 6) {
             int randomNumber = random.nextInt(10) ; // 저장된 restaurant 수로 할 것
-            if (! randomNumbers.contains(randomNumber)) {
+            if (!randomNumbers.contains(randomNumber)) {
                 randomNumbers.add(randomNumber);
                 CafeDTO dto= new CafeDTO();
                 cafe= cafes.get(randomNumber);
@@ -317,14 +313,13 @@ public class CafeService {
     public void saveCafes() {
         for (int i = 1; i < 5; i++) { // 1 and 11
             URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                    .path("/areaBasedList1")
+                    .path("/areaBasedList2")
                     .queryParam("serviceKey", apiKey)
                     .queryParam("numOfRows", 95) //95
                     .queryParam("pageNo", Integer.toString(i))
                     .queryParam("MobileOS", "ETC")
                     .queryParam("MobileApp", "AppTest")
                     .queryParam("_type", "json")
-                    .queryParam("listYN", "Y")
                     .queryParam("arrange", "A")
                     .queryParam("contentTypeId", 39)
                     .queryParam("areaCode", 39)
@@ -368,7 +363,7 @@ public class CafeService {
     }
 
     public void processSaveInfo() {
-        List<Cafe> cafes = cafeRepository.findAll();  // 모든 레스토랑을 불러옴
+        List<Cafe> cafes = cafeRepository.findAll();  // 모든 카페을 불러옴
 
         for (Cafe cafe : cafes) {
             String jsonResponse = getInfo(cafe).block();
@@ -390,7 +385,7 @@ public class CafeService {
 
     private Mono<String> getInfo(Cafe cafe){
         URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                .path("/detailIntro1")
+                .path("/detailIntro2")
                 .queryParam("serviceKey", apiKey)
                 .queryParam("MobileOS", "ETC")
                 .queryParam("MobileApp", "AppTest")
