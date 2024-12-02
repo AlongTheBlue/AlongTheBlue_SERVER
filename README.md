@@ -1,11 +1,27 @@
-# 제주도 바닷가를 따라, 바당따라
-🏆**한국관광공사 X 카카오 2024 관광데이터 활용 공모전 장려상 수상작**🏆
+# ![바당따라](https://github.com/user-attachments/assets/40b3a5c6-9a1d-4341-bc64-56022c682c84) 제주도 바닷가를 따라, 바당따라
+🏆 **한국관광공사 X 카카오 2024 관광데이터 활용 공모전 장려상 수상작** 🏆
 
-[![2024 관광데이터 활용 공모전 배너](https://github.com/user-attachments/assets/37534e0c-3ffe-4e4e-8e93-44420a90fca5)](https://www.2024tourapi.com/)
+<a href="https://www.2024tourapi.com/">
+  <img src="https://github.com/user-attachments/assets/37534e0c-3ffe-4e4e-8e93-44420a90fca5" width="100%" />
+</a>
+
+<br/>
+
+<p align="center">
+    <a href="https://www.alongtheblue.site">
+      <img src="https://github.com/AlongTheBlue/.github/blob/1e485f03b9b2a13fcedb858fcb1680b88542ee9c/assets/web.png" width="15%" />
+    </a>
+    <a href="https://github.com/AlongTheBlue">
+      <img src="https://github.com/AlongTheBlue/.github/blob/1e485f03b9b2a13fcedb858fcb1680b88542ee9c/assets/github.png" width="15%" />
+    </a>
+    <a href="https://api.visitkorea.or.kr/#/cntBoardDetail?no=7">
+      <img src="https://github.com/AlongTheBlue/.github/blob/1e485f03b9b2a13fcedb858fcb1680b88542ee9c/assets/%E1%84%80%E1%85%A7%E1%86%AF%E1%84%80%E1%85%AA%E1%84%87%E1%85%A1%E1%86%AF%E1%84%91%E1%85%AD.png" width="15%" />
+    </a>
+</p>
 
 </br>
 
-## Tech Stack
+## 📚 Tech Stack
 ### Backend
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring boot](https://img.shields.io/badge/Spring_boot-6DB33F?style=for-the-badge&logo=Springboot&logoColor=white)
@@ -40,7 +56,7 @@
 
 </br>
 
-## Develop Convention
+## 📌 Develop Convention
 #### Commit
 | **커밋 유형** | **의미** |
 | --- | --- |
@@ -54,8 +70,15 @@
 
 </br>
 
-## Member
+## 👤 Member
 |[강예린](https://github.com/rkddpfls02)|[김예일](https://github.com/yeilkk)|[문인배](https://github.com/MoonInbae)|[이지우](https://github.com/Jiwoo-Leee)|
 |:---:|:---:|:---:|:---:|
 |<img src="https://github.com/rkddpfls02.png" width="180" height="180" >|<img src="https://github.com/yeilkk.png" width="180" height="180" >|<img src="https://github.com/MoonInbae.png" width="180" height="180" >|<img src="https://github.com/Jiwoo-Leee.png" width="180" height="180" >|
 | **Backend Developer** | **Backend Developer <br> Team Leader**| **Infrastructure Engineer <br> Backend Developer** | **Backend Developer** | **Backend Developer** |
+
+</br>
+
+## 🏆 Awards (500,000 KRW)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e2be7d85-c9c5-4ff5-90e6-db4ee7d2fb63" width="70%">
+</p>
