@@ -1,5 +1,5 @@
-# 제주도 바닷가를 따라, 바당따라
-🏆**한국관광공사 X 카카오 2024 관광데이터 활용 공모전 장려상 수상작**🏆
+# ![바당따라](https://github.com/user-attachments/assets/40b3a5c6-9a1d-4341-bc64-56022c682c84) 제주도 바닷가를 따라, 바당따라
+🏆 **한국관광공사 X 카카오 2024 관광데이터 활용 공모전 장려상 수상작** 🏆
 
 <a href="https://www.2024tourapi.com/">
   <img src="https://github.com/user-attachments/assets/37534e0c-3ffe-4e4e-8e93-44420a90fca5" width="100%" />
@@ -21,7 +21,7 @@
 
 </br>
 
-## Tech Stack
+## 📚 Tech Stack
 ### Backend
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring boot](https://img.shields.io/badge/Spring_boot-6DB33F?style=for-the-badge&logo=Springboot&logoColor=white)
@@ -56,7 +56,7 @@
 
 </br>
 
-## Develop Convention
+## 📌 Develop Convention
 #### Commit
 | **커밋 유형** | **의미** |
 | --- | --- |
@@ -70,8 +70,15 @@
 
 </br>
 
-## Member
+## 👤 Member
 |[강예린](https://github.com/rkddpfls02)|[김예일](https://github.com/yeilkk)|[문인배](https://github.com/MoonInbae)|[이지우](https://github.com/Jiwoo-Leee)|
 |:---:|:---:|:---:|:---:|
 |<img src="https://github.com/rkddpfls02.png" width="180" height="180" >|<img src="https://github.com/yeilkk.png" width="180" height="180" >|<img src="https://github.com/MoonInbae.png" width="180" height="180" >|<img src="https://github.com/Jiwoo-Leee.png" width="180" height="180" >|
 | **Backend Developer** | **Backend Developer <br> Team Leader**| **Infrastructure Engineer <br> Backend Developer** | **Backend Developer** | **Backend Developer** |
+
+</br>
+
+## 🏆 Awards
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/dab95034-fa01-4b6b-af8f-d7d2fc7177ee" width="70%">
+</p>
