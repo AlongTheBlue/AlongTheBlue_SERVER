@@ -80,5 +80,5 @@
 
 ## 🏆 Awards
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/dab95034-fa01-4b6b-af8f-d7d2fc7177ee" width="70%">
+  <img src="https://github.com/user-attachments/assets/e2be7d85-c9c5-4ff5-90e6-db4ee7d2fb63" width="70%">
 </p>
