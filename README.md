@@ -78,7 +78,7 @@
 
 </br>
 
-## 🏆 Awards
+## 🏆 Awards (500,000 KRW)
 <p align="center">
   <img src="https://github.com/user-attachments/assets/e2be7d85-c9c5-4ff5-90e6-db4ee7d2fb63" width="70%">
 </p>
